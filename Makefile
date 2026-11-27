@@ -3,7 +3,8 @@
 GO ?= go
 # Build tags, for example TAGS=debug for the debug overlay.
 TAGS ?=
-# Arguments for the desktop game, for example ARGS=-pad for the touch pad.
+# Arguments for the desktop game, for example ARGS=-pad for the touch pad or
+# ARGS='-map meadow' to start on another map.
 ARGS ?=
 PORT ?= 8080
 # Inkscape 1.x for make art, a name on PATH or a path, for example

@@ -86,6 +86,14 @@ func drawTileArt(p *pen, kind string, x, y, w, h float64, col, row int) {
 		drawTree(p, cx, cy)
 	case "tree_top":
 		drawTreeTop(p, cx, cy)
+	case "floor":
+		drawFloor(p, x, y, w, h)
+	case "wall":
+		drawWall(p, x, y, w, h, row)
+	case "roof":
+		drawRoof(p, x, y, w, h)
+	case "door":
+		drawDoor(p, x, y, w, h)
 	default:
 		p.rect(x, y, w, h, missingTile)
 	}
@@ -132,6 +140,62 @@ func drawTree(p *pen, x, y float64) {
 func drawTreeTop(p *pen, x, y float64) {
 	p.circle(x, y+2, 7.5, grassDark)
 	p.circle(x-2, y-1, 5, grass)
+}
+
+// drawFloor draws wooden floorboards: a cream floor with three planks
+// running across the tile.
+func drawFloor(p *pen, x, y, w, h float64) {
+	p.rect(x, y, w, h, cream)
+	seam := fade(barkBrown, 0.35)
+	for i := 1; i < 3; i++ {
+		p.rect(x, y+h*float64(i)/3-0.25, w, 0.5, seam)
+	}
+	// One butt joint per plank, staggered so the boards do not line up.
+	p.rect(x+w*0.3, y, 0.5, h/3, seam)
+	p.rect(x+w*0.75, y+h/3, 0.5, h/3, seam)
+	p.rect(x+w*0.15, y+h*2/3, 0.5, h/3, seam)
+}
+
+// drawWall draws a stone wall of two brick courses. row offsets the vertical
+// joints of every other tile row, so a tall wall looks bonded.
+func drawWall(p *pen, x, y, w, h float64, row int) {
+	p.rect(x, y, w, h, stoneGrey)
+	mortar := stoneLight
+	p.rect(x, y+h/2-0.3, w, 0.6, mortar)
+	p.rect(x, y+h-0.6, w, 0.6, mortar)
+	shift := 0.0
+	if row%2 != 0 {
+		shift = w / 4
+	}
+	p.rect(x+w/4+shift-0.3, y, 0.6, h/2, mortar)
+	p.rect(x+w*3/4-shift-0.3, y+h/2, 0.6, h/2, mortar)
+}
+
+// drawRoof draws red roof shingles: two rows of rounded tiles with a dark
+// line under each row.
+func drawRoof(p *pen, x, y, w, h float64) {
+	p.rect(x, y, w, h, petalPink)
+	edge := fade(cocoa, 0.45)
+	for i := 0; i < 2; i++ {
+		bottom := y + h*float64(i+1)/2
+		p.rect(x, bottom-0.6, w, 0.6, edge)
+		for j := 0; j < 4; j++ {
+			p.ellipse(x+w*(float64(j)+0.5)/4, bottom-h/8, w/10, h/14, fade(white, 0.25))
+		}
+	}
+}
+
+// drawDoor draws a wooden door with a rounded top and a brass knob, set in a
+// stone wall.
+func drawDoor(p *pen, x, y, w, h float64) {
+	p.rect(x, y, w, h, stoneGrey)
+	dw := w * 0.6
+	dx := x + (w-dw)/2
+	top := y + h*0.25
+	p.circle(x+w/2, top, dw/2, barkBrown)
+	p.rect(dx, top, dw, y+h-top, barkBrown)
+	p.rect(x+w/2-0.25, top-dw/2+1, 0.5, y+h-top+dw/2-1, cocoa)
+	p.circle(dx+dw*0.8, y+h*0.62, 0.8, flowerHeart)
 }
 
 // drawCritter draws the placeholder critter, a round orange fox, with its

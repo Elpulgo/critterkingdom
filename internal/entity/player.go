@@ -63,6 +63,14 @@ func (p *Player) WalkTo(target geom.Vec) {
 	p.walking = true
 }
 
+// Place puts the critter's feet at pos, as when it arrives on another map. It
+// stops any walk, since a walk target belongs to the map the critter left;
+// facing and a hop under way are kept.
+func (p *Player) Place(pos geom.Vec) {
+	p.Pos = pos
+	p.walking = false
+}
+
 // Target returns the spot the critter is walking to, and false when it is not
 // walking anywhere.
 func (p *Player) Target() (geom.Vec, bool) {

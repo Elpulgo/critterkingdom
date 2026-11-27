@@ -364,8 +364,9 @@ Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
 - Daily work on desktop: `make run` (fast compile, debugger works). The
   `debug` build tag (`make run TAGS=debug`) adds an overlay, toggled with F3,
   with FPS, screen and world sizes, the input state and the critter's
-  position. Later it gains collision boxes, hitboxes and a `-map` flag to
-  jump straight to a map.
+  position. Later it gains collision boxes and hitboxes. The `-map` flag
+  (`make run ARGS='-map meadow'`) jumps straight to a map; it exists today in
+  every desktop build, not only `debug` ones.
 - Browser check: `make serve` runs wasmserve, pinned as a Go tool in
   `go.mod`, and serves http://localhost:8080/web/, rebuilding the game on
   every reload. Test on a real tablet over the LAN from milestone 0 onwards;
@@ -416,7 +417,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 - [x] Tiled JSON loading, layers, collision grid, animated tiles (water)
 - [ ] Camera follow and clamp; y-sorted props; "above" layer
-- [ ] Warps: village to meadow, village to house interior
+- [x] Warps: village to meadow, village to house interior
 - [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
 - [ ] A* tap-to-walk, joystick alternative
 - [ ] Audio manager: one music loop, footsteps, unlock on first tap
