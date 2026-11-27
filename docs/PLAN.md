@@ -2,7 +2,7 @@
 
 Status: draft v0.3, 2026-11-27. Changes since v0.2: M0 is implemented, and
 sections 4.2 to 4.5, 6.6 and Appendix B now describe the code as built. The
-tablet playtest, the CI workflow and the deploy are still open. v0.2 added
+tablet playtest and the first deploy are still open. v0.2 added
 real-time fights (section 2.7) and milestone M5.
 
 How to use it: each milestone in section 5 is meant to become its own spec and
@@ -391,7 +391,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 ### M0 Foundation: "Hello Critter" (1 to 2 weeks)
 
 - [x] `go mod init`, the folder layout above, a Makefile (`run`, `web`, `test`, `art`, `check`)
-- [ ] GitHub Actions workflow in `.github/workflows/ci.yml`
+- [x] GitHub Actions workflow in `.github/workflows/ci.yml`
 - [x] Ebitengine window: a placeholder critter moves with keyboard, touch (tap-to-walk and pad), gamepad and mouse, through the input abstraction in `engine`
 - [x] Offscreen world render with integer scaling and full-resolution text; adaptive logical width
 - [x] The same build served by wasmserve (`make serve`)

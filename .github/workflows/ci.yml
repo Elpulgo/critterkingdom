@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - name: Format, go.mod, vet and tests
+        run: make check
+
+      - name: Build the desktop game for each platform
+        run: |
+          for target in linux/amd64 windows/amd64 darwin/arm64; do
+            echo "building $target"
+            CGO_ENABLED=0 GOOS=${target%/*} GOARCH=${target#*/} go build -o /dev/null ./cmd/game
+          done
+
+      - name: Build the browser bundle
+        run: make web
+
+      - name: Upload the browser bundle for GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build/web
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
