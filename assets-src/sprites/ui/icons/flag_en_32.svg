@@ -1,32 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- English flag icon (language picker), the UK Union Jack simplified for
      32 by 32 CSS px (64 by 64 px at 2 px per CSS px), the simplified redraw
-     of flag_en_64.svg: a deep water blue field, 12 px white diagonals with
-     4 px poppy red diagonals down their middle, and a 14 px white cross with
-     a 6 px poppy red cross, so every white border is 4 px. The diagonals are
-     clipped to the rounded flag. -->
+     of flag_en_64.svg. The flag is 56 by 40 px, larger on its page than at
+     64 CSS px, so the blue shows: a deep water blue field, 8 px plain white
+     diagonals (no red stripe at this size, as a white-red-white stack would
+     need 12 px and leave the blue triangles under 4 px), and a 12 px white
+     cross with a 4 px poppy red cross, so every white border is 4 px and each
+     of the eight blue triangles keeps at least 5 px of fill. The diagonals run
+     corner to corner and are clipped to the rounded flag. -->
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
   <defs>
     <clipPath id="flag_en_32_clip">
-      <rect x="6" y="14" width="52" height="34" rx="6"/>
+      <rect x="4" y="11" width="56" height="40" rx="6"/>
     </clipPath>
   </defs>
   <!-- Soft drop shadow, the flag 6 px lower -->
   <g id="flag_en_32_shadow" transform="translate(0 6)" opacity="0.22">
-    <rect x="6" y="14" width="52" height="34" rx="6" fill="#181425" stroke="#181425" stroke-width="4"/>
+    <rect x="4" y="11" width="56" height="40" rx="6" fill="#181425" stroke="#181425" stroke-width="4"/>
   </g>
   <!-- Deep water blue field -->
-  <rect id="flag_en_32_field" x="6" y="14" width="52" height="34" rx="6" fill="#124e89" stroke="none"/>
-  <!-- Diagonals, clipped to the flag -->
+  <rect id="flag_en_32_field" x="4" y="11" width="56" height="40" rx="6" fill="#124e89" stroke="none"/>
+  <!-- White diagonals, clipped to the flag -->
   <g id="flag_en_32_diagonals" clip-path="url(#flag_en_32_clip)" fill="none" stroke-linecap="butt">
-    <path d="M 3 12 L 61 50 M 3 50 L 61 12" stroke="#ffffff" stroke-width="12"/>
-    <path d="M 3 12 L 61 50 M 3 50 L 61 12" stroke="#e43b44" stroke-width="4"/>
+    <path d="M -1.6 7 L 65.6 55 M -1.6 55 L 65.6 7" stroke="#ffffff" stroke-width="8"/>
   </g>
   <!-- White cross and poppy red cross; the arms end on the straight edges -->
-  <rect id="flag_en_32_cross_white_across" x="6" y="24" width="52" height="14" fill="#ffffff" stroke="none"/>
-  <rect id="flag_en_32_cross_white_down" x="25" y="14" width="14" height="34" fill="#ffffff" stroke="none"/>
-  <rect id="flag_en_32_cross_red_across" x="6" y="28" width="52" height="6" fill="#e43b44" stroke="none"/>
-  <rect id="flag_en_32_cross_red_down" x="29" y="14" width="6" height="34" fill="#e43b44" stroke="none"/>
+  <rect id="flag_en_32_cross_white_across" x="4" y="25" width="56" height="12" fill="#ffffff" stroke="none"/>
+  <rect id="flag_en_32_cross_white_down" x="26" y="11" width="12" height="40" fill="#ffffff" stroke="none"/>
+  <rect id="flag_en_32_cross_red_across" x="4" y="29" width="56" height="4" fill="#e43b44" stroke="none"/>
+  <rect id="flag_en_32_cross_red_down" x="30" y="11" width="4" height="40" fill="#e43b44" stroke="none"/>
   <!-- Midnight blue outline on top -->
-  <rect id="flag_en_32_outline" x="6" y="14" width="52" height="34" rx="6" fill="none" stroke="#262b44" stroke-width="4"/>
+  <rect id="flag_en_32_outline" x="4" y="11" width="56" height="40" rx="6" fill="none" stroke="#262b44" stroke-width="4"/>
 </svg>
