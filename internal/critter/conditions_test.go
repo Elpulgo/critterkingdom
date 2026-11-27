@@ -140,6 +140,50 @@ func TestSpeciesActive_OnlyWhenEveryConditionHolds(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name:    "daily visitor appears on its day",
+			species: critter.Species{ID: "badger", DailyVisitor: true},
+			world:   critter.World{TimeOfDay: critter.Day, Visitor: "badger"},
+			want:    true,
+		},
+		{
+			name:    "daily visitor stays away on another critter's day",
+			species: critter.Species{ID: "badger", DailyVisitor: true},
+			world:   critter.World{TimeOfDay: critter.Day, Visitor: "owl"},
+			want:    false,
+		},
+		{
+			name:    "daily visitor stays away when there is no visitor",
+			species: critter.Species{ID: "badger", DailyVisitor: true},
+			world:   critter.World{TimeOfDay: critter.Day},
+			want:    false,
+		},
+		{
+			name:    "ordinary critter is not held back by the daily visitor",
+			species: critter.Species{ID: "frog"},
+			world:   critter.World{TimeOfDay: critter.Day, Visitor: "badger"},
+			want:    true,
+		},
+		{
+			name: "night-only daily visitor still hides by day on its day",
+			species: critter.Species{
+				ID:           "badger",
+				ActiveAt:     []critter.TimeOfDay{critter.Night},
+				DailyVisitor: true,
+			},
+			world: critter.World{TimeOfDay: critter.Day, Visitor: "badger"},
+			want:  false,
+		},
+		{
+			name: "night-only daily visitor appears at night on its day",
+			species: critter.Species{
+				ID:           "badger",
+				ActiveAt:     []critter.TimeOfDay{critter.Night},
+				DailyVisitor: true,
+			},
+			world: critter.World{TimeOfDay: critter.Night, Visitor: "badger"},
+			want:  true,
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

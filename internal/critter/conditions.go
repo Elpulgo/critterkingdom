@@ -12,6 +12,9 @@ type World struct {
 	// Companion is the species id of the critter following the player, or
 	// empty when none is.
 	Companion string
+	// Visitor is the species id of today's daily visitor (see DailyVisitor),
+	// or empty when there is none.
+	Visitor string
 }
 
 // Active reports whether the species can appear in w: every condition it
@@ -24,6 +27,9 @@ func (sp *Species) Active(w World) bool {
 		return false
 	}
 	if sp.NeedsCompanion != "" && w.Companion != sp.NeedsCompanion {
+		return false
+	}
+	if sp.DailyVisitor && w.Visitor != sp.ID {
 		return false
 	}
 	return true
