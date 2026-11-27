@@ -303,3 +303,110 @@ func TestLog_Start_MakesANewQuestActiveAndRejectsUnknownOrActiveQuests(t *testin
 		t.Errorf("Active = %v, want %v", got, want)
 	}
 }
+
+func TestLog_PlayingTheMissingHat_CompletesOnTheLastStepWithItsReward(t *testing.T) {
+	def, err := quest.Parse([]byte(missingHatJSON))
+	if err != nil {
+		t.Fatalf("Parse: %v", err)
+	}
+	l := startedLog(t, []quest.Definition{def}, "missing_hat")
+
+	plays := []struct {
+		event quest.Event
+		want  quest.Change
+	}{
+		{quest.Event{Kind: quest.EnteredArea, ID: "meadow"},
+			quest.Change{Quest: "missing_hat", Kind: quest.StepAdvanced, Step: 1, Count: 0, Of: 1}},
+		{quest.Event{Kind: quest.ItemCollected, ID: "grandmas_hat"},
+			quest.Change{Quest: "missing_hat", Kind: quest.StepAdvanced, Step: 2, Count: 0, Of: 1}},
+		{quest.Event{Kind: quest.TalkedTo, ID: "grandma_hedgehog"},
+			quest.Change{Quest: "missing_hat", Kind: quest.Completed, Step: 2, Count: 1, Of: 1,
+				Reward: quest.Reward{Sticker: "hat_hero", Item: "cookie"}}},
+	}
+	for _, p := range plays {
+		got := l.Handle(p.event)
+		if want := []quest.Change{p.want}; !reflect.DeepEqual(got, want) {
+			t.Fatalf("Handle(%+v) = %+v, want %+v", p.event, got, want)
+		}
+	}
+	if got := l.Status("missing_hat"); got != quest.Done {
+		t.Errorf("Status = %v, want Done", got)
+	}
+	if got, want := progressOf(l, "missing_hat"), (progress{}); got != want {
+		t.Errorf("Progress of a done quest = %+v, want %+v", got, want)
+	}
+}
+
+func TestLog_DoneQuest_NeverGrantsItsRewardAgain(t *testing.T) {
+	grandma := quest.Event{Kind: quest.TalkedTo, ID: "grandma_hedgehog"}
+	talkToGrandma := quest.Step{Type: quest.Talk, NPC: "grandma_hedgehog"}
+	defs := []quest.Definition{
+		{ID: "hat", Steps: []quest.Step{talkToGrandma},
+			Reward: quest.Reward{Sticker: "hat_hero", Item: "cookie"}},
+		// Still listening to grandma after the hat quest is done, to show
+		// the event keeps reaching active quests.
+		{ID: "tea", Steps: []quest.Step{talkToGrandma, talkToGrandma, afterwards}},
+	}
+	l := startedLog(t, defs, "hat")
+	if got := l.Handle(grandma); len(got) != 1 || got[0].Kind != quest.Completed {
+		t.Fatalf("finishing Handle = %+v, want one Completed", got)
+	}
+	if err := l.Start("tea"); err != nil {
+		t.Fatalf("Start(tea): %v", err)
+	}
+
+	later := []struct {
+		event quest.Event
+		want  []quest.Change
+	}{
+		{grandma, []quest.Change{{Quest: "tea", Kind: quest.StepAdvanced, Step: 1, Count: 0, Of: 1}}},
+		{grandma, []quest.Change{{Quest: "tea", Kind: quest.StepAdvanced, Step: 2, Count: 0, Of: 1}}},
+		{quest.Event{Kind: quest.EnteredArea, ID: "meadow"}, nil},
+		{quest.Event{Kind: quest.ItemCollected, ID: "grandmas_hat"}, nil},
+	}
+	for _, p := range later {
+		if got := l.Handle(p.event); !reflect.DeepEqual(got, p.want) {
+			t.Errorf("after completion: Handle(%+v) = %+v, want %+v", p.event, got, p.want)
+		}
+	}
+
+	if err := l.Start("hat"); err == nil {
+		t.Error("Start of a done quest: want an error")
+	}
+	if got := l.Status("hat"); got != quest.Done {
+		t.Errorf("Status(hat) = %v, want Done", got)
+	}
+	if got, want := l.Active(), []string{"tea"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("Active = %v, want %v", got, want)
+	}
+	// After the failed restart the finishing event still grants nothing.
+	if got := l.Handle(grandma); len(got) != 0 {
+		t.Errorf("after the failed restart: Handle(grandma) = %+v, want no change", got)
+	}
+}
+
+func TestLog_CountedLastStep_CompletesOnlyWhenTheCounterIsFull(t *testing.T) {
+	// A quest without a reward: it completes with an empty one.
+	defs := []quest.Definition{{ID: "berries", Steps: []quest.Step{
+		{Type: quest.Collect, Item: "berry", Count: 3},
+	}}}
+	l := startedLog(t, defs, "berries")
+
+	got := l.Handle(quest.Event{Kind: quest.ItemCollected, ID: "berry", N: 2})
+	want := []quest.Change{{Quest: "berries", Kind: quest.Progressed, Step: 0, Count: 2, Of: 3}}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Handle(2 berries) = %+v, want %+v", got, want)
+	}
+	if got := l.Status("berries"); got != quest.Active {
+		t.Errorf("at 2 of 3: Status = %v, want Active", got)
+	}
+
+	got = l.Handle(quest.Event{Kind: quest.ItemCollected, ID: "berry"})
+	want = []quest.Change{{Quest: "berries", Kind: quest.Completed, Step: 0, Count: 3, Of: 3}}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Handle(third berry) = %+v, want %+v", got, want)
+	}
+	if got := l.Status("berries"); got != quest.Done {
+		t.Errorf("at 3 of 3: Status = %v, want Done", got)
+	}
+}
