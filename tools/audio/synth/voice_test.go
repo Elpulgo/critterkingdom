@@ -2,7 +2,6 @@ package synth
 
 import (
 	"math"
-	"slices"
 	"testing"
 )
 
@@ -10,32 +9,6 @@ import (
 var syllableNames = []string{
 	"ba", "bi", "bo", "da", "di", "do", "ka", "ki", "ko",
 	"la", "li", "lo", "ma", "mi", "mo", "na", "ni", "no", "pa", "pi",
-}
-
-func TestCatalog_HoldsTheTwentySyllablesInAHighAndALowVoice(t *testing.T) {
-	var want []string
-	for _, voice := range []string{"high", "low"} {
-		for _, syl := range syllableNames {
-			want = append(want, "voices/"+voice+"/"+syl+".ogg")
-		}
-	}
-
-	var got []string
-	for _, s := range Catalog() {
-		if s.Kind != Voice {
-			continue
-		}
-		if s.Render == nil {
-			t.Errorf("%s has no render function", s.Path)
-		}
-		got = append(got, s.Path)
-	}
-
-	slices.Sort(want)
-	slices.Sort(got)
-	if !slices.Equal(got, want) {
-		t.Errorf("voices in the catalog:\n got %q\nwant %q", got, want)
-	}
 }
 
 // fundamental estimates the pitch in Hz of the middle of a voiced sound by

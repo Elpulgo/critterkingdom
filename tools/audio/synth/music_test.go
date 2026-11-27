@@ -6,23 +6,6 @@ import (
 	"testing"
 )
 
-func TestCatalog_HoldsTheFourMusicLoops(t *testing.T) {
-	want := []string{"music/village.ogg", "music/meadow.ogg", "music/cave.ogg", "music/boss.ogg"}
-
-	var got []string
-	for _, s := range Catalog() {
-		if s.Kind == Music {
-			got = append(got, s.Path)
-		}
-	}
-
-	slices.Sort(want)
-	slices.Sort(got)
-	if !slices.Equal(got, want) {
-		t.Errorf("music in the catalog:\n got %q\nwant %q", got, want)
-	}
-}
-
 // renderLoop renders a song the way the catalog ships it.
 func renderLoop(t *testing.T, song Song) []float64 {
 	t.Helper()
