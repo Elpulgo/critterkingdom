@@ -1,6 +1,7 @@
 # Critter Kingdom: Project Plan
 
-Status: draft v0.1, 2026-11-27. This is the living plan for the game.
+Status: draft v0.2, 2026-11-27. Changes since v0.1: real-time fights (section
+2.7), a new milestone M5 for them, and milestones renumbered M6 to M8.
 
 How to use it: each milestone in section 5 is meant to become its own spec and
 branch. Tick the boxes as work lands. When a decision changes, update the
@@ -11,10 +12,10 @@ decision log in section 9 instead of rewriting history.
 Critter Kingdom is a cozy 2D top-down adventure for children aged 5 to 9. You
 play a small critter (fox, bunny or hedgehog) in a kingdom of talking animals.
 You explore a pixel-art world, chat with villagers, take on small quests,
-befriend wild critters and collect them in a sticker book, and solve gentle
-puzzles in tiny dungeons. It is written in Go with Ebitengine, compiled to
-WebAssembly and played in the browser on a tablet or laptop. No accounts, no
-ads, no purchases, no chat with strangers.
+befriend wild critters and collect them in a sticker book, bonk grumpy critters
+with your stick, and solve gentle puzzles in tiny dungeons. It is written in Go
+with Ebitengine, compiled to WebAssembly and played in the browser on a tablet
+or laptop. No accounts, no ads, no purchases, no chat with strangers.
 
 ## 1. Vision
 
@@ -22,16 +23,16 @@ ads, no purchases, no chat with strangers.
 
 | Inspiration | What we take | How it becomes kid-sized |
 |---|---|---|
-| Zelda (Link's Awakening, A Link to the Past) | Top-down exploration, items that open new areas, small dungeons with puzzles, villagers to talk to | One puzzle idea per room. No game over. "Enemies" are grumpy critters you boop into friends. |
+| Zelda (Link's Awakening, A Link to the Past) | Top-down exploration, items that open new areas, small dungeons with puzzles, real-time stick fights and bosses, villagers to talk to | One puzzle idea per room. Every enemy telegraphs its attack. No game over: at zero petals you nap and wake at the door. |
 | Pokémon Go | Creatures hidden in the world, finding them in their habitats, a collection to fill, rarity, "only comes out at night" | No GPS. Critters live in the game world. Befriend by picking the right snack, not by throwing balls. The collection is a sticker book. |
-| Kitaria Fables | Cast of cute animal villagers, village-and-quests loop, cozy tone, light action, co-op | Quests take 3 to 8 minutes and are shown with pictures. Co-op is a later stretch goal. |
+| Kitaria Fables | Cast of cute animal villagers, village-and-quests loop, cozy tone, action combat with cute animals, co-op | Quests take 3 to 8 minutes and are shown with pictures. Fights are short and forgiving. Co-op is a later stretch goal. |
 
 ### 1.2 Design pillars for ages 5 to 9
 
 1. **Never stuck, never punished.** No game over, no timers, nothing is ever lost. A stuck player always has a visible hint.
 2. **Readable without reading.** Every quest step has an icon. Every speaker has a portrait with an expression. Every line can be read aloud. Text is short (max two lines) and large.
-3. **One stick, one button.** Move and "paw" (interact). Menus are big picture buttons. Nothing needs double-tap, long-press or button combos.
-4. **Kindness is the mechanic.** You help, befriend and calm. Winning looks like hearts and stickers.
+3. **One stick, one button.** Move and "paw" (interact or swing). Menus are big picture buttons. Nothing needs double-tap, long-press or button combos.
+4. **Brave, not brutal.** You can fight grumpy critters with your stick, and they poof into flowers and run off smiling. Nobody bleeds, nobody dies, and helping and befriending are still how you win.
 5. **Small loops, frequent smiles.** Something rewarding happens every minute. A quest fits in one sitting.
 6. **Safe by design.** Offline-first, no accounts, no network needed, saves live on the device.
 7. **Playtest with real kids** at the end of every milestone. Watch, don't explain.
@@ -39,7 +40,8 @@ ads, no purchases, no chat with strangers.
 ### 1.3 Deliberately out of scope for v1
 
 Real-world GPS play, online multiplayer, chat, accounts, monetisation, farming
-and crafting systems, inventory-management puzzles, reflex-based combat, 3D.
+and crafting systems, inventory-management puzzles, twitch combat (parries,
+combos, dodge rolls), 3D.
 
 ## 2. The game
 
@@ -50,10 +52,10 @@ six villagers and your own little house. Around it, biomes unlock over time:
 
 | Biome | Unlocked by | Critters | Hook |
 |---|---|---|---|
-| Sunny Meadow | start | bird, snail, squirrel | tutorial quests, berry bushes |
+| Sunny Meadow | start | bird, snail, squirrel | tutorial quests, berry bushes, first slimes at the edges |
 | Lily Pond | start | frog, firefly (night only) | first companion with an ability |
-| Whispering Woods | "Fix the Bridge" quest | owl, fox kit, mushroom sprite | brambles need the Snippers |
-| Glow Cave | firefly companion or lantern | glow-worm, friendly bat | first mini-dungeon, five rooms |
+| Whispering Woods | "Fix the Bridge" quest | owl, fox kit, mushroom sprite | brambles need the Snippers, thistle beasts |
+| Glow Cave | firefly companion or lantern | glow-worm, friendly bat | first mini-dungeon, five rooms, first boss |
 | Pebble Beach | Splash Boots | crab, seal pup | later content |
 
 Each biome is one or two maps of roughly 40 by 30 tiles, with two or three
@@ -69,11 +71,13 @@ deterministic.
 - Pick a species (fox, bunny, hedgehog) and a colour. Pick a name from a list
   of presets, or type one (pre-readers cannot type).
 - Three save slots, so siblings each have their own critter.
+- Your stick. Later a Sturdy Stick and a Sparkle Wand. The newest one is
+  always used, so there is no weapon menu.
 - Cosmetic rewards: hats, scarves, stickers for your house wall.
 - A **companion**: one befriended critter follows you. You can pet it
   (hearts). A few companions have an ability used by puzzles and quests: the
   firefly lights dark places, the bird points at hidden things, the frog
-  fetches from shallow water.
+  fetches from shallow water. Companions also help in fights (see 2.7).
 
 ### 2.3 Talking
 
@@ -91,7 +95,8 @@ deterministic.
 
 Step types, enough for everything in v1: **talk to**, **go to**, **collect
 N**, **deliver X to Y**, **befriend critter**, **find hidden thing**
-(companion gives hot/cold hints), **solve puzzle room**.
+(companion gives hot/cold hints), **solve puzzle room**, **defeat N
+grumpies**, **clear a room**.
 
 Presentation:
 
@@ -110,6 +115,7 @@ Example quests for the vertical slice:
 |---|---|---|
 | The Missing Hat | Grandma Hedgehog | walk, talk, pick up, return (the hat is on the scarecrow) |
 | Berry Pie | Baker Badger | collect five berries, counter UI |
+| Slimes in the Berry Patch | Baker Badger | first fights: defeat three slimes at the meadow's edge |
 | Scared Little Mouse | Pip the mouse | befriend the firefly at night, companion ability (light) |
 | Fix the Bridge | Beaver Woodcutter | deliver three planks, area gating |
 | The Sleepy Tree (main) | Owl Teacher | collect four Glow Seeds, one per mini-dungeon |
@@ -140,15 +146,81 @@ Example quests for the vertical slice:
   light three mushrooms in the order a painting shows; find the key under a
   pot; step on tiles in order; bring a specific companion to wake a sleepy
   guardian.
-- **Glow Cave** is the first mini-dungeon: five rooms, dark, ends with a Glow
-  Seed and a hat.
-- **Grumpy critters** (thistle-beasts, sulky slimes) wander some areas.
-  Touching one bumps you back and costs a petal (you have three). Boop them
-  with your stick and they turn into flowers or run off. At zero petals you
-  take a nap and wake at the area entrance with full petals, nothing lost. A
-  "No grumpies" toggle puts them all to sleep.
+- **Glow Cave** is the first mini-dungeon: five rooms, dark, two of them locked
+  until the grumpies inside are cleared, a sunflower checkpoint, and the
+  Grumbling Grub boss at the end. Reward: a Glow Seed, the Sturdy Stick and a
+  hat.
 
-### 2.7 Session shape and saving
+### 2.7 Fights
+
+Real-time action in the overworld, in the spirit of Zelda and Kitaria Fables,
+tuned for small hands.
+
+**How a fight works**
+
+- The paw button swings your stick in the direction you face. Interacting has
+  priority: if a villager, item or sign is in front of you, paw talks or picks
+  up instead. Villagers can never be hit.
+- Aim assist: when an enemy is within a short cone in front of you, the swing
+  turns toward it. On touch, tapping an enemy walks you up to it and swings
+  until it is gone.
+- Enemies always telegraph. Every attack starts with a visible wind-up of at
+  least 0.6 seconds (shaking, puffing up, a flash) before anything can hurt
+  you. Projectiles are slow and big.
+- Hitboxes are generous for you and forgiving for them: your swing is wider
+  than the stick looks, and an enemy's hurt-box is smaller than its sprite.
+- Taking a hit: lose one petal, a short knockback, one second of blinking
+  invulnerability, a soft "oof". No red flashes and no screen shake by
+  default.
+- Defeating an enemy: it poofs into flowers and hearts, sometimes drops a
+  snack, and its grumpy face turns happy as it runs off. Nobody dies, nothing
+  is scary.
+- Nap rule: at zero petals you fall asleep and wake at the room or map
+  entrance with full petals. Enemies in that room reset. Nothing is lost.
+
+**Petals** are your health: three to start, up to five through Big Petal
+rewards. Hearts dropped by enemies and pots restore one. Outside fights petals
+regrow slowly (about one every 20 seconds), so nobody gets stuck weak.
+
+**Enemies for v1** (grumpy, never monstrous; each has exactly one trick):
+
+| Enemy | Where | Trick | Hits to defeat |
+|---|---|---|---|
+| Sulky Slime | meadow edges, cave | hops toward you slowly | 1 |
+| Thistle Beast | woods, cave | shakes, then charges in a straight line; step sideways | 2 |
+| Grumpy Mushroom | cave | stands still, puffs a slow spore cloud in four directions; hit it between puffs | 1 |
+| Buzzy Bee (M8) | meadow, woods | flies in a lazy wave | 1 |
+| Rolling Pinecone (M8) | woods | rolls at you, then stops dizzy; hit it while dizzy | 2 |
+
+**Boss: the Grumbling Grub**, at the end of Glow Cave. Three telegraphed
+phases (roll across the room, spit slow glow-blobs, sulk when tired). It only
+takes hits while sulking. Its health is a row of five big stars, not a number.
+When beaten, it turns out it was only hungry: you give it a berry, it becomes a
+friend and a sticker.
+
+**Weapons**: the Stick (start), then the Sturdy Stick (Glow Cave reward, two
+damage), then the Sparkle Wand (M8, shoots a slow sparkle for enemies that are
+hard to reach). The newest one is always used.
+
+**Companion in fights**: your companion follows a step behind, cannot be hurt,
+and helps on its own: it nips at nearby enemies for small damage every few
+seconds, and its ability still applies (the firefly lights the room). It
+cheers when you win.
+
+**Where fights happen**: never inside the village. A few slimes at the
+meadow's edges, more in the woods, and rooms in the cave. Some cave rooms lock
+their doors until cleared (classic Zelda), always with a sunflower checkpoint
+before the boss.
+
+**Age presets**: Little Explorer gives enemies one hit point, one petal of
+damage, slower speed and fewer per room. Explorer uses the values above.
+Peaceful mode puts every enemy to sleep for kids who just want to explore.
+
+**Data and code**: enemy stats, speed, telegraph time, drops and which
+behaviour they use live in `enemies.json`. The behaviours themselves (hop
+toward, charge, stationary puff, roll, fly in a wave) and each boss are code.
+
+### 2.8 Session shape and saving
 
 - Autosave at every quest step, map change and new sticker. The title screen
   has a huge "Continue" button.
@@ -159,17 +231,19 @@ Example quests for the vertical slice:
 
 ## 3. Controls
 
-| Input | Move | Paw (interact) | Backpack | Notes |
+| Input | Move | Paw (interact or swing) | Backpack | Notes |
 |---|---|---|---|---|
-| Touch (default) | **Tap where to walk** (pathfinding). Tap a critter, villager or item to walk there and interact. Optional floating joystick. | Big paw-print button bottom-right (or just tap the thing) | Big backpack button top-right | Point-and-click is the easiest thing a 5-year-old can do |
+| Touch (default) | **Tap where to walk** (pathfinding). Tap a critter, villager or item to walk there and interact; tap an enemy to walk there and swing. Optional floating joystick. | Big paw-print button bottom-right (or just tap the thing) | Big backpack button top-right | Point-and-click is the easiest thing a 5-year-old can do |
 | Keyboard | Arrows or WASD | Space, Enter or E | Esc or Tab | |
 | Gamepad | Left stick or d-pad | A (bottom face button) | Start or Y | Standard layout via Ebitengine |
 | Mouse | Click to walk | Click the thing | Click the backpack | |
 
 Rules: eight-direction movement, four-direction facing. No run button (walk
-speed is brisk). Dialogue advances with any tap or paw. Everything the player
-can interact with shows a bubble when they are near. Touch targets are at least
-64 CSS pixels (about 1 cm on a tablet).
+speed is brisk). The paw button interacts when something is in front of you
+and swings the stick otherwise; villagers can never be hit. There is no dodge
+or block button; enemies telegraph instead. Dialogue advances with any tap or
+paw. Everything the player can interact with shows a bubble when they are
+near. Touch targets are at least 64 CSS pixels (about 1 cm on a tablet).
 
 ## 4. Technical plan
 
@@ -207,11 +281,13 @@ critterkingdom/
     engine/            game loop glue, scene stack, camera, input abstraction (Move vector, Paw, Menu, TapAt)
     assets/            embed.FS + loaders (images, Aseprite JSON, audio, fonts), caching
     world/             Tiled map loading, layers, collision grid, warps, triggers, y-sorting, A* pathfinding
-    entity/            player, npc, critter, item, prop; animation controller
+    entity/            player, npc, critter, enemy, item, prop; animation controller
+    combat/            hitboxes, petals and damage rules, invulnerability, knockback, aim assist,
+                       enemy behaviour state machines, boss scripts                 [pure Go]
     dialogue/          data model + runner (conditions, choices, actions)   [pure Go]
     quest/             definitions, runtime state, event bus, step types    [pure Go]
     critter/           species data, spawn zones, befriend rules            [pure Go]
-    inventory/         items, stickers, companion                           [pure Go]
+    inventory/         items, stickers, companion, weapons                  [pure Go]
     save/              SaveGame struct, versioning, Store interface (localStorage on js, file on desktop)
     i18n/              string tables sv/en, T(key)
     tts/               read-aloud: speechSynthesis on js, no-op elsewhere
@@ -230,9 +306,10 @@ Flow: a `Scene` stack (Boot, Title, World) where Dialogue, Backpack and
 Minigame are pushed as overlays that pause the world underneath. The World
 scene owns the map, entities, camera and systems: movement and collision,
 interaction (nearest interactable in facing direction, or the tapped one),
-animation, simple AI (idle, wander, follow), triggers (warps, area enter) and
-the spawner. Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
-`Befriended`) and the quest system listens.
+combat (swings, hurt-boxes, enemy behaviours), animation, simple AI (idle,
+wander, follow), triggers (warps, area enter, room doors) and the spawner.
+Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
+`Befriended`, `EnemyDefeated`, `RoomCleared`) and the quest system listens.
 
 ### 4.3 Key technical decisions
 
@@ -241,13 +318,13 @@ the spawner. Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
 | Resolution | The world is rendered to an offscreen image 180 px tall whose width follows the screen's aspect ratio (320 on 16:9, 240 on a 4:3 iPad), then drawn at the largest integer scale that fits. UI and text are drawn at full screen resolution. | Chunky pixel art plus crisp, large, readable text for early readers. No letterboxing on tablets. |
 | Tiles | 16 by 16 grid. Player and villagers drawn in a 32 by 32 box (big heads), small critters 16 or 24 px. | Tiles are fast to produce; characters stay cute and readable. |
 | Maps | Tiled, exported as JSON (`.tmj`), read by a small loader of our own (the format is plain JSON: layers, tile ids, objects with properties). `go-tiled` reads the TMX format if you would rather not write one. | Mature, free, terrain brushes, object layers for spawns, warps and triggers. LDtk is the alternative. |
-| Content | Data-driven JSON: critters, quests, dialogue, strings, items. Adding a quest means adding a file, not code. | Fast iteration, testable, and later the kids' ideas go in as data. |
+| Content | Data-driven JSON: critters, enemies, quests, dialogue, strings, items. Adding a quest means adding a file, not code. | Fast iteration, testable, and later the kids' ideas go in as data. |
 | Assets | `embed.FS` into the binary to start. Move large audio to fetched-at-runtime if the compressed WASM passes about 10 MB. | Simplest first; optimise when measured. |
 | Save | A versioned JSON `SaveGame`; a `Store` interface with a localStorage implementation (js build tag) and a file implementation (desktop). Autosave. | Offline, no accounts. The version number allows migrations. |
 | Languages | Swedish and English from day one. All text goes through `i18n.T(key)`. The font must include å, ä and ö. | Retrofitting i18n is painful; both are needed at home. |
 | Read-aloud | Web Speech API (`speechSynthesis`) through `syscall/js`, with a settings toggle. | Free, instant, supports sv and en. Voice quality varies by device; recorded voices can replace it later. |
 | Time | In-game time advances by sleeping, not by the real clock. Only the daily visitor uses the real date. | Deterministic, kid-controlled, testable. |
-| Combat | A light "boop" with a stick, petals instead of hearts, a nap instead of death, "No grumpies" toggle. | Zelda feel without fear or frustration. |
+| Combat | Real-time action on the existing paw button (interact first, swing otherwise). Enemies telegraph for at least 0.6 s, hitboxes are generous, health is petals, zero petals means a nap, age presets scale enemies, Peaceful mode sleeps them. Behaviours are code, stats are data. | The Zelda and Kitaria feel, kept to one stick and one button, and never a game over. |
 | UI framework | Hand-rolled: 9-slice panels, big buttons. | The UI is small and unusual (icons, huge targets). `ebitenui` exists if it grows. |
 | Dependencies | Ebitengine, possibly `go-tiled`, stdlib for JSON. | Keep the dependency list short. |
 
@@ -268,8 +345,8 @@ the spawner. Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
 ### 4.5 Developer loop
 
 - Daily work on desktop: `go run ./cmd/game` (fast compile, debugger works). A
-  `debug` build tag adds an overlay with FPS, position and collision boxes,
-  plus a `-map` flag to jump straight to a map.
+  `debug` build tag adds an overlay with FPS, position, collision boxes and
+  hitboxes, plus a `-map` flag to jump straight to a map.
 - Browser check: `go run github.com/hajimehoshi/wasmserve@latest ./cmd/game`
   and open http://localhost:8080. Test on a real tablet over the LAN from
   milestone 0 onwards.
@@ -285,10 +362,15 @@ for rendering or wiring.
   counters, rewards), dialogue runner (conditions, choices, actions),
   inventory, Snack Time rules, save round-trip and version migration, movement
   and collision maths, spawner weights with a seeded RNG, i18n fallback.
+- Combat tests: petals never go below zero, the invulnerability window, the
+  knockback direction, the aim-assist cone, hitbox overlap, enemy behaviour
+  state machines stepped with a fake clock (telegraph, attack, recover), the
+  boss phase script, room-clear door logic, age-preset scaling, drop tables
+  with a seeded RNG.
 - **Content lint test**: loads every real data file and asserts that every
-  referenced NPC, item, critter, map, sprite and string key exists in both
-  languages, every map has a spawn point, and every warp resolves. This test
-  is what catches a typo in a quest file.
+  referenced NPC, item, critter, enemy, map, sprite and string key exists in
+  both languages, every map has a spawn point, and every warp resolves. This
+  test is what catches a typo in a quest file.
 - Determinism: inject a clock and a seeded `rand.Rand`; no sleeps.
 
 ## 5. Roadmap: the steps
@@ -349,44 +431,60 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 **Done when** all five critters can be befriended, show up in the book, and one follows you.
 
-### M5 Exploring and puzzles: "The Glow Cave" (3 to 4 weeks)
+### M5 Fights: "Brave little critter" (2 to 3 weeks)
+
+- [ ] `combat` package with tests: hitboxes, petals, damage, invulnerability, knockback, aim-assist cone
+- [ ] Player swing (three directions, mirrored), hurt and nap animations; paw logic (interact first, swing otherwise); tap-an-enemy on touch
+- [ ] Enemy framework: `enemies.json`, behaviour state machines with telegraphs; Sulky Slime, Thistle Beast, Grumpy Mushroom
+- [ ] Drops (hearts, snacks), slow petal regrowth, Big Petal item
+- [ ] Companion assist: nips at enemies, cannot be hurt, cheers
+- [ ] Age-preset scaling and Peaceful mode
+- [ ] Hit feedback: white flash, pop particles, poof into flowers, soft sounds, a tiny hitstop
+- [ ] Quest step types "defeat N" and "clear a room"; the "Slimes in the Berry Patch" quest at the meadow's edge
+
+**Done when** a 7-year-old clears the meadow slimes and asks for more, and a 5-year-old on Little Explorer naps at most once.
+
+### M6 Exploring and puzzles: "The Glow Cave" (3 to 4 weeks)
 
 - [ ] Gating items: Snippers (brambles), Splash Boots (shallow water)
 - [ ] Puzzle pieces: push block, flower switch, mushrooms in order, key and door, pots
 - [ ] Darkness with a light radius (firefly companion or lantern) using a light-mask image
-- [ ] Grumpy critters: patrol, bump, boop, petals, nap; "No grumpies" toggle
-- [ ] Glow Cave map (five rooms), Glow Seed, main quest skeleton; "Fix the Bridge" opens the Woods
+- [ ] Rooms that lock until cleared; sunflower checkpoint
+- [ ] Boss: the Grumbling Grub with three telegraphed phases, star health bar, berry ending and sticker
+- [ ] Glow Cave map (five rooms), Glow Seed, Sturdy Stick, main quest skeleton; "Fix the Bridge" opens the Woods
 
-**Done when** a 6-year-old finishes the cave with at most one hint from an adult.
+**Done when** a 6-year-old finishes the cave with at most one hint from an adult and beats the Grub within three tries.
 
-### M6 Kid-proofing and polish: "Ready for the sofa" (2 to 3 weeks)
+### M7 Kid-proofing and polish: "Ready for the sofa" (2 to 3 weeks)
 
 - [ ] Title: three slots, species and colour picker, preset names, language flags
-- [ ] "Little Explorer" (5 to 6) and "Explorer" (7 to 9) presets: arrows, hints, grumpies, pad or tap
-- [ ] Settings: sound, read-aloud, controls
+- [ ] "Little Explorer" (5 to 6) and "Explorer" (7 to 9) presets: arrows, hints, enemy scaling, pad or tap
+- [ ] Settings: sound, read-aloud, controls, Peaceful mode
 - [ ] Juice: sparkles, hearts, confetti, soft screen transitions; no harsh flashes
 - [ ] Loading screen with progress; PWA manifest and offline; orientation hint
 - [ ] Performance and size pass on a tablet (60 fps, under about 10 MB over the wire)
-- [ ] Three playtests with target-age kids; fix the top five confusions
+- [ ] Three playtests with target-age kids; fix the top five confusions; tune enemy numbers per preset from the notes
 - [ ] `CREDITS.md`, licences checked
 
 **Done when** a parent can send a link and a 5-year-old plays for 10 minutes unassisted.
 
-### M7 Content expansion (ongoing)
+### M8 Content expansion (ongoing)
 
 Whispering Woods and Pebble Beach, ten more critters, six more quests, two more
-mini-dungeons, the full "Sleepy Tree" main quest, hats and house decoration,
-the Follow the Bounce mini-game.
+mini-dungeons with their own bosses, the full "Sleepy Tree" main quest, Buzzy
+Bee and Rolling Pinecone, the Sparkle Wand, hats and house decoration, the
+Follow the Bounce mini-game.
 
 ### Stretch goals (pick later)
 
-Local co-op (a second player steers the companion with a gamepad),
+Local co-op (a second player steers the companion with a gamepad and can
+fight too), a Leaf Shield that blocks on its own while you stand still,
 draw-your-own-critter pixel editor, a tiny garden (plant a seed, berries after
 you sleep), a birthday party event on a date set by a parent, photo mode
 (saves a PNG), desktop and mobile store builds, optional cloud save through a
 small Go server using a six-letter family code (no accounts).
 
-Rough total to a playable vertical slice (M0 to M6): 4 to 5 months part-time,
+Rough total to a playable vertical slice (M0 to M7): 5 to 6 months part-time,
 plus the art time in 6.7.
 
 ## 6. Making the assets
@@ -398,21 +496,25 @@ plus the art time in 6.7.
   (bright, great for cute games) or *Resurrect 64* (more range). Import it
   into Aseprite and never eyedrop colours from elsewhere.
 - **Sizes**: tiles 16 by 16; player and villagers in a 32 by 32 box (feet at
-  bottom centre, collision box about 12 by 10 at the feet); small critters 16
-  or 24 px; portraits 64 by 64 with three expressions; stickers 48 by 48 with
-  a white "sticker" border; icons 16 px (HUD) and 32 px (menus); 9-slice panel
-  48 by 48 with 16 px borders.
+  bottom centre, collision box about 12 by 10 at the feet); small critters and
+  enemies 16 or 24 px, the boss 48 by 48; portraits 64 by 64 with three
+  expressions; stickers 48 by 48 with a white "sticker" border; icons 16 px
+  (HUD) and 32 px (menus); 9-slice panel 48 by 48 with 16 px borders.
 - **Shapes**: big heads (about half the height), big eyes with a highlight,
   rounded everything, no sharp angles.
+- **Enemies look grumpy, never scary**: furrowed eyebrows and a pout, no
+  fangs, no blood, no glowing red eyes. A defeated enemy smiles.
 - **Lines and shading**: a 1 px outline in a darker version of the fill colour
   (not black); two or three shades per material; light from top-left; no
   dithering, so kids get a clean read.
 - **Contrast rule**: ground tiles are lighter and less saturated than
   characters, so characters pop.
 - **Animation**: idle 2 to 4 frames at 4 to 6 fps (a small bob or squash);
-  walk 4 frames at 8 to 10 fps; hop 3 frames for small critters. Draw down, up
-  and side; the engine mirrors the side view. Shared emote sprites (heart,
-  exclamation, zzz, sweat, music note) that float above anyone.
+  walk 4 frames at 8 to 10 fps; swing 3 frames at 12 fps; hurt 1 frame; hop 3
+  frames for small critters. Enemies: idle 2, move 4, telegraph 2, attack 2 to
+  3, hurt 1, poof 4. Draw down, up and side; the engine mirrors the side view.
+  Shared emote sprites (heart, exclamation, zzz, sweat, music note) that float
+  above anyone.
 - **References**: Kitaria Fables, Animal Crossing, Stardew Valley, Link's
   Awakening (Switch), Tunic (for colour and softness). Collect screenshots in
   a PureRef board.
@@ -435,19 +537,21 @@ AI image tools are fine for mood boards and quick concept drafts. Final sprites
 still need hand clean-up for palette and consistency, and each tool's licence
 terms need checking.
 
-### 6.3 Step by step: characters
+### 6.3 Step by step: characters and enemies
 
 1. Make the **style sheet first**: one grass tile, one tree, one critter, one
-   UI panel and one portrait, placed on a 320 by 180 mock screen and viewed at
-   4x. Iterate until it feels cute. Show it to the kids and ask which one they
-   like.
+   enemy, one UI panel and one portrait, placed on a 320 by 180 mock screen
+   and viewed at 4x. Iterate until it feels cute. Show it to the kids and ask
+   which one they like.
 2. New 32 by 32 file in Aseprite with the palette loaded. Block the
    silhouette: head circle about 16 px, body about 10 px, feet on row 30.
 3. Flat colours, then shading, then outline, then eyes and highlight.
 4. Duplicate for the up and side views. The side view is mirrored by the
    engine (`flipX`).
-5. Animate with tags: `idle_down`, `walk_down`, `idle_up`, and so on. Use
-   onion skin. Idle is a 1 px squash; walk is a bounce with alternating feet.
+5. Animate with tags: `idle_down`, `walk_down`, `swing_down`, `idle_up`, and
+   so on. Use onion skin. Idle is a 1 px squash; walk is a bounce with
+   alternating feet; swing is anticipation, hit and recover, with a shared
+   white "swoosh" arc sprite drawn on top.
 6. Export a sheet plus JSON:
    ```
    aseprite -b fox.aseprite --sheet fox.png --data fox.json --format json-array --list-tags --sheet-type packed
@@ -457,10 +561,15 @@ terms need checking.
 7. Portrait: a 64 by 64 file, same palette, tags `neutral`, `happy`, `sad`.
 8. Cheap variants: palette swaps (bunny to brown bunny), or a shared body with
    swappable head, ear and tail layers.
+9. Enemies: the same process in a 16 by 16 or 24 by 24 box with tags `idle`,
+   `move`, `telegraph`, `attack`, `hurt`, `poof`. The telegraph frames are the
+   most important ones in the game: make them big and obvious (puff up, shake,
+   flash) so a 5-year-old sees the attack coming.
 
-Frame budget per playable critter: 3 directions times (2 idle + 4 walk), plus
-boop, sleep and happy, about 23 frames. Villagers: 18 (or 6 if they stand
-still). Small critters: 5 to 10.
+Frame budget per playable critter: 3 directions times (2 idle + 4 walk + 3
+swing), plus hurt, sleep and happy, about 30 frames. Villagers: 18 (or 6 if
+they stand still). Small critters: 5 to 10. Enemies: about 15. The boss: about
+30.
 
 ### 6.4 Step by step: tiles, props and maps
 
@@ -473,7 +582,7 @@ still). Small critters: 5 to 10.
 3. Props as multi-tile images: tree (32 by 48), bush, berry bush (full and
    empty), rock, fence set, sign, house (64 by 64) with door, chest (closed and
    open), pot, push block, flower switch (off and on), mushroom (off and on),
-   bramble, plank bridge.
+   bramble, plank bridge, room door (open and locked), sunflower checkpoint.
 4. Interior set: floor, walls, window, bed, table, rug, shelf.
 5. Tilesets in Tiled: `tileset_outdoor.png`, `tileset_indoor.png` and
    `tileset_cave.png` as regular tilesets; props as an *image collection*
@@ -482,9 +591,10 @@ still). Small critters: 5 to 10.
    `ground`, `decor`, `props` (object layer with tile objects, y-sorted),
    `above` (tree tops, roofs), `collision` (a one-tile "solid" tileset, or
    rectangles), `objects` (`player_spawn`, `npc` with `id`, `warp` with
-   `target_map` and `target_spawn`, `spawn_zone` with `habitat`, `item` with
-   `item_id`, `trigger` with `event`, puzzle objects). Map properties:
-   `music`, `biome`, `dark`.
+   `target_map` and `target_spawn`, `spawn_zone` with `habitat`, `enemy` with
+   `id`, `room` rectangles with `locks_doors`, `item` with `item_id`,
+   `trigger` with `event`, puzzle objects). Map properties: `music`, `biome`,
+   `dark`.
 7. Turn on "Repeat last export on save" in Tiled so the `.tmj` in
    `assets/maps/` is always current. Test with `go run ./cmd/game -map meadow`.
 
@@ -495,7 +605,11 @@ still). Small critters: 5 to 10.
 - 9-slice panel (48 by 48, 16 px borders), rounded with a soft shadow; a
   button in normal and pressed states; a "next" arrow; a checkmark.
 - Icon set at 16 and 32 px: speech, footsteps, berry, hat, heart, star,
-  sticker, backpack, gear, speaker, flags, snacks, key, lantern, zzz.
+  sticker, backpack, gear, speaker, flags, snacks, key, lantern, zzz, stick,
+  sturdy stick, wand.
+- Petals HUD (full and empty petal), the boss's row of stars.
+- Effects: swoosh arc, hit spark, poof cloud, flowers burst, spore cloud,
+  dust puff.
 - Virtual joystick (ring plus knob) and a big **paw-print** action button.
 - Text at full resolution using Fredoka or Baloo 2 through Ebitengine's
   `text/v2`. Dialogue text about 1 cm tall on a tablet, at most two lines of
@@ -504,12 +618,15 @@ still). Small critters: 5 to 10.
 **Sound effects** (jsfxr or ChipTone to WAV, then
 `ffmpeg -i x.wav -c:a libvorbis -q:a 4 x.ogg`): step, talk blip, pickup, door,
 chest, quest start (three notes up), quest done (fanfare), befriend success
-(sparkle), wrong snack (a soft "bwomp", never harsh), menu tap, boop, hearts,
-sparkle, zzz. Keep everything soft and cap the master volume.
+(sparkle), wrong snack (a soft "bwomp", never harsh), menu tap, hearts,
+sparkle, zzz, swing whoosh, hit pop, hurt "oof", poof, heart pickup, room lock
+and unlock chime, the Grub's friendly grumble. Keep everything soft and cap the
+master volume.
 
-**Music** (BeepBox or Bosca Ceoil to WAV, then OGG at `-q:a 3`): three loops
-of 45 to 60 seconds for village, meadow and cave; 90 to 120 BPM, major or
-pentatonic, soft instruments. Music is the biggest asset, so keep loops short.
+**Music** (BeepBox or Bosca Ceoil to WAV, then OGG at `-q:a 3`): four loops of
+45 to 60 seconds for village, meadow, cave and boss; 90 to 120 BPM, major or
+pentatonic, soft instruments. The boss track is bouncy, not scary. Music is
+the biggest asset, so keep loops short.
 
 **Critter voices**: record about 20 syllables ("ba", "mi", "ko", ...) in a
 high and a low voice and play one per couple of letters while the text types
@@ -526,12 +643,12 @@ text in `CREDITS.md`).
 ```
 assets-src/   .aseprite, .tmx/.tsx, BeepBox .json, raw .wav   (sources of truth; consider git LFS)
 assets/       exported and embedded
-  sprites/    critters/fox.png + fox.json, npcs/, props/, ui/, emotes/
+  sprites/    critters/fox.png + fox.json, npcs/, enemies/, props/, effects/, ui/, emotes/
   tiles/      tileset_outdoor.png ...
   maps/       village.tmj, meadow.tmj, ...
   audio/      music/*.ogg, sfx/*.ogg|wav, voices/
   fonts/      Fredoka-Medium.ttf
-  data/       critters.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
+  data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
 ```
 
 - `make art` runs Aseprite's CLI export on changed sources; `make audio` runs
@@ -549,14 +666,16 @@ assets/       exported and embedded
 |---|---|---|
 | Terrain tiles and transitions | about 60 | 12 to 15 |
 | Props and interiors | about 30 | 10 |
-| Playable critters (fox, bunny, hedgehog via swaps) | 3 | 8 to 10 |
+| Playable critters (fox, bunny, hedgehog via swaps), incl. swing and hurt | 3 | 11 to 13 |
 | Villagers | 5 | 12 to 15 |
 | Wild critters | 5 | 8 to 10 |
+| Enemies (slime, thistle beast, mushroom) | 3 | 10 to 12 |
+| Boss (the Grumbling Grub) | 1 | 6 to 8 |
 | Portraits (three expressions each) | 6 | 6 |
-| UI, icons, pad, logo | about 40 pieces | 8 |
-| Sound effects | about 15 | 3 |
-| Music loops | 3 | 6 |
-| **Total** | | **about 75 to 85** |
+| UI, icons, pad, logo, petals, effects | about 55 pieces | 12 |
+| Sound effects | about 22 | 4 |
+| Music loops | 4 | 8 |
+| **Total** | | **about 100 to 115** |
 
 Strategy for a non-artist: build the whole game on CC0 placeholders, replace
 one category at a time, keep frame counts low, reuse a base body with palette
@@ -574,23 +693,27 @@ is a legitimate shortcut.
    the pixel look.
 5. **Age presets** ("Little Explorer" and "Explorer") instead of a difficulty
    menu.
-6. **PWA**: an icon on the tablet home screen that works offline, including in
+6. **Grumpies become friends.** Every enemy is a grumpy version of a critter.
+   Calm five of a kind and it appears in the sticker book; every boss turns
+   into a friend when beaten. Fights feed the collecting loop instead of
+   fighting it.
+7. **PWA**: an icon on the tablet home screen that works offline, including in
    the car.
-7. **Draw-your-own-critter**: a 16 by 16 in-game pixel editor with the game
+8. **Draw-your-own-critter**: a 16 by 16 in-game pixel editor with the game
    palette. Cheap in Ebitengine, huge for kids.
-8. **Birthday party event**: a parent sets a date in settings and the village
+9. **Birthday party event**: a parent sets a date in settings and the village
    celebrates that day.
-9. **Photo mode**: one button saves a screenshot for showing grandparents.
-10. **Skip real-world GPS**: browsers have no step counter, and outdoor play
+10. **Photo mode**: one button saves a screenshot for showing grandparents.
+11. **Skip real-world GPS**: browsers have no step counter, and outdoor play
     with a tablet is a poor fit for ages 5 to 9. Take the collecting loop,
     leave the walking.
-11. **Content as data**, so adding a quest is adding a JSON file, and the
+12. **Content as data**, so adding a quest is adding a JSON file, and the
     content lint test catches mistakes.
-12. **Playtest protocol**: 10-minute sessions, sit behind, say nothing, write
+13. **Playtest protocol**: 10-minute sessions, sit behind, say nothing, write
     down every place they look lost or ask "what now?" in
     `docs/PLAYTEST-LOG.md`. Ask "what would you do next?" rather than
     explaining.
-13. Later, a **tiny Go server** for family cloud saves via a short code (no
+14. Later, a **tiny Go server** for family cloud saves via a short code (no
     accounts, no email). The save types are the same Go structs on both sides.
 
 ## 8. Risks
@@ -600,8 +723,10 @@ is a legitimate shortcut.
 | WASM size and first load on tablets | Brotli hosting, short music loops, a size budget checked in CI, a loading screen with progress |
 | Browser audio blocked until a gesture | "Tap to start" overlay; the audio manager unlocks on first input |
 | iOS Safari quirks (memory, touch, speech, no orientation lock) | Test on an iPad from M0; orientation hint; keep memory under about 300 MB |
+| Fights too hard or too scary for the youngest | Telegraphs of at least 0.6 s, generous hitboxes, slow petal regrowth, age presets, Peaceful mode, grumpy-not-monstrous art rule, playtests with real 5-year-olds |
+| Accidental swings at villagers or during dialogue | Interact has priority over swing; villagers have no hurt-box; overlays swallow the paw button |
 | Art is the long pole | Placeholder packs first; art bible; low frame counts; palette swaps |
-| Scope creep | Vertical slice M0 to M6 before any content expansion; the stretch list stays a list |
+| Scope creep | Vertical slice M0 to M7 before any content expansion; the stretch list stays a list |
 | Save data lost when browser storage is cleared | Autosave often; export and import "magic word"; later an optional cloud save |
 | Text too hard for 5-year-olds | Icons everywhere, read-aloud, max two lines, playtests |
 | Go GC pauses in WASM | Avoid per-frame allocations, reuse `DrawImageOptions`, draw only visible tiles |
@@ -616,7 +741,7 @@ is a legitimate shortcut.
 | 2026-11-27 | UI and text at full resolution | Pixel fonts at world resolution | Readability for early readers |
 | 2026-11-27 | Tap-to-walk as the default on touch | Virtual pad only | Easiest for 5-year-olds |
 | 2026-11-27 | Day and night change by sleeping | Real-time clock | Deterministic and kid-controlled |
-| 2026-11-27 | Boop, petals and nap; no game over | Classic hearts and game over | Pillar 1 |
+| 2026-11-27 | Real-time action fights on the paw button, telegraphed enemies, petals and nap, age presets, Peaceful mode | Boop-only grumpies; turn-based critter battles; both | The Zelda and Kitaria feel the game is modelled on, kept to one stick and one button, never a game over. Turn-based would be a second game mode and more reading. |
 | 2026-11-27 | localStorage and file saves, no accounts | Backend with logins | Pillar 6 |
 | 2026-11-27 | sv and en from day one | English only | Needed at home; retrofitting is painful |
 
@@ -638,6 +763,25 @@ A critter:
 }
 ```
 
+An enemy (behaviours are code; everything else is data):
+
+```json
+{
+  "id": "sulky_slime",
+  "name": {"en": "Sulky Slime", "sv": "Surt Slem"},
+  "sprite": "enemies/sulky_slime",
+  "behaviour": "hop_toward",
+  "hp": 1,
+  "damage": 1,
+  "speed": 30,
+  "telegraphSeconds": 0.6,
+  "drops": [{"item": "heart", "chance": 0.5}, {"item": "berry", "chance": 0.2}],
+  "littleExplorer": {"hp": 1, "damage": 1, "speed": 20},
+  "sticker": "calm_slime",
+  "stickerAfter": 5
+}
+```
+
 A quest:
 
 ```json
@@ -653,6 +797,8 @@ A quest:
   "reward": {"sticker": "hat_hero", "item": "cookie"}
 }
 ```
+
+A fight step inside a quest: `{"type": "defeat", "enemy": "sulky_slime", "count": 3, "icon": "stick"}`
 
 A dialogue file:
 
