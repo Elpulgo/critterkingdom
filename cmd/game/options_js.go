@@ -4,8 +4,12 @@ package main
 
 import "syscall/js"
 
-// parseOptions reads the page's query string, such as ?pad=1.
+// parseOptions reads the page's query string, such as ?pad=1. The browser
+// build always starts on the default map.
 func parseOptions() options {
 	params := js.Global().Get("URLSearchParams").New(js.Global().Get("location").Get("search"))
-	return options{touchPad: params.Call("get", "pad").String() == "1"}
+	return options{
+		touchPad: params.Call("get", "pad").String() == "1",
+		startMap: defaultStartMap,
+	}
 }

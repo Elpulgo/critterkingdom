@@ -17,7 +17,12 @@ import (
 type options struct {
 	// touchPad turns on the floating touch pad.
 	touchPad bool
+	// startMap names the map the game starts on, such as "village".
+	startMap string
 }
+
+// defaultStartMap is the map the game starts on unless -map names another.
+const defaultStartMap = "village"
 
 func main() {
 	opts := parseOptions()
@@ -25,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	scene, err := world.NewScene(font, assets.LoadMap, "meadow")
+	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap)
 	if err != nil {
 		log.Fatal(err)
 	}
