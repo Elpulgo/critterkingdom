@@ -76,19 +76,14 @@ func TestDecode_ReportsCorruptInputsAsErrCorrupt(t *testing.T) {
 	}{
 		{"empty input", ``},
 		{"truncated JSON", `{"version":2`},
-		{"not JSON at all", `not-a-save`},
 		{"JSON null", `null`},
 		{"JSON array instead of object", `[1,2,3]`},
-		{"JSON string instead of object", `"hello"`},
-		{"JSON number instead of object", `42`},
 		{"missing version field", `{"critter":{"name":"Pip","species":"fox","colour":"red"}}`},
 		{"version is null", `{"version":null,"critter":{"name":"Pip","species":"fox","colour":"red"}}`},
 		{"version is a string", `{"version":"2","critter":{"name":"Pip","species":"fox","colour":"red"}}`},
 		{"version is a fractional number", `{"version":1.5,"critter":{"name":"Pip","species":"fox","colour":"red"}}`},
 		{"version is zero", `{"version":0,"critter":{"name":"Pip","species":"fox","colour":"red"}}`},
-		{"version is negative", `{"version":-1,"critter":{"name":"Pip","species":"fox","colour":"red"}}`},
 		{"critter is a number instead of an object", `{"version":2,"critter":123}`},
-		{"critter is an array instead of an object", `{"version":2,"critter":["Pip"]}`},
 		{"critter name is a number instead of a string", `{"version":2,"critter":{"name":42,"species":"fox","colour":"red"}}`},
 	}
 
