@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"image"
 	_ "image/png"
+	"io/fs"
 	"net/url"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -152,6 +155,104 @@ func TestManifest_URLsAreRelativeForSubPathDeployment(t *testing.T) {
 			}
 			if u.Scheme != "" || u.Host != "" {
 				t.Errorf("%s = %q has scheme/host; want relative URL", tc.name, tc.value)
+			}
+		})
+	}
+}
+
+// buildProducts are the files `make web` adds next to the copy of web/; they
+// never exist in web/ itself.
+var buildProducts = []string{"main.wasm", "wasm_exec.js"}
+
+var stringLiteral = regexp.MustCompile(`'([^']*)'|"([^"]*)"`)
+
+// loadPrecache returns the entries of `const PRECACHE = [...]` in sw.js.
+func loadPrecache(t *testing.T) []string {
+	t.Helper()
+	data, err := os.ReadFile("sw.js")
+	if err != nil {
+		t.Fatalf("read sw.js: %v", err)
+	}
+	src := string(data)
+	const open = "const PRECACHE = ["
+	start := strings.Index(src, open)
+	if start < 0 {
+		t.Fatalf("sw.js has no %q", open)
+	}
+	body := src[start+len(open):]
+	end := strings.Index(body, "];")
+	if end < 0 {
+		t.Fatal("sw.js: PRECACHE array is not closed with \"];\"")
+	}
+	var entries []string
+	for _, m := range stringLiteral.FindAllStringSubmatch(body[:end], -1) {
+		entries = append(entries, m[1]+m[2])
+	}
+	if len(entries) == 0 {
+		t.Fatal("sw.js: PRECACHE is empty")
+	}
+	return entries
+}
+
+// A single missing file makes cache.addAll reject, and with it the whole
+// offline install.
+func TestServiceWorker_EveryPrecachedEntryExists(t *testing.T) {
+	for _, entry := range loadPrecache(t) {
+		t.Run(entry, func(t *testing.T) {
+			if entry == "./" {
+				return
+			}
+			for _, product := range buildProducts {
+				if entry == product {
+					return
+				}
+			}
+			info, err := os.Stat(entry)
+			if err != nil {
+				t.Fatalf("precached %q is not a file in web/: %v", entry, err)
+			}
+			if info.IsDir() {
+				t.Fatalf("precached %q is a directory, want a file", entry)
+			}
+		})
+	}
+}
+
+func TestServiceWorker_PrecachesEveryFileThePageNeedsOffline(t *testing.T) {
+	precached := map[string]bool{}
+	for _, entry := range loadPrecache(t) {
+		precached[entry] = true
+	}
+
+	needed := append([]string{}, buildProducts...)
+	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		name := filepath.ToSlash(path)
+		if name == "sw.js" || strings.HasSuffix(name, "_test.go") {
+			return nil
+		}
+		needed = append(needed, name)
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk web/: %v", err)
+	}
+
+	for _, file := range needed {
+		t.Run(file, func(t *testing.T) {
+			entry := file
+			if file == "index.html" {
+				// wasmserve answers index.html with its own page, so the
+				// page is precached as the directory URL.
+				entry = "./"
+			}
+			if !precached[entry] {
+				t.Errorf("%q is needed offline but sw.js does not precache %q", file, entry)
 			}
 		})
 	}
