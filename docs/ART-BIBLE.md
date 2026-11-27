@@ -8,8 +8,9 @@ Inkscape while you work.
 ## Mood
 
 Five words set the feel of every drawing: **sunny, soft, round, friendly,
-storybook**. The world is a warm afternoon in a picture book for 5-to-9-year-
-olds. Even the caves and the grumpy enemies belong to the same gentle world.
+storybook**. The world is a warm afternoon in a picture book for
+5-to-9-year-olds. Even the caves and the grumpy enemies belong to the same
+gentle world.
 
 ## Look
 
@@ -202,8 +203,8 @@ frame-by-frame sprite sheets:
   faces that young children read at a glance.
 - **Animal Crossing**: toy-like proportions (big heads, stubby limbs, expressive
   eyes) and cheerful village warmth.
-- **The Legend of Zelda: Link's Awakening (Switch)** and **Tunic**: clean top-
-  down readability, bright saturated colour against calm ground, and clear
+- **The Legend of Zelda: Link's Awakening (Switch)** and **Tunic**: clean
+  top-down readability, bright saturated colour against calm ground, and clear
   silhouettes.
 
 When gathering visual references locally, drop screenshots into a PureRef board
