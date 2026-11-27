@@ -4,7 +4,8 @@ package assets
 
 import "embed"
 
-// FS holds the embedded files, such as fonts/Fredoka.ttf and maps/meadow.tmj.
+// FS holds the embedded files: fonts/Fredoka.ttf, and the Tiled maps
+// maps/*.tmj (village, house, meadow), which internal/assets.MapNames lists.
 //
 //go:embed fonts maps
 var FS embed.FS
