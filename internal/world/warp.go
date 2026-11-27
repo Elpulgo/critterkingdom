@@ -119,3 +119,23 @@ func (m *Map) loadMarkers() error {
 	}
 	return nil
 }
+
+// MapLoader loads the map called name, for example "meadow". The game passes
+// assets.LoadMap; world cannot import assets itself.
+type MapLoader func(name string) (*Map, error)
+
+// ResolveWarp loads the target map of w with load and returns it together with
+// the world-pixel position of its spawn w.TargetSpawn. It returns an error
+// naming the target map when the map cannot be loaded, and naming both the map
+// and the spawn when the map has no player_spawn of that name.
+func ResolveWarp(load MapLoader, w Warp) (*Map, geom.Vec, error) {
+	m, err := load(w.TargetMap)
+	if err != nil {
+		return nil, geom.Vec{}, fmt.Errorf("warp to map %q: %w", w.TargetMap, err)
+	}
+	pos, ok := m.Spawn(w.TargetSpawn)
+	if !ok {
+		return nil, geom.Vec{}, fmt.Errorf("warp to map %q: no player_spawn named %q", w.TargetMap, w.TargetSpawn)
+	}
+	return m, pos, nil
+}

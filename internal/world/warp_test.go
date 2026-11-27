@@ -1,6 +1,7 @@
 package world
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -217,6 +218,80 @@ func TestLoadMap_RejectsSpawnsAndWarpsThatCannotBeUsed(t *testing.T) {
 			}
 			if !strings.Contains(err.Error(), tt.wantErr) {
 				t.Errorf("LoadMap error = %q; want it to contain %q", err.Error(), tt.wantErr)
+			}
+		})
+	}
+}
+
+// twoMapLoader loads the inline maps "village" and "house" through the real
+// LoadMap, each with two spawns so that picking the wrong map or spawn shows.
+// Any other name fails with an error that does not mention the name, so tests
+// can see that ResolveWarp adds it.
+func twoMapLoader() MapLoader {
+	maps := map[string][]byte{
+		"village": markerMap(`{"name": "biome", "type": "string", "value": "village"}`, `
+			{"id": 1, "name": "start", "type": "player_spawn", "x": 128, "y": 128, "point": true},
+			{"id": 2, "name": "from_house", "type": "player_spawn", "x": 384, "y": 256, "point": true}`),
+		"house": markerMap(`{"name": "biome", "type": "string", "value": "house"}`, `
+			{"id": 1, "name": "by_the_bed", "type": "player_spawn", "x": 640, "y": 128, "point": true},
+			{"id": 2, "name": "from_village", "type": "player_spawn", "x": 256, "y": 384, "point": true}`),
+	}
+	return func(name string) (*Map, error) {
+		data, ok := maps[name]
+		if !ok {
+			return nil, errors.New("not found")
+		}
+		return LoadMap(data)
+	}
+}
+
+func TestResolveWarp_LeadsToTheTargetMapAtTheNamedSpawn(t *testing.T) {
+	load := twoMapLoader()
+	tests := []struct {
+		name      string
+		warp      Warp
+		wantBiome string
+		wantPos   geom.Vec
+	}{
+		{"village door into the house", Warp{TargetMap: "house", TargetSpawn: "from_village"}, "house", geom.Vec{X: 32, Y: 48}},
+		{"house door back to the village", Warp{TargetMap: "village", TargetSpawn: "from_house"}, "village", geom.Vec{X: 48, Y: 32}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m, pos, err := ResolveWarp(load, tt.warp)
+			if err != nil {
+				t.Fatalf("ResolveWarp: %v", err)
+			}
+			if m.Biome != tt.wantBiome {
+				t.Errorf("ResolveWarp map biome = %q; want the %q map", m.Biome, tt.wantBiome)
+			}
+			if pos != tt.wantPos {
+				t.Errorf("ResolveWarp pos = %v; want %v", pos, tt.wantPos)
+			}
+		})
+	}
+}
+
+func TestResolveWarp_ToAMissingMapOrSpawnFailsNamingIt(t *testing.T) {
+	load := twoMapLoader()
+	tests := []struct {
+		name     string
+		warp     Warp
+		wantErrs []string
+	}{
+		{"missing map", Warp{TargetMap: "cave", TargetSpawn: "from_village"}, []string{`"cave"`}},
+		{"missing spawn", Warp{TargetMap: "house", TargetSpawn: "from_cellar"}, []string{`"house"`, `"from_cellar"`}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m, _, err := ResolveWarp(load, tt.warp)
+			if err == nil {
+				t.Fatalf("ResolveWarp succeeded with map %v; want an error", m)
+			}
+			for _, want := range tt.wantErrs {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("ResolveWarp error = %q; want it to contain %s", err.Error(), want)
+				}
 			}
 		})
 	}
