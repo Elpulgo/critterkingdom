@@ -699,10 +699,24 @@ assets/       exported and embedded
   data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
 ```
 
-- `make art` arrives with the first drawing in M1: a script in `tools/` will
-  run Inkscape's command line on changed sources, export each part, tile and
-  prop to PNG at 8 px per world pixel and write the part JSON. Until then the
-  placeholder art is drawn in code. Later `make audio` runs ffmpeg;
+- `make art` runs `go run ./tools/art`, a Go command (logic in
+  `tools/art/artexport`) that drives Inkscape 1.x's command line over the
+  SVGs in `assets-src/sprites/` and `assets-src/tiles/` that are newer than
+  their export (`make art ART_ARGS=-force` exports all of them;
+  `INKSCAPE=/path/to/inkscape` when it is not on `PATH`). The folder decides
+  the kind of drawing. A character in `assets-src/sprites/critters/`,
+  `npcs/` or `enemies/`, for example `critters/fox.svg`, becomes one PNG per
+  `<view>_<part>` object plus `fox.json` in `assets/sprites/critters/fox/`;
+  the JSON gives each part's box and pivot in world pixels from the
+  `<view>_feet` marker, read from `--query-all`, and PNGs of parts no longer
+  in the drawing are deleted. Every other drawing (props, effects, ui,
+  emotes, tiles) becomes one PNG of its page at the mirrored path, for
+  example `assets/tiles/tileset_outdoor.png`. Everything is exported at
+  8 px per world pixel. Only whole parts get a `<view>_` id: a named object
+  inside a part, such as `down_head_shine`, is exported as a part of its own.
+  Until the first drawing lands the placeholder art is drawn in code. The
+  exporter's tests use a fake Inkscape; `go test -tags inkscape ./tools/art/...`
+  runs the real one on a machine that has it. Later `make audio` runs ffmpeg;
   `make check` runs gofmt, `go mod tidy -diff`, vet for desktop and browser
   and every test, which will include the content lint test; `make web` builds
   the wasm bundle into `build/web/`.
@@ -911,9 +925,12 @@ cp web/index.html web/loader.js build/web/
 cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" build/web/      # Go 1.23 and older: misc/wasm/wasm_exec.js
 
 # assets
-inkscape assets-src/fox.svg --export-id=down_head --export-id-only \
+make art    # export changed drawings; ART_ARGS=-force for all, INKSCAPE=/path/to/inkscape if not on PATH
+# what make art runs for each part of a character, by hand:
+inkscape assets-src/sprites/critters/fox.svg --query-all    # id,x,y,width,height of every object
+inkscape assets-src/sprites/critters/fox.svg --export-type=png --export-id=down_head --export-id-only \
+  --export-area-snap --export-dpi=96 \
   --export-filename=assets/sprites/critters/fox/down_head.png   # one part, at 8 px per world pixel
-inkscape assets-src/fox.svg --query-all                          # id,x,y,width,height of every object
 ffmpeg -i in.wav -c:a libvorbis -q:a 4 out.ogg
 
 # tests
