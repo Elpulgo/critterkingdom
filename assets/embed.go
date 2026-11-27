@@ -5,8 +5,9 @@ package assets
 import "embed"
 
 // FS holds the embedded files, such as fonts/Fredoka.ttf, maps/meadow.tmj,
-// the string tables data/strings/sv.json and data/strings/en.json, the quest
-// definitions data/quests/*.json, and critters.json.
+// the item catalog data/items.json, the string tables data/strings/sv.json
+// and data/strings/en.json, the quest definitions data/quests/*.json, and
+// critters.json.
 //
 //go:embed fonts maps critters.json
 //go:embed fonts maps data
