@@ -15,13 +15,18 @@ const testCatalog = `[
 	{"id": "grandmas_hat", "name": {"en": "Grandma's Hat", "sv": "Mormors hatt"}, "icon": "hat", "key": true}
 ]`
 
-func newInventory(t *testing.T) *inventory.Inventory {
+func newCatalog(t *testing.T) *inventory.Catalog {
 	t.Helper()
 	c, err := inventory.ParseCatalog([]byte(testCatalog))
 	if err != nil {
 		t.Fatalf("ParseCatalog: %v", err)
 	}
-	return inventory.New(c)
+	return c
+}
+
+func newInventory(t *testing.T) *inventory.Inventory {
+	t.Helper()
+	return inventory.New(newCatalog(t))
 }
 
 func mustAdd(t *testing.T, inv *inventory.Inventory, id string, n int) {
