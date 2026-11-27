@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- English flag icon (language picker), the UK Union Jack simplified for
+     64 by 64 CSS px (128 by 128 px at 2 px per CSS px): a deep water blue
+     field, 18 px white diagonals with 6 px poppy red diagonals down their
+     middle, and a 24 px white cross with a 14 px poppy red cross, so every
+     white border is at least 5 px. The diagonals are clipped to the rounded
+     flag. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="flag_en_64_clip">
+      <rect x="12" y="28" width="104" height="68" rx="12"/>
+    </clipPath>
+  </defs>
+  <!-- Soft drop shadow, the flag 6 px lower -->
+  <g id="flag_en_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <rect x="12" y="28" width="104" height="68" rx="12" fill="#181425" stroke="#181425" stroke-width="6"/>
+  </g>
+  <!-- Deep water blue field -->
+  <rect id="flag_en_64_field" x="12" y="28" width="104" height="68" rx="12" fill="#124e89" stroke="none"/>
+  <!-- Diagonals, clipped to the flag -->
+  <g id="flag_en_64_diagonals" clip-path="url(#flag_en_64_clip)" fill="none" stroke-linecap="butt">
+    <path d="M 6 24 L 122 100 M 6 100 L 122 24" stroke="#ffffff" stroke-width="18"/>
+    <path d="M 6 24 L 122 100 M 6 100 L 122 24" stroke="#e43b44" stroke-width="6"/>
+  </g>
+  <!-- White cross and poppy red cross; the arms end on the straight edges -->
+  <rect id="flag_en_64_cross_white_across" x="12" y="50" width="104" height="24" fill="#ffffff" stroke="none"/>
+  <rect id="flag_en_64_cross_white_down" x="52" y="28" width="24" height="68" fill="#ffffff" stroke="none"/>
+  <rect id="flag_en_64_cross_red_across" x="12" y="55" width="104" height="14" fill="#e43b44" stroke="none"/>
+  <rect id="flag_en_64_cross_red_down" x="57" y="28" width="14" height="68" fill="#e43b44" stroke="none"/>
+  <!-- Midnight blue outline on top -->
+  <rect id="flag_en_64_outline" x="12" y="28" width="104" height="68" rx="12" fill="none" stroke="#262b44" stroke-width="6"/>
+</svg>
