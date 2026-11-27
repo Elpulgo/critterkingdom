@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Outdoor tileset: 128 by 128 px tiles (16 by 16 world px) on an 8 by 8 grid.
+       Each tile is a <g> whose id is its tile type, translated to its grid cell
+       (column*128, row*128) and clipped to its own 128 px cell by tile_cell.
+       Ground tiles get no outline. A shape crossing a tile edge is repeated
+       128 px over on the opposite side so the tile wraps seamlessly.
+       Light comes from the top-left. -->
+  <defs>
+    <clipPath id="tile_cell">
+      <rect x="0" y="0" width="128" height="128"/>
+    </clipPath>
+  </defs>
+
+  <!-- Row 0, column 0: grass. Meadow green #63c74d with two leaf green #3e8948 tufts,
+       the same tile as grass_tile in the style sheet. -->
+  <g id="grass" transform="translate(0,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(32,44)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(90,102)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 1: grass_2. One tuft in the upper right, a small one lower left. -->
+  <g id="grass_2" transform="translate(128,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(88,52)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(30,100)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 2: grass_3. Plain meadow with three small two-blade tufts. -->
+  <g id="grass_3" transform="translate(256,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(26,36)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+    <g transform="translate(96,72)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+    <g transform="translate(48,112)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 3: grass_4. A tuft crossing the right edge (x 108..139),
+       repeated 128 px to the left so the tile wraps, and a small tuft in the middle. -->
+  <g id="grass_4" transform="translate(384,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(124,70)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(-4,70)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(56,32)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 4: path. Light tan #e4a672 dirt with warm ochre #d77643 dents
+       and cream #ead4aa highlight dabs on their upper-left. The dent crossing the
+       bottom edge (y 121..131) is repeated 128 px up. -->
+  <g id="path" transform="translate(512,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e4a672" stroke="none"/>
+    <g fill="#d77643" stroke="none">
+      <ellipse cx="34" cy="40" rx="10" ry="6"/>
+      <ellipse cx="94" cy="28" rx="7" ry="5"/>
+      <ellipse cx="62" cy="88" rx="12" ry="7"/>
+      <ellipse cx="108" cy="102" rx="6" ry="4"/>
+      <ellipse cx="20" cy="126" rx="8" ry="5"/>
+      <ellipse cx="20" cy="-2" rx="8" ry="5"/>
+    </g>
+    <g fill="#ead4aa" stroke="none">
+      <ellipse cx="30" cy="37" rx="4" ry="2"/>
+      <ellipse cx="57" cy="84" rx="5" ry="2"/>
+      <circle cx="80" cy="56" r="3"/>
+      <circle cx="16" cy="76" r="2"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 5: sand. Peach #e8b796 with light tan #e4a672 wind ripples
+       and cream #ead4aa sparkle dots. -->
+  <g id="sand" transform="translate(640,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <g fill="#e4a672" stroke="none">
+      <rect x="18" y="30" width="36" height="6" rx="3"/>
+      <rect x="74" y="60" width="32" height="6" rx="3"/>
+      <rect x="30" y="98" width="40" height="6" rx="3"/>
+    </g>
+    <g fill="#ead4aa" stroke="none">
+      <circle cx="90" cy="24" r="3"/>
+      <circle cx="16" cy="70" r="2"/>
+      <circle cx="104" cy="108" r="3"/>
+      <circle cx="56" cy="62" r="2"/>
+    </g>
+  </g>
+
+  <!-- Rows 0 and 1: water_1..water_3, the three animation frames. Pond blue #0099db
+       with sky cyan #2ce8f5 ripples and one deep water blue #124e89 shade dimple
+       under the lower ripple. The ripples drift right a little each frame; in
+       water_3 the middle ripple crosses the right edge (x 110..138) and is
+       repeated 128 px to the left. -->
+  <g id="water_1" transform="translate(768,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <ellipse cx="80" cy="102" rx="16" ry="4" fill="#124e89" stroke="none"/>
+    <g fill="#2ce8f5" stroke="none">
+      <ellipse cx="36" cy="36" rx="18" ry="4"/>
+      <ellipse cx="76" cy="96" rx="14" ry="4"/>
+      <circle cx="96" cy="44" r="3"/>
+    </g>
+  </g>
+
+  <g id="water_2" transform="translate(896,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <ellipse cx="88" cy="100" rx="18" ry="4" fill="#124e89" stroke="none"/>
+    <g fill="#2ce8f5" stroke="none">
+      <ellipse cx="44" cy="38" rx="20" ry="4"/>
+      <ellipse cx="84" cy="94" rx="16" ry="4"/>
+      <circle cx="104" cy="52" r="3"/>
+    </g>
+  </g>
+
+  <g id="water_3" transform="translate(0,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <ellipse cx="96" cy="104" rx="14" ry="4" fill="#124e89" stroke="none"/>
+    <g fill="#2ce8f5" stroke="none">
+      <ellipse cx="52" cy="40" rx="16" ry="4"/>
+      <ellipse cx="92" cy="98" rx="12" ry="4"/>
+      <ellipse cx="124" cy="68" rx="14" ry="4"/>
+      <ellipse cx="-4" cy="68" rx="14" ry="4"/>
+    </g>
+  </g>
+</svg>
