@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Music note emote, 128 by 128 px (16 by 16 world px at 8 px per world px).
+     Two beamed notes: round heads tilted up to the right, stems on their right
+     sides and one thick beam that rises to the right, centred on the page.
+     Orchid purple fill, plum 8 px outline and head shade, blossom pink
+     highlights. No drop shadow: it floats.
+     The outline is one 16 px plum stroke round all the parts together, drawn
+     under the parts' purple fill, so the parts join without lines between
+     them. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Outline: every part in plum with a 16 px plum stroke, 8 px outside the fill -->
+  <g id="music_note_outline" fill="#68386c" stroke="#68386c" stroke-width="16" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="38" cy="95" rx="17" ry="13" transform="rotate(-20 38 95)"/>
+    <ellipse cx="90" cy="85" rx="17" ry="13" transform="rotate(-20 90 85)"/>
+    <rect x="46" y="44" width="9" height="51"/>
+    <rect x="98" y="34" width="9" height="51"/>
+    <path d="M 46 31 L 107 19 L 107 35 L 46 47 Z"/>
+  </g>
+  <!-- Fill: the same parts in orchid purple -->
+  <g id="music_note_fill" fill="#b55088" stroke="none">
+    <ellipse cx="38" cy="95" rx="17" ry="13" transform="rotate(-20 38 95)"/>
+    <ellipse cx="90" cy="85" rx="17" ry="13" transform="rotate(-20 90 85)"/>
+    <rect x="46" y="44" width="9" height="51"/>
+    <rect x="98" y="34" width="9" height="51"/>
+    <path d="M 46 31 L 107 19 L 107 35 L 46 47 Z"/>
+  </g>
+  <!-- Shade: an arc inside each head's lower-right edge, below the stem -->
+  <g id="music_note_shade" fill="none" stroke="#68386c" stroke-width="6" stroke-linecap="round">
+    <path d="M 48.72 101.43 A 14 10 0 0 1 33.21 104.4" transform="rotate(-20 38 95)"/>
+    <path d="M 100.72 91.43 A 14 10 0 0 1 85.21 94.4" transform="rotate(-20 90 85)"/>
+  </g>
+  <!-- Highlights: a dab on each head's upper-left and a line along the beam's top -->
+  <g id="music_note_highlight" fill="#f6757a" stroke="none">
+    <ellipse cx="32" cy="91" rx="5" ry="3" transform="rotate(-20 38 95)"/>
+    <ellipse cx="84" cy="81" rx="5" ry="3" transform="rotate(-20 90 85)"/>
+  </g>
+  <path id="music_note_beam_highlight" d="M 57 33.8 L 81 29.1" fill="none" stroke="#f6757a" stroke-width="5" stroke-linecap="round"/>
+</svg>

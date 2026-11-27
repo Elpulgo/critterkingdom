@@ -84,6 +84,13 @@ var uiArt = []struct {
 	{"effects/spore_cloud.svg", 192, 192},
 	{"effects/hit_spark.svg", 128, 128},
 	{"effects/dust_puff.svg", 128, 128},
+	// Shared emotes, 16 world px: half the width of the 32 world px character
+	// they float above.
+	{"emotes/heart.svg", 128, 128},
+	{"emotes/exclamation.svg", 128, 128},
+	{"emotes/zzz.svg", 128, 128},
+	{"emotes/sweat.svg", 128, 128},
+	{"emotes/music_note.svg", 128, 128},
 }
 
 // uiArtFolders are the folders whose every .svg must be a manifest row.
