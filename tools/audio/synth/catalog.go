@@ -43,5 +43,8 @@ func Catalog() []Sound {
 	for _, e := range sfxList {
 		c = append(c, Sound{Path: "sfx/" + e.name + ".ogg", Kind: SFX, Render: e.render})
 	}
+	for _, s := range Songs() {
+		c = append(c, Sound{Path: "music/" + s.Name + ".ogg", Kind: Music, Render: s.Render})
+	}
 	return c
 }
