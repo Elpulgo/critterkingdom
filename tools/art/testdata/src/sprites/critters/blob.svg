@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Fixture for tools/art/inkscape_test.go: a one-view character whose
+       body box is fractional (80.5,150.35 to 175.5,240.65), so the export
+       has to snap it outward to 80,150 to 176,241. No strokes, so the
+       visual and geometric bounding boxes are the same. -->
+  <g id="layer1">
+    <!-- Body in orange #f77622 -->
+    <ellipse id="down_body" cx="128" cy="195.5" rx="47.5" ry="45.15" fill="#f77622"/>
+    <!-- Head in light orange #feae34 -->
+    <circle id="down_head" cx="128" cy="100" r="60" fill="#feae34"/>
+    <!-- Head pivot marker in red #e43b44 -->
+    <circle id="down_head_pivot" cx="128" cy="148" r="2" fill="#e43b44"/>
+    <!-- Feet anchor in dark blue #262b44 -->
+    <circle id="down_feet" cx="128" cy="240" r="4" fill="#262b44"/>
+  </g>
+</svg>
