@@ -61,12 +61,12 @@
 
     <!-- Canopy 8 px darker outline (#265c42) tracing the union of the three puff circles
          (cx=128 cy=116 r=88, cx=184 cy=184 r=64, cx=72 cy=184 r=64) and the bottom ellipse
-         (cx=128 cy=204 rx=104 ry=60), transitioning at their intersection points -->
-    <path d="M 40.3 123.5
-             A 88 88 0 1 1 215.7 123.5
+         (cx=128 cy=204 rx=104 ry=60), transitioning at their true intersection points -->
+    <path d="M 41.2 130.7
+             A 88 88 0 1 1 214.8 130.7
              A 64 64 0 0 1 200.4 245.9
              A 104 60 0 0 1 55.6 245.9
-             A 64 64 0 0 1 40.3 123.5 Z"
+             A 64 64 0 0 1 41.2 130.7 Z"
           fill="none" stroke="#265c42" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
 
