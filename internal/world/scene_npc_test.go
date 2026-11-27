@@ -163,3 +163,110 @@ func TestScene_PawWithNoVillagerInFrontHopsAndStartsNoInteraction(t *testing.T) 
 		})
 	}
 }
+
+// run updates s with each of frames in turn and returns how many of those
+// ticks started an interaction.
+func run(t *testing.T, s *Scene, frames ...engine.Frame) int {
+	t.Helper()
+	started := 0
+	for _, f := range frames {
+		if err := s.Update(f); err != nil {
+			t.Fatalf("Update: %v", err)
+		}
+		if _, ok := s.TakeInteraction(); ok {
+			started++
+		}
+	}
+	return started
+}
+
+// repeat returns n copies of f.
+func repeat(n int, f engine.Frame) []engine.Frame {
+	return slices.Repeat([]engine.Frame{f}, n)
+}
+
+func TestScene_TappingAVillagerWalksTheCritterToItAndStartsOneInteractionOnArrival(t *testing.T) {
+	// The critter starts at (24,40). The baker stands at Tiled (640,320),
+	// world (80,40), and the press lands on its body at (80,30). The critter
+	// is in reach from x 56, 32 px away: 27 ticks at 1.2 px a tick.
+	load := mapLoader(map[string][]byte{
+		"village": roomMap(6, 4, "village", villageStart+`,`+pointNPC(2, "baker_badger", 640, 320), ``),
+	})
+	s := newVillageScene(t, load)
+	baker := geom.Vec{X: 80, Y: 40}
+
+	var got Interaction
+	started := 0
+	for range 60 {
+		if err := s.Update(pointFrame(true, geom.Vec{X: 80, Y: 30})); err != nil {
+			t.Fatalf("Update: %v", err)
+		}
+		if in, ok := s.TakeInteraction(); ok {
+			got, started = in, started+1
+		}
+	}
+
+	if want := (Interaction{NPC: "baker_badger"}); started != 1 || got != want {
+		t.Fatalf("with the pointer held on the baker: %d interactions, last %+v; want exactly one, %+v", started, got, want)
+	}
+	if d := baker.Sub(s.player.Pos).Len(); d > entity.InteractReach || d < entity.InteractReach-1.2 {
+		t.Errorf("critter at %v, %.1f px from the baker; want stopped on arriving within %v px", s.player.Pos, d, entity.InteractReach)
+	}
+	if s.player.Facing != entity.FacingRight {
+		t.Errorf("critter faces %s; want right, towards the baker", s.player.Facing)
+	}
+}
+
+func TestScene_SteeringAwayAfterTappingAVillagerCancelsTheInteraction(t *testing.T) {
+	// The critter starts at (24,40). In the plain village the baker stands at
+	// Tiled (640,320), world (80,40). In the warp village it stands at Tiled
+	// (704,320), world (88,40), behind the warp over (64,32)-(80,48). The
+	// house here is as wide as the village and has no walls, so nothing but
+	// a cancelled tap stops a walk there on to where the baker stood.
+	plain := roomMap(6, 4, "village", villageStart+`,`+pointNPC(2, "baker_badger", 640, 320), ``)
+	warped := roomMap(6, 4, "village",
+		villageStart+`,`+warpObject(2, 4, 2, "house", "from_village")+`,`+pointNPC(3, "baker_badger", 704, 320), ``)
+	release := pointFrame(false, geom.Vec{})
+	tests := []struct {
+		name    string
+		village []byte
+		tap     geom.Vec
+		// then cancels the tap and ends with the critter near where the
+		// baker stood.
+		then []engine.Frame
+	}{
+		{
+			// West for 10 ticks to x 14.4, then east for 40 to x 62.4,
+			// 17.6 px from the baker.
+			name: "stick", village: plain, tap: geom.Vec{X: 80, Y: 30},
+			then: slices.Concat(repeat(10, walkFrame(geom.Vec{X: -1})), repeat(40, walkFrame(geom.Vec{X: 1}))),
+		},
+		{
+			// (60,52) is outside the baker's tap box and 23.3 px from it.
+			name: "press elsewhere", village: plain, tap: geom.Vec{X: 80, Y: 30},
+			then: repeat(60, pointFrame(true, geom.Vec{X: 60, Y: 52})),
+		},
+		{
+			// The walk to the baker enters the warp, and the critter then
+			// stands idle on the house's from_village spawn, (24,28).
+			name: "warp", village: warped, tap: geom.Vec{X: 88, Y: 30},
+			then: repeat(120, engine.Frame{View: villageView, DT: 1.0 / 60}),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			load := mapLoader(map[string][]byte{
+				"village": tt.village,
+				"house":   roomMap(6, 4, "house", houseObjects, ``),
+			})
+			s := newVillageScene(t, load)
+
+			started := run(t, s, pointFrame(true, tt.tap), release)
+			started += run(t, s, tt.then...)
+
+			if started != 0 {
+				t.Errorf("%d interactions started, critter at %v on %q; want none after the tap was cancelled", started, s.player.Pos, s.mapName)
+			}
+		})
+	}
+}

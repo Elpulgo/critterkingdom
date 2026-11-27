@@ -51,6 +51,14 @@ const (
 	titleFade = 1.0
 )
 
+// The tap box of a villager, in world pixels from its feet: a press inside it
+// taps the villager rather than the ground behind it.
+const (
+	tapHalfWidth = 10
+	tapAbove     = 24
+	tapBelow     = 2
+)
+
 // Interaction is an interaction the critter started with a villager. NPC is
 // the villager's id.
 type Interaction struct {
@@ -75,9 +83,16 @@ type Scene struct {
 	bob      float64 // how far the walk bob lifts the critter, in world pixels
 	elapsed  float64 // total elapsed seconds, for tile animations
 
-	// awaitRelease ignores pointer walking after a warp until the pointer has
-	// been let go, so a held tap does not walk the critter straight back.
+	// awaitRelease ignores pointer walking until the pointer has been let go:
+	// after a warp, so a held tap does not walk the critter straight back, and
+	// after a press on a villager, which walks to the villager instead.
 	awaitRelease bool
+	// wasPointing is whether the pointer was held on the tick before, so a
+	// press can be told from a hold.
+	wasPointing bool
+	// tapTarget is the villager the critter walks to because it was tapped,
+	// or nil. Reaching it starts an interaction.
+	tapTarget *entity.NPC
 
 	// pending is the interaction started and not yet taken with
 	// TakeInteraction, or nil. lastNPC is the id of the villager last
@@ -136,6 +151,8 @@ func (s *Scene) setMap(name string, m *Map) {
 		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
 	}
 	s.player.Walls = m.Collision
+	// A tapped villager belongs to the map before.
+	s.tapTarget = nil
 	spawns := m.NPCs()
 	s.npcs = make([]*entity.NPC, 0, len(spawns))
 	for _, sp := range spawns {
@@ -166,24 +183,33 @@ func (s *Scene) followWarp() error {
 	return nil
 }
 
-// Update moves the critter, the villagers and the camera by one tick, and
-// moves the critter to another map when its feet end the tick inside a warp.
+// Update moves the critter, the villagers and the camera by one tick, starts
+// an interaction when the critter reaches a villager it was tapped towards,
+// and moves the critter to another map when its feet end the tick inside a
+// warp.
 // It returns an error when that warp's target map or spawn does not exist.
 func (s *Scene) Update(f engine.Frame) error {
 	s.elapsed += f.DT
 	in := f.Input
+	pressed := in.Pointing && !s.wasPointing
+	s.wasPointing = in.Pointing
 	if !in.Pointing {
 		s.awaitRelease = false
 	}
-	if in.Move.IsZero() && in.Pointing && !s.awaitRelease {
-		s.player.WalkTo(s.camera.Add(in.Point))
-	}
+	s.steer(in, pressed)
 	if in.Paw {
 		s.paw()
 	}
 	s.player.Update(f.DT, in.Move, s.walkable)
 	if err := s.followWarp(); err != nil {
 		return err
+	}
+	if s.tapTarget != nil && !s.reachTapTarget() {
+		if _, walking := s.player.Target(); !walking {
+			// The walk ended before getting there: a wall stopped it, or the
+			// stick or a warp ended it.
+			s.tapTarget = nil
+		}
 	}
 	for _, n := range s.npcs {
 		n.Update(f.DT, s.player.Pos)
@@ -201,6 +227,68 @@ func (s *Scene) Update(f engine.Frame) error {
 	focus := s.player.Pos.Sub(geom.Vec{Y: focusLift})
 	s.camera = engine.SmoothCameraFor(focus, f.View.W, f.View.H, s.bounds, f.View.Scale)
 	return nil
+}
+
+// steer turns this tick's movement input into where the critter goes. The
+// stick or keys win and drop a tapped villager. A press on a villager makes
+// it the tap target, which the critter walks to until it is in reach; a
+// press anywhere else drops the target and, like a held pointer, walks the
+// critter to the point.
+func (s *Scene) steer(in engine.Input, pressed bool) {
+	if !in.Move.IsZero() {
+		s.tapTarget = nil
+		return
+	}
+	if pressed && !s.awaitRelease {
+		point := s.camera.Add(in.Point)
+		s.tapTarget = s.villagerAt(point)
+		if s.tapTarget != nil {
+			// The rest of this press walks to the villager, not the point.
+			s.awaitRelease = true
+		}
+	}
+	if s.tapTarget != nil {
+		if !s.reachTapTarget() {
+			s.player.WalkTo(s.tapTarget.Pos)
+		}
+		return
+	}
+	if in.Pointing && !s.awaitRelease {
+		s.player.WalkTo(s.camera.Add(in.Point))
+	}
+}
+
+// villagerAt returns the villager whose tap box holds the world point p, the
+// one standing lowest in the view when boxes overlap, as it is drawn on top,
+// or nil when there is none.
+func (s *Scene) villagerAt(p geom.Vec) *entity.NPC {
+	var hit *entity.NPC
+	for _, n := range s.npcs {
+		box := geom.Rect{
+			Min: geom.Vec{X: n.Pos.X - tapHalfWidth, Y: n.Pos.Y - tapAbove},
+			Max: geom.Vec{X: n.Pos.X + tapHalfWidth, Y: n.Pos.Y + tapBelow},
+		}
+		if box.Contains(p) && (hit == nil || n.Pos.Y >= hit.Pos.Y) {
+			hit = n
+		}
+	}
+	return hit
+}
+
+// reachTapTarget checks whether the critter's feet are within reach of the
+// tapped villager. If so, the critter stops, faces it and starts an
+// interaction with it, the target is dropped and it returns true.
+func (s *Scene) reachTapTarget() bool {
+	n := s.tapTarget
+	off := n.Pos.Sub(s.player.Pos)
+	if off.Len() > entity.InteractReach {
+		return false
+	}
+	s.player.Place(s.player.Pos)
+	s.player.Facing = s.player.Facing.Toward(off)
+	s.interact(n)
+	s.tapTarget = nil
+	return true
 }
 
 // paw starts an interaction with the villager the critter would pick, or
