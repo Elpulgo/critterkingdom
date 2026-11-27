@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration flower_red, seen from above:
+       a poppy with four round poppy red petals around a marigold heart,
+       with two leaves peeking out below. 16 by 16 world px.
+       Petals, heart and leaves get the 8 px round outline in their paired
+       darker colour; the heart has one highlight dot on its top-left, towards
+       the light. -->
+  <g stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <g fill="#3e8948" stroke="#265c42">
+      <ellipse cx="34" cy="86" rx="18" ry="9" transform="rotate(30 34 86)"/>
+      <ellipse cx="94" cy="86" rx="18" ry="9" transform="rotate(-30 94 86)"/>
+    </g>
+    <g fill="#e43b44" stroke="#a22633">
+      <circle cx="64" cy="38" r="17"/>
+      <circle cx="46" cy="56" r="17"/>
+      <circle cx="82" cy="56" r="17"/>
+      <circle cx="64" cy="74" r="17"/>
+    </g>
+    <circle cx="64" cy="56" r="12" fill="#feae34" stroke="#d77643"/>
+  </g>
+  <circle cx="61" cy="53" r="4" fill="#fee761" stroke="none"/>
+</svg>

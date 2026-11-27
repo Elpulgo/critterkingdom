@@ -28,9 +28,24 @@ type worldSize struct{ w, h int }
 // pixels. A drawing missing from the folders, or a drawing in the folders but
 // not listed here, fails TestArt_EveryDrawingFollowsTheArtBible.
 var manifest = map[string]worldSize{
-	"tiles/tileset_cave.svg":    {128, 16},
-	"tiles/tileset_indoor.svg":  {128, 16},
-	"tiles/tileset_outdoor.svg": {128, 128},
+	"sprites/decor/clover.svg":        {16, 16},
+	"sprites/decor/flower_pink.svg":   {16, 16},
+	"sprites/decor/flower_red.svg":    {16, 16},
+	"sprites/decor/flower_white.svg":  {16, 16},
+	"sprites/decor/flower_yellow.svg": {16, 16},
+	"sprites/decor/leaf_1.svg":        {16, 16},
+	"sprites/decor/leaf_2.svg":        {16, 16},
+	"sprites/decor/leaf_3.svg":        {16, 16},
+	"sprites/decor/pebble_1.svg":      {16, 16},
+	"sprites/decor/pebble_2.svg":      {16, 16},
+	"sprites/decor/pebble_3.svg":      {16, 16},
+	"sprites/decor/tuft_1.svg":        {16, 16},
+	"sprites/decor/tuft_2.svg":        {16, 16},
+	"sprites/decor/tuft_3.svg":        {16, 16},
+	"sprites/decor/twig.svg":          {16, 16},
+	"tiles/tileset_cave.svg":          {128, 16},
+	"tiles/tileset_indoor.svg":        {128, 16},
+	"tiles/tileset_outdoor.svg":       {128, 128},
 }
 
 // artFolders are the folders under assets-src whose drawings `make art` exports.

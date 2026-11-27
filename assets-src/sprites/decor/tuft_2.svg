@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration tuft_2: a wide clump of five grass blades standing on
+       y 100. 16 by 16 world px, no outline, as for all ground tufts. The two
+       blades on the right take the shade; the tallest blade's left side the
+       highlight. -->
+  <g stroke="none">
+    <path d="M 82 100 C 88 84 98 76 110 74 C 102 80 96 90 94 100 Z" fill="#265c42"/>
+    <path d="M 68 100 C 72 78 80 62 90 52 C 86 66 82 82 80 100 Z" fill="#265c42"/>
+    <path d="M 34 100 C 32 86 26 78 18 72 C 30 74 40 84 44 100 Z" fill="#3e8948"/>
+    <path d="M 42 100 C 42 80 46 62 52 50 C 56 64 58 82 56 100 Z" fill="#3e8948"/>
+    <path d="M 54 100 C 56 74 60 50 66 36 C 72 50 74 74 72 100 Z" fill="#3e8948"/>
+    <path d="M 58 98 C 60 76 62 58 66 46 C 67 60 66 78 64 98 Z" fill="#63c74d"/>
+  </g>
+</svg>

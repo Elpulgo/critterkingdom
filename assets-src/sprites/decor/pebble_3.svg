@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration pebble_3: a scatter of three small pebbles.
+       16 by 16 world px. Cool grey with the 8 px round slate blue outline, a
+       pale slate highlight on each top-left and soft ink shadows below. -->
+  <g fill="#181425" fill-opacity="0.2" stroke="none">
+    <ellipse cx="50" cy="64" rx="13" ry="6"/>
+    <ellipse cx="82" cy="58" rx="12" ry="5"/>
+    <ellipse cx="66" cy="92" rx="14" ry="6"/>
+  </g>
+  <g fill="#8b9bb4" stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="58" rx="11" ry="8"/>
+    <ellipse cx="80" cy="52" rx="10" ry="7"/>
+    <ellipse cx="64" cy="85" rx="12" ry="9"/>
+  </g>
+  <g fill="#c0cbdc" stroke="none">
+    <circle cx="44" cy="55" r="3"/>
+    <circle cx="77" cy="49" r="3"/>
+    <ellipse cx="60" cy="81" rx="4" ry="3"/>
+  </g>
+</svg>
