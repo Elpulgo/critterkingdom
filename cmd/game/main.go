@@ -9,6 +9,7 @@ import (
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
+	"github.com/Elpulgo/critterkingdom/internal/i18n"
 	"github.com/Elpulgo/critterkingdom/internal/world"
 )
 
@@ -19,6 +20,9 @@ type options struct {
 	touchPad bool
 	// startMap names the map the game starts on, such as "village".
 	startMap string
+	// lang is the language to start in, "sv" or "en". An empty or unknown
+	// value keeps Swedish.
+	lang string
 }
 
 // defaultStartMap is the map the game starts on unless -map names another.
@@ -29,6 +33,16 @@ func main() {
 	font, err := assets.LoadFont()
 	if err != nil {
 		log.Fatal(err)
+	}
+	strs, err := assets.LoadStrings()
+	if err != nil {
+		log.Fatal(err)
+	}
+	i18n.Use(strs)
+	if opts.lang != "" {
+		if err := i18n.SetLanguage(i18n.Lang(opts.lang)); err != nil {
+			log.Printf("lang %q: %v; starting in %s", opts.lang, err, i18n.Language())
+		}
 	}
 	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap)
 	if err != nil {

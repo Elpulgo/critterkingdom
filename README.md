@@ -18,6 +18,7 @@ The one exception is `make art`, which also needs Inkscape (see [Art](#art)).
 make run              # play on the desktop
 make run TAGS=debug   # with the debug overlay, F3 hides it
 make run ARGS=-pad    # with the touch pad instead of tap-to-walk
+make run ARGS=-lang=en # in English instead of Swedish
 make run ARGS='-map meadow'  # start on another map from assets/maps
 make serve            # play in a browser at http://localhost:8080/web/
 make test             # run the tests
@@ -39,6 +40,8 @@ Without make, use `go run ./cmd/game` and `go tool wasmserve ./cmd/game`.
    instead of the game's.
 4. Add `?pad=1` to the address to steer with a pad on the left half of the
    screen instead of tapping where to walk.
+5. Add `?lang=en` to play in English instead of Swedish, or both at once:
+   `?pad=1&lang=en`.
 
 Every reload rebuilds the game, so edit, save and reload the tablet.
 

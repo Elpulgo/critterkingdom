@@ -1,0 +1,13 @@
+[
+  {
+    "id": "firefly",
+    "name": {"en": "Firefly", "sv": "Eldfluga"},
+    "habitat": "pond",
+    "activeAt": ["night"],
+    "likes": "berry",
+    "rarity": "uncommon",
+    "sprite": "critters/firefly",
+    "ability": "light",
+    "fact": {"en": "Fireflies glow to say hello.", "sv": "Eldflugor lyser för att säga hej."}
+  }
+]
