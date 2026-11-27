@@ -3,6 +3,7 @@ package world
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"sort"
 	"time"
 
@@ -65,6 +66,76 @@ func (m *Map) Tile(gid uint32) (Tile, bool) {
 		return t, true
 	}
 	return Tile{}, true
+}
+
+// FrameGID returns the global tile ID of the animation frame showing for gid
+// at elapsed. It loops after the last frame and returns gid (with flip bits
+// cleared) when the tile has no animation or gid is not in any tileset.
+func (m *Map) FrameGID(gid uint32, elapsed time.Duration) uint32 {
+	gid &^= gidFlipMask
+	ts, local, ok := m.findTileset(gid)
+	if !ok {
+		return gid
+	}
+	t, exists := ts.tiles[local]
+	if !exists || len(t.Animation) == 0 {
+		return gid
+	}
+	var total time.Duration
+	for _, f := range t.Animation {
+		if f.Duration > 0 {
+			total += f.Duration
+		}
+	}
+	if total <= 0 {
+		return ts.FirstGID + uint32(t.Animation[0].TileID)
+	}
+	rem := elapsed % total
+	if rem < 0 {
+		rem += total
+	}
+	var acc time.Duration
+	for _, f := range t.Animation {
+		if f.Duration <= 0 {
+			continue
+		}
+		acc += f.Duration
+		if rem < acc {
+			return ts.FirstGID + uint32(f.TileID)
+		}
+	}
+	return ts.FirstGID + uint32(t.Animation[len(t.Animation)-1].TileID)
+}
+
+// VisibleCells returns the half-open cell range [c0, c1) and [r0, r1) of map
+// cells that overlap view with positive area, clamped to the map's dimensions.
+// When view does not overlap the map with positive area, it returns an empty
+// range (c0 == c1 or r0 == r1).
+func (m *Map) VisibleCells(view geom.Rect) (c0, r0, c1, r1 int) {
+	if m == nil || m.TileSize <= 0 || m.Cols <= 0 || m.Rows <= 0 {
+		return 0, 0, 0, 0
+	}
+	if view.Max.X <= view.Min.X || view.Max.Y <= view.Min.Y {
+		return 0, 0, 0, 0
+	}
+	c0 = clampCell(int(math.Floor(view.Min.X/m.TileSize)), 0, m.Cols)
+	c1 = clampCell(int(math.Ceil(view.Max.X/m.TileSize)), 0, m.Cols)
+	r0 = clampCell(int(math.Floor(view.Min.Y/m.TileSize)), 0, m.Rows)
+	r1 = clampCell(int(math.Ceil(view.Max.Y/m.TileSize)), 0, m.Rows)
+	if c1 <= c0 || r1 <= r0 {
+		return 0, 0, 0, 0
+	}
+	return c0, r0, c1, r1
+}
+
+func clampCell(v, lo, hi int) int {
+	if v < lo {
+		return lo
+	}
+	if v > hi {
+		return hi
+	}
+	return v
 }
 
 // findTileset returns the tileset that owns gid and its 0-based local tile ID.

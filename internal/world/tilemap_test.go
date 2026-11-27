@@ -369,3 +369,164 @@ func TestLoadMap_RejectsUnsupportedOrMalformedMaps(t *testing.T) {
 		})
 	}
 }
+
+func TestMap_FrameGID_ShowsEachWaterFrameForItsDurationAndLoops(t *testing.T) {
+	const tmj = `{
+		"orientation": "orthogonal",
+		"infinite": false,
+		"width": 1,
+		"height": 1,
+		"tilewidth": 128,
+		"tileheight": 128,
+		"tilesets": [
+			{
+				"firstgid": 1,
+				"name": "terrain",
+				"tilecount": 1,
+				"tiles": [
+					{"id": 0, "type": "grass"}
+				]
+			},
+			{
+				"firstgid": 10,
+				"name": "water",
+				"tilecount": 3,
+				"tiles": [
+					{
+						"id": 0,
+						"type": "water_1",
+						"animation": [
+							{"tileid": 0, "duration": 200},
+							{"tileid": 1, "duration": 200},
+							{"tileid": 2, "duration": 200}
+						]
+					},
+					{"id": 1, "type": "water_2"},
+					{"id": 2, "type": "water_3"}
+				]
+			}
+		],
+		"layers": []
+	}`
+
+	m, err := LoadMap([]byte(tmj))
+	if err != nil {
+		t.Fatalf("LoadMap: %v", err)
+	}
+
+	// Animated water tile is GID 10 (local tile 0 of the second tileset, firstgid 10).
+	// Its 3 frames are local tiles 0, 1, 2 (GIDs 10, 11, 12) for 200 ms each (600 ms total).
+	cases := []struct {
+		elapsed time.Duration
+		wantGID uint32
+	}{
+		{0 * time.Millisecond, 10},
+		{199 * time.Millisecond, 10},
+		{200 * time.Millisecond, 11},
+		{250 * time.Millisecond, 11},
+		{399 * time.Millisecond, 11},
+		{400 * time.Millisecond, 12},
+		{450 * time.Millisecond, 12},
+		{599 * time.Millisecond, 12},
+		{600 * time.Millisecond, 10},
+		{650 * time.Millisecond, 10},
+		{850 * time.Millisecond, 11},
+	}
+
+	for _, tc := range cases {
+		if got := m.FrameGID(10, tc.elapsed); got != tc.wantGID {
+			t.Errorf("FrameGID(10, %v) = %d; want %d", tc.elapsed, got, tc.wantGID)
+		}
+	}
+
+	// Flip bits on an animated GID are ignored when picking the frame.
+	if got := m.FrameGID(10|0x80000000, 250*time.Millisecond); got != 11 {
+		t.Errorf("FrameGID(10|flip, 250ms) = %d; want 11", got)
+	}
+
+	// Static tile without animation returns its own GID unchanged at any elapsed time.
+	if got := m.FrameGID(1, 450*time.Millisecond); got != 1 {
+		t.Errorf("FrameGID(1, 450ms) = %d; want 1", got)
+	}
+	if got := m.FrameGID(0, 450*time.Millisecond); got != 0 {
+		t.Errorf("FrameGID(0, 450ms) = %d; want 0", got)
+	}
+}
+
+func TestMap_VisibleCells_ReturnsOverlappingCellsClampedToMap(t *testing.T) {
+	// 4x3 map of 16x16 world-pixel tiles (total size 64x48).
+	const tmj = `{
+		"orientation": "orthogonal",
+		"infinite": false,
+		"width": 4,
+		"height": 3,
+		"tilewidth": 128,
+		"tileheight": 128,
+		"tilesets": [{"firstgid": 1, "name": "t", "tilecount": 1}],
+		"layers": []
+	}`
+
+	m, err := LoadMap([]byte(tmj))
+	if err != nil {
+		t.Fatalf("LoadMap: %v", err)
+	}
+
+	tests := []struct {
+		name           string
+		view           geom.Rect
+		wantC0, wantR0 int
+		wantC1, wantR1 int
+		wantEmptyRange bool
+	}{
+		{
+			name:   "interior view partially overlapping cells",
+			view:   geom.Rect{Min: geom.Vec{X: 4, Y: 18}, Max: geom.Vec{X: 35, Y: 40}},
+			wantC0: 0, wantR0: 1,
+			wantC1: 3, wantR1: 3,
+		},
+		{
+			name:   "tile-aligned view does not include adjacent touching cells",
+			view:   geom.Rect{Min: geom.Vec{X: 16, Y: 16}, Max: geom.Vec{X: 32, Y: 32}},
+			wantC0: 1, wantR0: 1,
+			wantC1: 2, wantR1: 2,
+		},
+		{
+			name:   "view extending past all map edges clamps to map bounds",
+			view:   geom.Rect{Min: geom.Vec{X: -20, Y: -10}, Max: geom.Vec{X: 100, Y: 80}},
+			wantC0: 0, wantR0: 0,
+			wantC1: 4, wantR1: 3,
+		},
+		{
+			name:   "view partially outside top-left edge clamps start to zero",
+			view:   geom.Rect{Min: geom.Vec{X: -5, Y: -5}, Max: geom.Vec{X: 17, Y: 15}},
+			wantC0: 0, wantR0: 0,
+			wantC1: 2, wantR1: 1,
+		},
+		{
+			name:           "view wholly to the left of the map returns empty range",
+			view:           geom.Rect{Min: geom.Vec{X: -32, Y: 0}, Max: geom.Vec{X: 0, Y: 32}},
+			wantEmptyRange: true,
+		},
+		{
+			name:           "view wholly beyond the bottom-right of the map returns empty range",
+			view:           geom.Rect{Min: geom.Vec{X: 64, Y: 48}, Max: geom.Vec{X: 96, Y: 80}},
+			wantEmptyRange: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			c0, r0, c1, r1 := m.VisibleCells(tc.view)
+			if tc.wantEmptyRange {
+				if c0 < c1 && r0 < r1 {
+					t.Fatalf("VisibleCells(%v) = (%d, %d, %d, %d); want empty range", tc.view, c0, r0, c1, r1)
+				}
+				return
+			}
+			if c0 != tc.wantC0 || r0 != tc.wantR0 || c1 != tc.wantC1 || r1 != tc.wantR1 {
+				t.Errorf("VisibleCells(%v) = (%d, %d, %d, %d); want (%d, %d, %d, %d)",
+					tc.view, c0, r0, c1, r1, tc.wantC0, tc.wantR0, tc.wantC1, tc.wantR1)
+			}
+		})
+	}
+}
