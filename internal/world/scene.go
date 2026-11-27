@@ -1,10 +1,10 @@
-// Package world is where the critter walks. For now that is a single meadow;
-// maps made in Tiled replace it later.
+// Package world is where the critter walks around Tiled maps.
 package world
 
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -16,13 +16,10 @@ import (
 )
 
 const (
-	tileSize   = 16
-	meadowCols = 40
-	meadowRows = 24
-	hedgeWidth = 16
-	// edgeGap keeps the critter's feet this far from the edge of the meadow,
-	// so it stands in front of the hedge rather than inside it.
-	edgeGap = hedgeWidth + 4
+	// feetMarginX and feetMarginTop keep the critter's 12 by 10 feet box inside
+	// the map bounds when its feet position is clamped to walkable.
+	feetMarginX   = 6
+	feetMarginTop = 10
 	// focusLift raises the camera's focus from the critter's feet to the
 	// middle of its body.
 	focusLift = 8
@@ -52,17 +49,19 @@ const (
 	titleFade = 1.0
 )
 
-// Scene is the meadow: a field of grass inside a hedge where the critter
-// walks around, and hops and says hello when the paw button is pressed.
+// Scene is the world scene: a Tiled map where the critter walks around,
+// collides with solid scenery, and hops and says hello when the paw button is
+// pressed.
 type Scene struct {
-	bounds   geom.Rect // the whole meadow, in world pixels
-	walkable geom.Rect // where the critter's feet may go
-	meadow   *meadow
+	m        *Map
+	bounds   geom.Rect // the whole map, in world pixels
+	walkable geom.Rect // where the critter's feet may go so its box stays inside bounds
 	player   *entity.Player
 	camera   geom.Vec // top-left corner of the view, in world pixels
 	viewSize geom.Vec // size of the view, in world pixels
 	pen      pen
 	bob      float64 // how far the walk bob lifts the critter, in world pixels
+	elapsed  float64 // total elapsed seconds, for tile animations
 
 	walked     float64 // seconds the critter has spent walking
 	greet      float64 // seconds left of the greeting
@@ -72,22 +71,54 @@ type Scene struct {
 	bubbleFace *text.GoTextFace
 }
 
-// NewScene returns the meadow with the critter in the middle.
-func NewScene(font *text.GoTextFaceSource) *Scene {
-	bounds := geom.Rect{Max: geom.Vec{X: meadowCols * tileSize, Y: meadowRows * tileSize}}
+// NewScene returns a world scene for m with the critter placed at the first
+// player_spawn object in the objects layer. It returns an error when m has no
+// player_spawn object.
+func NewScene(font *text.GoTextFaceSource, m *Map) (*Scene, error) {
+	if m == nil {
+		return nil, fmt.Errorf("map is nil")
+	}
+	spawn, ok := findPlayerSpawn(m)
+	if !ok {
+		return nil, fmt.Errorf("map has no player_spawn object in objects layer")
+	}
+	size := m.Size()
+	bounds := geom.Rect{Max: size}
+	walkable := geom.Rect{
+		Min: geom.Vec{X: feetMarginX, Y: feetMarginTop},
+		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
+	}
+	player := entity.NewPlayer(spawn)
+	player.Walls = m.Collision
 	return &Scene{
+		m:          m,
 		bounds:     bounds,
-		walkable:   bounds.Inset(edgeGap),
-		meadow:     newMeadow(bounds.Max.Sub(bounds.Min), bounds.Inset(hedgeWidth+6)),
-		player:     entity.NewPlayer(geom.Vec{X: bounds.Max.X / 2, Y: bounds.Max.Y / 2}),
+		walkable:   walkable,
+		player:     player,
 		titleAlpha: 1,
 		titleFace:  engine.NewFace(font, titleTextSize, titleWeight),
 		bubbleFace: engine.NewFace(font, bubbleTextSize, bubbleWeight),
+	}, nil
+}
+
+// findPlayerSpawn returns the position of the first object of type
+// player_spawn in the objects layer of m, and false when there is none.
+func findPlayerSpawn(m *Map) (geom.Vec, bool) {
+	objs := m.ObjectLayer("objects")
+	if objs == nil {
+		return geom.Vec{}, false
 	}
+	for _, o := range objs.Objects {
+		if o.Type == "player_spawn" {
+			return geom.Vec{X: o.X, Y: o.Y}, true
+		}
+	}
+	return geom.Vec{}, false
 }
 
 // Update moves the critter and the camera by one tick.
 func (s *Scene) Update(f engine.Frame) error {
+	s.elapsed += f.DT
 	in := f.Input
 	if in.Move.IsZero() && in.Pointing {
 		s.player.WalkTo(s.camera.Add(in.Point))
@@ -122,13 +153,20 @@ func (s *Scene) updateBob(dt float64) {
 	s.bob += math.Max(-bobPace*dt, math.Min(bobPace*dt, target-s.bob))
 }
 
-// DrawWorld draws the meadow and the critter.
+// DrawWorld draws the map layers and the critter.
 func (s *Scene) DrawWorld(c engine.Canvas) {
-	c.Image.Fill(hedgeDark)
+	c.Image.Fill(ink)
 	s.pen.begin(c, s.camera)
-	drawMeadow(&s.pen, s.meadow, geom.Rect{Min: s.camera, Max: s.camera.Add(s.viewSize)})
+	view := geom.Rect{Min: s.camera, Max: s.camera.Add(s.viewSize)}
+	c0, r0, c1, r1 := s.m.VisibleCells(view)
+	elapsed := time.Duration(s.elapsed * float64(time.Second))
+
+	drawTileLayer(&s.pen, s.m, s.m.TileLayer("ground"), c0, r0, c1, r1, elapsed)
+	drawTileLayer(&s.pen, s.m, s.m.TileLayer("decor"), c0, r0, c1, r1, elapsed)
+	drawProps(&s.pen, s.m, s.m.ObjectLayer("props"), view, elapsed)
 	feet := s.player.Pos
 	drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
 }
 
 // DrawUI draws the title and the greeting bubble at full screen resolution.
