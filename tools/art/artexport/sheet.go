@@ -11,6 +11,9 @@ const pxPerWorldPixel = 8
 
 var partIDPattern = regexp.MustCompile(`^(down|up|side)_[a-z0-9_]+$`)
 
+// viewOrder lists the views in a fixed order for deterministic iteration.
+var viewOrder = []string{"down", "up", "side"}
+
 // Sheet describes the exported parts of a character drawing across views.
 type Sheet struct {
 	PxPerWorldPixel int             `json:"pxPerWorldPixel"`
@@ -44,7 +47,6 @@ func BuildSheet(boxes []Box) (Sheet, error) {
 		pivotIDs []string
 	}
 
-	viewOrder := []string{"down", "up", "side"}
 	accum := make(map[string]*viewAccum, len(viewOrder))
 	getView := func(v string) *viewAccum {
 		a, ok := accum[v]
