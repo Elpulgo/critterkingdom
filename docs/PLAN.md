@@ -302,7 +302,7 @@ critterkingdom/
     content/           content lint: validates all data cross-references    [test]
   assets/              exported, embedded game data (see 6.6)
   assets-src/          Inkscape, Tiled and BeepBox sources (not embedded)
-  web/                 index.html and loader.js (loading bar, tap-to-start); later manifest.webmanifest, sw.js
+  web/                 index.html and loader.js (loading bar, tap-to-start), manifest.webmanifest, sw.js, icons/
   tools/               asset export helpers
   docs/                PLAN.md (this), later ART-BIBLE.md, CREDITS.md, PLAYTEST-LOG.md
 ```
@@ -343,10 +343,17 @@ Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
   page, where `make web` writes it, or from `Content-Length` under wasmserve.
   The game starts on the tap. Ebitengine adds its own viewport tag at start,
   so the loader keeps ours in force.
-- PWA: `manifest.webmanifest` plus a service worker, so the game can be added
-  to the tablet home screen and works offline.
+- PWA: `manifest.webmanifest`, app icons in `web/icons/` and a service worker
+  (`web/sw.js`), so the game can be added to the tablet home screen and works
+  offline. The worker stores the whole bundle when it installs, then answers
+  network-first with a cache fallback: an online visit always gets the newest
+  build, and the stored copy is used only when the network fails. `loader.js`
+  registers it only where service workers exist (not on plain http over the
+  LAN), and a failed registration never stops the game.
 - Portrait on a phone: show a "turn your device" picture (iOS cannot lock
-  orientation from a web page).
+  orientation from a web page). The hint is CSS-only: a media query shows it
+  on coarse-pointer screens up to 600 CSS px wide held in portrait, with no
+  JavaScript, so it also covers the loading screen.
 - Serve `.wasm` as `application/wasm` with Brotli or gzip. Cloudflare Pages,
   Netlify and GitHub Pages all work as free static hosts; verify compression.
 - Build with `-trimpath -ldflags="-s -w"`; optionally try `wasm-opt -Oz` for a
@@ -407,7 +414,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 ### M1 A place to walk: "Acorn Hollow" (2 to 3 weeks)
 
-- [ ] Tiled JSON loading, layers, collision grid, animated tiles (water)
+- [x] Tiled JSON loading, layers, collision grid, animated tiles (water)
 - [ ] Camera follow and clamp; y-sorted props; "above" layer
 - [ ] Warps: village to meadow, village to house interior
 - [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
@@ -699,10 +706,24 @@ assets/       exported and embedded
   data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
 ```
 
-- `make art` arrives with the first drawing in M1: a script in `tools/` will
-  run Inkscape's command line on changed sources, export each part, tile and
-  prop to PNG at 8 px per world pixel and write the part JSON. Until then the
-  placeholder art is drawn in code. Later `make audio` runs ffmpeg;
+- `make art` runs `go run ./tools/art`, a Go command (logic in
+  `tools/art/artexport`) that drives Inkscape 1.x's command line over the
+  SVGs in `assets-src/sprites/` and `assets-src/tiles/` that are newer than
+  their export (`make art ART_ARGS=-force` exports all of them;
+  `INKSCAPE=/path/to/inkscape` when it is not on `PATH`). The folder decides
+  the kind of drawing. A character in `assets-src/sprites/critters/`,
+  `npcs/` or `enemies/`, for example `critters/fox.svg`, becomes one PNG per
+  `<view>_<part>` object plus `fox.json` in `assets/sprites/critters/fox/`;
+  the JSON gives each part's box and pivot in world pixels from the
+  `<view>_feet` marker, read from `--query-all`, and PNGs of parts no longer
+  in the drawing are deleted. Every other drawing (props, effects, ui,
+  emotes, tiles) becomes one PNG of its page at the mirrored path, for
+  example `assets/tiles/tileset_outdoor.png`. Everything is exported at
+  8 px per world pixel. Only whole parts get a `<view>_` id: a named object
+  inside a part, such as `down_head_shine`, is exported as a part of its own.
+  Until the first drawing lands the placeholder art is drawn in code. The
+  exporter's tests use a fake Inkscape; `go test -tags inkscape ./tools/art/...`
+  runs the real one on a machine that has it. Later `make audio` runs ffmpeg;
   `make check` runs gofmt, `go mod tidy -diff`, vet for desktop and browser
   and every test, which will include the content lint test; `make web` builds
   the wasm bundle into `build/web/`.
@@ -907,13 +928,16 @@ go tool wasmserve ./cmd/game                                # then open http://l
 # build the web bundle
 make web    # or by hand:
 GOOS=js GOARCH=wasm go build -trimpath -ldflags="-s -w" -o build/web/main.wasm ./cmd/game
-cp web/index.html web/loader.js build/web/
+cp -R web/. build/web/ && rm -f build/web/*_test.go         # page, loader, manifest, icons, worker
 cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" build/web/      # Go 1.23 and older: misc/wasm/wasm_exec.js
 
 # assets
-inkscape assets-src/fox.svg --export-id=down_head --export-id-only \
+make art    # export changed drawings; ART_ARGS=-force for all, INKSCAPE=/path/to/inkscape if not on PATH
+# what make art runs for each part of a character, by hand:
+inkscape assets-src/sprites/critters/fox.svg --query-all    # id,x,y,width,height of every object
+inkscape assets-src/sprites/critters/fox.svg --export-type=png --export-id=down_head --export-id-only \
+  --export-area-snap --export-dpi=96 \
   --export-filename=assets/sprites/critters/fox/down_head.png   # one part, at 8 px per world pixel
-inkscape assets-src/fox.svg --query-all                          # id,x,y,width,height of every object
 ffmpeg -i in.wav -c:a libvorbis -q:a 4 out.ogg
 
 # tests

@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Critters">
 <meta name="description" content="A cosy adventure for young explorers, with talking critters and small quests.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Critter Kingdom</title>
 <style>
   html, body {
@@ -151,8 +154,44 @@
     display: none;
   }
 
+  #rotate {
+    display: none;
+  }
+
+  /* A phone held upright: the game is landscape only, so cover it with a
+     picture asking to turn the device. Coarse pointer keeps a narrow
+     desktop window usable; 600px is below the smallest tablet. */
+  @media (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
+    #rotate {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #181425;
+    }
+  }
+
+  #rotate svg {
+    width: clamp(120px, 50vmin, 240px);
+    height: auto;
+  }
+
+  #rotate .phone {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: turn 2.4s ease-in-out infinite;
+  }
+
+  @keyframes turn {
+    0%, 25% { transform: rotate(0deg); }
+    55%, 85% { transform: rotate(90deg); }
+    100% { transform: rotate(0deg); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .critter, #play, #bar.waiting > div {
+    .critter, #play, #bar.waiting > div, #rotate .phone {
       animation: none;
     }
     #bar.waiting > div {
@@ -184,6 +223,16 @@
   <p id="message" role="status"></p>
   <pre id="details" hidden></pre>
   <noscript><p>Critter Kingdom needs JavaScript to run.</p></noscript>
+</div>
+<div id="rotate" role="img" aria-label="Turn your device sideways">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <g class="phone">
+      <rect x="35" y="20" width="30" height="60" rx="5" fill="#3a4466" stroke="#fff" stroke-width="4"/>
+      <circle cx="50" cy="72" r="2.5" fill="#fff"/>
+    </g>
+    <path d="M71 13.6A42 42 0 0 1 91.4 42.7" fill="none" stroke="#fee761" stroke-width="5" stroke-linecap="round"/>
+    <path d="M92.4 50.5 97.3 41.6 85.5 43.7z" fill="#fee761" stroke="#fee761" stroke-width="2" stroke-linejoin="round"/>
+  </svg>
 </div>
 <script src="wasm_exec.js"></script>
 <script src="loader.js"></script>

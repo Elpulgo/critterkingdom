@@ -3,13 +3,11 @@ package world
 import (
 	"image/color"
 	"math"
-	"math/rand/v2"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	"github.com/Elpulgo/critterkingdom/internal/entity"
-	"github.com/Elpulgo/critterkingdom/internal/geom"
 )
 
 // Placeholder art drawn in code with smooth shapes, in colours from the
@@ -17,7 +15,12 @@ import (
 var (
 	grass       = color.NRGBA{0x63, 0xc7, 0x4d, 0xff}
 	grassDark   = color.NRGBA{0x3e, 0x89, 0x48, 0xff}
-	hedgeDark   = color.NRGBA{0x26, 0x5c, 0x42, 0xff}
+	dirtPath    = color.NRGBA{0xd7, 0x76, 0x43, 0xff}
+	waterBlue   = color.NRGBA{0x2c, 0xe8, 0xf5, 0xff}
+	waterDeep   = color.NRGBA{0x00, 0x99, 0xdb, 0xff}
+	stoneGrey   = color.NRGBA{0x8b, 0x9b, 0xb4, 0xff}
+	stoneLight  = color.NRGBA{0xc0, 0xcb, 0xdc, 0xff}
+	barkBrown   = color.NRGBA{0x73, 0x3e, 0x39, 0xff}
 	flowerHeart = color.NRGBA{0xfe, 0xae, 0x34, 0xff}
 	petalWhite  = color.NRGBA{0xff, 0xff, 0xff, 0xff}
 	petalPink   = color.NRGBA{0xf6, 0x75, 0x7a, 0xff}
@@ -28,6 +31,7 @@ var (
 	shadow      = color.NRGBA{0x00, 0x00, 0x00, 0x3c}
 	white       = color.NRGBA{0xff, 0xff, 0xff, 0xff}
 	debugColor  = color.NRGBA{0xfe, 0xe7, 0x61, 0xff}
+	missingTile = color.NRGBA{0xff, 0x00, 0xff, 0xff}
 )
 
 const (
@@ -36,73 +40,55 @@ const (
 	critterHeight = 17
 	// bodyRadius is the radius of the critter's round body.
 	bodyRadius = 7
+	// reach is how far a prop shape can extend beyond its object rectangle, in
+	// world pixels. Props further than this outside the view are not drawn.
+	reach = 6
 )
 
-// meadow says where the tufts of grass, the flowers and the round bushes of
-// the hedge go, in world pixels. The same seed gives the same meadow every
-// time.
-type meadow struct {
-	size    geom.Vec
-	tufts   []geom.Vec
-	flowers []flower
-	bushes  []geom.Vec
-}
-
-type flower struct {
-	at    geom.Vec
-	petal color.NRGBA
-}
-
-// newMeadow lays out a meadow of the given size with a hedge around the
-// edge. Tufts and flowers only go inside inner.
-func newMeadow(size geom.Vec, inner geom.Rect) *meadow {
-	m := &meadow{size: size}
-	rng := rand.New(rand.NewPCG(1, 2))
-	for range 70 {
-		m.tufts = append(m.tufts, randomSpot(rng, inner))
-	}
-	petals := []color.NRGBA{petalWhite, petalPink}
-	for range 40 {
-		at := randomSpot(rng, inner)
-		m.flowers = append(m.flowers, flower{at: at, petal: petals[rng.IntN(len(petals))]})
-	}
-	t := float64(hedgeWidth)
-	for x := t / 2; x < size.X; x += 12 {
-		m.bushes = append(m.bushes, geom.Vec{X: x, Y: t - 2}, geom.Vec{X: x, Y: size.Y - t + 2})
-	}
-	for y := t / 2; y < size.Y; y += 12 {
-		m.bushes = append(m.bushes, geom.Vec{X: t - 2, Y: y}, geom.Vec{X: size.X - t + 2, Y: y})
-	}
-	return m
-}
-
-func randomSpot(rng *rand.Rand, r geom.Rect) geom.Vec {
-	return geom.Vec{
-		X: r.Min.X + rng.Float64()*(r.Max.X-r.Min.X),
-		Y: r.Min.Y + rng.Float64()*(r.Max.Y-r.Min.Y),
-	}
-}
-
-// reach is how far a tuft, a flower or a bush reaches from its spot, in
-// world pixels. Ones further than this outside the view are not drawn.
-const reach = 6
-
-// drawMeadow draws the grass, tufts and flowers of the meadow, with a hedge
-// around the edge. It skips the tufts, flowers and bushes outside visible.
-func drawMeadow(p *pen, m *meadow, visible geom.Rect) {
-	near := visible.Inset(-reach)
-	p.rect(0, 0, m.size.X, m.size.Y, grass)
-	for _, t := range m.tufts {
-		if near.Contains(t) {
-			drawTuft(p, t.X, t.Y)
+// drawTileArt draws the art for a tile or prop of the given type filling the
+// w by h rectangle at world position x, y. col and row pick between variants
+// of the same type, such as the petal colour of a flower. An unknown type is
+// a magenta square, so a missing drawing stands out.
+func drawTileArt(p *pen, kind string, x, y, w, h float64, col, row int) {
+	cx, cy := x+w/2, y+h/2
+	switch kind {
+	case "grass":
+		p.rect(x, y, w, h, grass)
+	case "path":
+		p.rect(x, y, w, h, dirtPath)
+		p.ellipse(cx-3, cy-2, 2.2, 1.2, cream)
+		p.ellipse(cx+3, cy+3, 1.8, 1.0, cream)
+	case "water_1":
+		p.rect(x, y, w, h, waterDeep)
+		p.ellipse(cx-2, cy-3, 3.5, 1.1, waterBlue)
+		p.ellipse(cx+2, cy+3, 2.5, 0.9, waterBlue)
+	case "water_2":
+		p.rect(x, y, w, h, waterDeep)
+		p.ellipse(cx, cy-1, 4.0, 1.2, waterBlue)
+		p.ellipse(cx-1, cy+4, 2.2, 0.8, waterBlue)
+	case "water_3":
+		p.rect(x, y, w, h, waterDeep)
+		p.ellipse(cx+2, cy-2, 3.2, 1.0, waterBlue)
+		p.ellipse(cx-2, cy+2, 3.8, 1.1, waterBlue)
+	case "tuft":
+		drawTuft(p, cx, cy+2)
+	case "flower":
+		petal := petalWhite
+		if (col+row)%2 != 0 {
+			petal = petalPink
 		}
+		drawFlower(p, cx, cy, petal)
+	case "bush":
+		drawBush(p, cx, cy)
+	case "rock":
+		drawRock(p, cx, cy)
+	case "tree":
+		drawTree(p, cx, cy)
+	case "tree_top":
+		drawTreeTop(p, cx, cy)
+	default:
+		p.rect(x, y, w, h, missingTile)
 	}
-	for _, f := range m.flowers {
-		if near.Contains(f.at) {
-			drawFlower(p, f.at.X, f.at.Y, f.petal)
-		}
-	}
-	drawHedge(p, m, near)
 }
 
 // drawTuft draws three pointed blades of grass standing on y.
@@ -121,25 +107,31 @@ func drawFlower(p *pen, x, y float64, petal color.NRGBA) {
 	p.circle(x, y, 0.6, flowerHeart)
 }
 
-// drawHedge draws a band of hedge around the edge of the meadow, with round
-// bushes along its inner side. Only the bushes inside near are drawn.
-func drawHedge(p *pen, m *meadow, near geom.Rect) {
-	t := float64(hedgeWidth)
-	w, h := m.size.X, m.size.Y
-	p.rect(0, 0, w, t, hedgeDark)
-	p.rect(0, h-t, w, t, hedgeDark)
-	p.rect(0, 0, t, h, hedgeDark)
-	p.rect(w-t, 0, t, h, hedgeDark)
-	for _, b := range m.bushes {
-		if near.Contains(b) {
-			drawBush(p, b.X, b.Y)
-		}
-	}
+// drawBush draws a round bush centred on x, y.
+func drawBush(p *pen, x, y float64) {
+	p.circle(x, y, 6, grassDark)
+	p.ellipse(x-2, y-2.5, 1.6, 0.9, grass)
 }
 
-func drawBush(p *pen, x, y float64) {
-	p.circle(x, y, 5, grassDark)
-	p.ellipse(x-2, y-2.5, 1.2, 0.6, grass)
+// drawRock draws a grey boulder on its shadow, centred on x, y.
+func drawRock(p *pen, x, y float64) {
+	p.ellipse(x, y+2, 6, 2.5, shadow)
+	p.ellipse(x, y, 5.5, 4.2, stoneGrey)
+	p.ellipse(x-1.5, y-1.5, 2.5, 1.4, stoneLight)
+}
+
+// drawTree draws a tree trunk with the bottom of its crown, centred on x, y.
+// The rest of the crown is a tree_top tile in the above layer.
+func drawTree(p *pen, x, y float64) {
+	p.ellipse(x, y+4, 6, 2.5, shadow)
+	p.rect(x-2.5, y-4, 5, 8, barkBrown)
+	p.circle(x, y-4, 5.5, grassDark)
+}
+
+// drawTreeTop draws the part of a tree crown the critter walks behind.
+func drawTreeTop(p *pen, x, y float64) {
+	p.circle(x, y+2, 7.5, grassDark)
+	p.circle(x-2, y-1, 5, grass)
 }
 
 // drawCritter draws the placeholder critter, a round orange fox, with its

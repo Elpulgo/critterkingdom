@@ -177,5 +177,20 @@
     play.addEventListener('click', () => run(go, instance), { once: true });
   }
 
+  // registerServiceWorker lets the game start offline after one online visit.
+  // Workers need https or localhost, so on a plain http LAN address there is
+  // none. The game runs the same without one, so a failure is only logged.
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => {
+        console.warn('Service worker not registered:', err);
+      });
+    });
+  }
+
+  registerServiceWorker();
   load();
 })();

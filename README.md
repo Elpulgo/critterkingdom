@@ -11,6 +11,7 @@ meadow, hops and says hello.
 ## Getting started
 
 You need Go 1.25 or later and nothing else: no C compiler and no Node.
+The one exception is `make art`, which also needs Inkscape (see [Art](#art)).
 
 ```sh
 make run              # play on the desktop
@@ -20,6 +21,7 @@ make serve            # play in a browser at http://localhost:8080/web/
 make test             # run the tests
 make check            # what CI runs: gofmt, go mod tidy, vet and tests
 make web              # build the browser bundle into build/web
+make art              # export changed drawings to PNG (needs Inkscape)
 make                  # list every command
 ```
 
@@ -53,10 +55,31 @@ build, F3 shows and hides the overlay.
 ## Art
 
 The placeholder art is drawn in code with smooth shapes at full screen
-resolution. Real art will be drawn in [Inkscape](https://inkscape.org/) and
-exported to PNG; [docs/ART-BIBLE.md](docs/ART-BIBLE.md) sets the palette, sizes
-and shape rules, and section 6 of [docs/PLAN.md](docs/PLAN.md) has the asset
-pipeline plan.
+resolution. Real art is drawn in [Inkscape](https://inkscape.org/) and
+exported to PNG at 8 px per world pixel by `make art`;
+[docs/ART-BIBLE.md](docs/ART-BIBLE.md) sets the palette, sizes and shape rules,
+and section 6 of [docs/PLAN.md](docs/PLAN.md) has the asset pipeline plan.
+
+`make art` runs Inkscape 1.x's command line on every drawing that changed
+since its last export:
+
+- Characters go in `assets-src/sprites/critters/`, `npcs/` or `enemies/`, one
+  file per character, for example `assets-src/sprites/critters/fox.svg`. Each
+  part is an object with an id named `<view>_<part>`, where the view is
+  `down`, `up` or `side` (`down_head`, `down_ear_left`). A tiny circle named
+  `<view>_<part>_pivot` marks where a part turns, and one named `<view>_feet`
+  marks the feet. Every part becomes its own PNG in
+  `assets/sprites/critters/fox/`, next to `fox.json`, which says where each
+  part sits and turns. Only give whole parts a `<view>_` id: a named object
+  inside a part, such as `down_head_shine`, is exported as a part of its own.
+- Every other drawing under `assets-src/sprites/` (props, effects, ui,
+  emotes) and `assets-src/tiles/` is exported whole, as one PNG of its page at
+  the same path under `assets/`.
+
+A drawing is exported again when its SVG is newer than its JSON or PNG;
+`make art ART_ARGS=-force` exports everything. If Inkscape is not on your
+`PATH`, give its path, for example on a Mac
+`make art INKSCAPE=/Applications/Inkscape.app/Contents/MacOS/inkscape`.
 
 ## Licence
 
