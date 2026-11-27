@@ -54,7 +54,9 @@ build, F3 shows and hides the overlay.
 
 The placeholder art is drawn in code with smooth shapes at full screen
 resolution. Real art will be drawn in [Inkscape](https://inkscape.org/) and
-exported to PNG; section 6 of [docs/PLAN.md](docs/PLAN.md) has the plan.
+exported to PNG; [docs/ART-BIBLE.md](docs/ART-BIBLE.md) sets the palette, sizes
+and shape rules, and section 6 of [docs/PLAN.md](docs/PLAN.md) has the asset
+pipeline plan.
 
 ## Licence
 
