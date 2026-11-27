@@ -9,6 +9,7 @@ import (
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
+	"github.com/Elpulgo/critterkingdom/internal/i18n"
 	"github.com/Elpulgo/critterkingdom/internal/world"
 )
 
@@ -17,6 +18,9 @@ import (
 type options struct {
 	// touchPad turns on the floating touch pad.
 	touchPad bool
+	// lang is the language to start in, "sv" or "en". An empty or unknown
+	// value keeps Swedish.
+	lang string
 }
 
 func main() {
@@ -24,6 +28,16 @@ func main() {
 	font, err := assets.LoadFont()
 	if err != nil {
 		log.Fatal(err)
+	}
+	strs, err := assets.LoadStrings()
+	if err != nil {
+		log.Fatal(err)
+	}
+	i18n.Use(strs)
+	if opts.lang != "" {
+		if err := i18n.SetLanguage(i18n.Lang(opts.lang)); err != nil {
+			log.Printf("lang %q: %v; starting in %s", opts.lang, err, i18n.Language())
+		}
 	}
 	m, err := assets.LoadMap("meadow")
 	if err != nil {
