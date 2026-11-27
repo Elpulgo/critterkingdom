@@ -28,6 +28,7 @@ type Map struct {
 	TileSize   float64
 	Properties Properties
 	Tilesets   []Tileset
+	Collision  *Grid
 
 	tileLayers   map[string]*TileLayer
 	objectLayers map[string]*ObjectLayer
@@ -383,6 +384,8 @@ func LoadMap(data []byte) (*Map, error) {
 			}
 		}
 	}
+
+	m.Collision = buildCollisionGrid(m)
 
 	return m, nil
 }

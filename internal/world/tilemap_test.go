@@ -132,6 +132,12 @@ func TestLoadMap_LoadsLayersObjectsPropertiesAndScalesPositionsToWorldPixels(t *
 	if m.TileLayer("decor") != nil {
 		t.Errorf("TileLayer(decor) should be nil when absent")
 	}
+	if m.Collision == nil {
+		t.Fatal("Map.Collision = nil when collision layer is absent; want empty Grid")
+	}
+	if m.Collision.Solid(0, 0) {
+		t.Errorf("Collision.Solid(0, 0) = true on map without collision layer; want false")
+	}
 
 	objs := m.ObjectLayer("objects")
 	if objs == nil || len(objs.Objects) != 2 {
