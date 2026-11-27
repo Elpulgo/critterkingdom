@@ -50,6 +50,20 @@ func facingAlong(v geom.Vec) Facing {
 	return FacingUp
 }
 
+// dir returns the unit vector f points along, with Y growing downwards.
+func (f Facing) dir() geom.Vec {
+	switch f {
+	case FacingUp:
+		return geom.Vec{Y: -1}
+	case FacingLeft:
+		return geom.Vec{X: -1}
+	case FacingRight:
+		return geom.Vec{X: 1}
+	default:
+		return geom.Vec{Y: 1}
+	}
+}
+
 // allows reports whether a character facing f can keep facing that way while
 // moving along v.
 func (f Facing) allows(v geom.Vec) bool {
