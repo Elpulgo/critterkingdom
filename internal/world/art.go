@@ -47,6 +47,9 @@ const (
 	// critterHeight is how far the tips of the critter's ears are above its
 	// feet, in world pixels.
 	critterHeight = 17
+	// villagerHeight is how far the tips of a villager's ears are above its
+	// feet, in world pixels.
+	villagerHeight = 20
 	// bodyRadius is the radius of the critter's round body.
 	bodyRadius = 7
 	// reach is how far a prop shape can extend beyond its object rectangle, in

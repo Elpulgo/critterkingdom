@@ -101,3 +101,65 @@ func TestScene_AVillagerNextToTheCritterTurnsToFaceIt(t *testing.T) {
 		}
 	}
 }
+
+// pawFrame is one tick at 60 ticks per second with the paw button pressed.
+var pawFrame = engine.Frame{Input: engine.Input{Paw: true}, View: villageView, DT: 1.0 / 60}
+
+func TestScene_PawInFrontOfAVillagerStartsAnInteractionInsteadOfAHop(t *testing.T) {
+	// The critter starts at (24,40) facing down. Grandma stands 20 px in
+	// front of it at Tiled (192,480), world (24,60); the baker stands nearer,
+	// 16 px behind it, at Tiled (192,192), world (24,24).
+	load := mapLoader(map[string][]byte{
+		"village": roomMap(6, 4, "village",
+			villageStart+`,`+pointNPC(2, "baker_badger", 192, 192)+`,`+pointNPC(3, "grandma_hedgehog", 192, 480), ``),
+	})
+	s := newVillageScene(t, load)
+
+	if err := s.Update(pawFrame); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	got, ok := s.TakeInteraction()
+	if want := (Interaction{NPC: "grandma_hedgehog"}); !ok || got != want {
+		t.Fatalf("TakeInteraction() = %+v, %v; want %+v, true", got, ok, want)
+	}
+	if got, ok := s.TakeInteraction(); ok {
+		t.Errorf("second TakeInteraction() = %+v, true; want the interaction taken only once", got)
+	}
+	if h := s.player.HopHeight(); h != 0 || s.greet != 0 {
+		t.Errorf("hop height %v, greeting %v s left; want no hop and no greeting when paw talks to a villager", h, s.greet)
+	}
+}
+
+func TestScene_PawWithNoVillagerInFrontHopsAndStartsNoInteraction(t *testing.T) {
+	// The critter starts at (24,40) facing down, on a village 80 px high.
+	tests := []struct {
+		name     string
+		villager string
+	}{
+		{"no villager on the map", ``},
+		// At Tiled (192,192), world (24,24): 16 px behind the critter.
+		{"villager behind", `,` + pointNPC(2, "baker_badger", 192, 192)},
+		// At Tiled (192,520), world (24,65): 25 px in front, beyond reach.
+		{"villager out of reach", `,` + pointNPC(2, "baker_badger", 192, 520)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			load := mapLoader(map[string][]byte{
+				"village": roomMap(6, 5, "village", villageStart+tt.villager, ``),
+			})
+			s := newVillageScene(t, load)
+
+			if err := s.Update(pawFrame); err != nil {
+				t.Fatalf("Update: %v", err)
+			}
+
+			if got, ok := s.TakeInteraction(); ok {
+				t.Errorf("TakeInteraction() = %+v, true; want no interaction", got)
+			}
+			if h := s.player.HopHeight(); h <= 0 || s.greet <= 0 {
+				t.Errorf("hop height %v, greeting %v s left; want the critter to hop and greet", h, s.greet)
+			}
+		})
+	}
+}

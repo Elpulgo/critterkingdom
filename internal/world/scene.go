@@ -51,9 +51,16 @@ const (
 	titleFade = 1.0
 )
 
+// Interaction is an interaction the critter started with a villager. NPC is
+// the villager's id.
+type Interaction struct {
+	NPC string
+}
+
 // Scene is the world scene: a Tiled map where the critter walks around,
-// collides with solid scenery, hops and says hello when the paw button is
-// pressed, and moves to another map when it walks into a warp.
+// collides with solid scenery, talks to the villager in front of it or hops
+// and says hello when the paw button is pressed, and moves to another map
+// when it walks into a warp.
 type Scene struct {
 	load     MapLoader
 	mapName  string // the name m was loaded under
@@ -71,6 +78,12 @@ type Scene struct {
 	// awaitRelease ignores pointer walking after a warp until the pointer has
 	// been let go, so a held tap does not walk the critter straight back.
 	awaitRelease bool
+
+	// pending is the interaction started and not yet taken with
+	// TakeInteraction, or nil. lastNPC is the id of the villager last
+	// interacted with, for the debug overlay.
+	pending *Interaction
+	lastNPC string
 
 	walked     float64 // seconds the critter has spent walking
 	greet      float64 // seconds left of the greeting
@@ -165,8 +178,8 @@ func (s *Scene) Update(f engine.Frame) error {
 	if in.Move.IsZero() && in.Pointing && !s.awaitRelease {
 		s.player.WalkTo(s.camera.Add(in.Point))
 	}
-	if in.Paw && s.player.Hop() {
-		s.greet = greetTime
+	if in.Paw {
+		s.paw()
 	}
 	s.player.Update(f.DT, in.Move, s.walkable)
 	if err := s.followWarp(); err != nil {
@@ -188,6 +201,48 @@ func (s *Scene) Update(f engine.Frame) error {
 	focus := s.player.Pos.Sub(geom.Vec{Y: focusLift})
 	s.camera = engine.SmoothCameraFor(focus, f.View.W, f.View.H, s.bounds, f.View.Scale)
 	return nil
+}
+
+// paw starts an interaction with the villager the critter would pick, or
+// hops and greets when there is none.
+func (s *Scene) paw() {
+	if i, ok := s.pickVillager(); ok {
+		s.interact(s.npcs[i])
+		return
+	}
+	if s.player.Hop() {
+		s.greet = greetTime
+	}
+}
+
+// pickVillager returns the index in s.npcs of the villager the paw would
+// interact with now, and false when there is none.
+func (s *Scene) pickVillager() (int, bool) {
+	if len(s.npcs) == 0 {
+		return 0, false
+	}
+	feet := make([]geom.Vec, len(s.npcs))
+	for i, n := range s.npcs {
+		feet[i] = n.Pos
+	}
+	return entity.PickInteractable(s.player.Pos, s.player.Facing, feet)
+}
+
+// interact starts an interaction with n, replacing one not yet taken.
+func (s *Scene) interact(n *entity.NPC) {
+	s.pending = &Interaction{NPC: n.ID}
+	s.lastNPC = n.ID
+}
+
+// TakeInteraction returns the interaction the critter started since the last
+// call, and false when it started none.
+func (s *Scene) TakeInteraction() (Interaction, bool) {
+	if s.pending == nil {
+		return Interaction{}, false
+	}
+	in := *s.pending
+	s.pending = nil
+	return in, true
 }
 
 // updateBob swings the walk bob while the critter walks and lets it
@@ -243,11 +298,15 @@ func (s *Scene) drawCharacters() {
 	}
 }
 
-// DrawUI draws the title and the greeting bubble at full screen resolution,
-// in the current language of i18n.
+// DrawUI draws the title, the "…" bubble over the villager the paw would
+// pick and the greeting bubble at full screen resolution, in the current
+// language of i18n.
 func (s *Scene) DrawUI(screen *ebiten.Image, ui engine.UI) {
 	if s.titleAlpha > 0 {
 		s.drawTitle(screen, ui)
+	}
+	if i, ok := s.pickVillager(); ok {
+		s.drawTalkBubble(screen, ui, s.npcs[i])
 	}
 	if s.greet > 0 {
 		s.drawGreeting(screen, ui)
@@ -284,13 +343,35 @@ func (s *Scene) drawGreeting(screen *ebiten.Image, ui engine.UI) {
 	engine.DrawText(screen, greeting, s.bubbleFace, x, bottom-h+padY, text.AlignCenter, fade(cocoa, alpha))
 }
 
+// drawTalkBubble draws a small bubble with three dots above n's head, kept
+// on the screen when n is near an edge. The dots are drawn rather than
+// written, so the bubble needs no glyph or text.
+func (s *Scene) drawTalkBubble(screen *ebiten.Image, ui engine.UI, n *entity.NPC) {
+	u := ui.Unit
+	w, h, tail, margin := 44*u, 22*u, 7*u, 8*u
+	dot, gap := 3*u, 10*u
+
+	head := n.Pos.Sub(s.camera).Sub(geom.Vec{Y: villagerHeight + 1})
+	hx, hy := ui.View.ViewToScreen(head)
+	sw := float64(screen.Bounds().Dx())
+	x := math.Max(w/2+margin, math.Min(hx, sw-w/2-margin))
+	bottom := math.Max(hy-tail, h+margin)
+
+	fillBubble(screen, float32(x), float32(bottom), float32(w), float32(h), float32(10*u), float32(hx), float32(tail), white)
+	cy := float32(bottom - h/2)
+	for k := -1.0; k <= 1; k++ {
+		vector.FillCircle(screen, float32(x+k*gap), cy, float32(dot), cocoa, true)
+	}
+}
+
 // feetInView returns where the critter's feet are in the view.
 func (s *Scene) feetInView() geom.Vec {
 	return s.player.Pos.Sub(s.camera)
 }
 
 // DebugLines adds the map's name, the critter's position, the camera, the
-// number of villagers and the walk target to the debug overlay.
+// number of villagers, the villager last interacted with and the walk target
+// to the debug overlay.
 func (s *Scene) DebugLines() []string {
 	p := s.player
 	lines := []string{
@@ -298,6 +379,9 @@ func (s *Scene) DebugLines() []string {
 		fmt.Sprintf("critter %.1f,%.1f facing %s", p.Pos.X, p.Pos.Y, p.Facing),
 		fmt.Sprintf("camera %.0f,%.0f", s.camera.X, s.camera.Y),
 		fmt.Sprintf("villagers %d", len(s.npcs)),
+	}
+	if s.lastNPC != "" {
+		lines = append(lines, "talked to "+s.lastNPC)
 	}
 	if t, ok := p.Target(); ok {
 		lines = append(lines, fmt.Sprintf("walk to %.0f,%.0f", t.X, t.Y))
