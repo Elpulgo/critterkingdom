@@ -54,6 +54,17 @@ var artFolders = []string{"tiles", "sprites"}
 // minStrokeWidth is half a world pixel in drawing px: nothing may be thinner.
 const minStrokeWidth = 4
 
+// propsFolder holds the prop drawings, which need an outline of outlineWidth
+// (one world pixel) with round joins and caps, never in ink or black.
+const (
+	propsFolder  = "sprites/props/"
+	outlineWidth = 1 * drawingPxPerWorldPx
+)
+
+// bannedOutlines are the stroke colours a prop is never outlined in: the
+// palette's ink and black.
+var bannedOutlines = map[string]bool{"#181425": true, "#000000": true, "#000": true, "black": true}
+
 var colourProperties = map[string]bool{
 	"fill":           true,
 	"stroke":         true,
@@ -85,9 +96,13 @@ func TestArt_EveryDrawingFollowsTheArtBible(t *testing.T) {
 func TestArt_LintRejectsDrawingsThatBreakTheArtBible(t *testing.T) {
 	palette := loadPalette(t, "palettes/endesga_32.gpl")
 	tile := "tiles/tiles.svg"
-	sprite := "sprites/props/prop.svg"
+	sprite := "sprites/decor/decor.svg"
+	prop := "sprites/props/prop.svg"
 	tileOnly := map[string]worldSize{tile: {16, 16}}
 	spriteOnly := map[string]worldSize{sprite: {16, 16}}
+	propOnly := map[string]worldSize{prop: {16, 16}}
+	// round sets the round joins and caps every prop stroke needs.
+	const round = `stroke-linejoin="round" stroke-linecap="round"`
 
 	tests := []struct {
 		name     string
@@ -96,11 +111,12 @@ func TestArt_LintRejectsDrawingsThatBreakTheArtBible(t *testing.T) {
 		want     string // a substring of the single problem expected; "" for none
 	}{
 		{
-			name:     "a tile and a prop that follow the rules pass",
-			manifest: map[string]worldSize{tile: {16, 16}, sprite: {16, 16}},
+			name:     "a tile, a decoration and a prop that follow the rules pass",
+			manifest: map[string]worldSize{tile: {16, 16}, sprite: {16, 16}, prop: {16, 16}},
 			files: map[string]string{
 				tile:   page(128, 128, `<rect width="128" height="128" style="fill:#63c74d;stroke:none"/>`),
 				sprite: page(128, 128, `<circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#265c42" stroke-width="8"/>`),
+				prop:   page(128, 128, `<circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#265c42" stroke-width="8" `+round+`/>`),
 			},
 		},
 		{
@@ -200,7 +216,7 @@ func TestArt_LintRejectsDrawingsThatBreakTheArtBible(t *testing.T) {
 			want:     `stroke-width="2" is thinner than 4 px`,
 		},
 		{
-			name:     "a stroked prop with no stroke-width anywhere gets the 1 px default and is rejected",
+			name:     "a stroked drawing with no stroke-width anywhere gets the 1 px default and is rejected",
 			manifest: spriteOnly,
 			files:    map[string]string{sprite: page(128, 128, `<circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#265c42"/>`)},
 			want:     `<circle> stroke="#265c42" has no stroke-width on it or a parent, so it is SVG's default 1 px`,
@@ -212,7 +228,7 @@ func TestArt_LintRejectsDrawingsThatBreakTheArtBible(t *testing.T) {
 			want:     `<path> stroke="#265c42" has no stroke-width on it or a parent`,
 		},
 		{
-			name:     "a stroked prop whose stroke-width is set on a parent group passes",
+			name:     "a stroked drawing whose stroke-width is set on a parent group passes",
 			manifest: spriteOnly,
 			files: map[string]string{sprite: page(128, 128,
 				`<g stroke-width="8"><circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#265c42"/></g>`)},
@@ -222,6 +238,51 @@ func TestArt_LintRejectsDrawingsThatBreakTheArtBible(t *testing.T) {
 			manifest: spriteOnly,
 			files:    map[string]string{sprite: page(128, 128, `<circle cx="64" cy="64" r="40" style="fill:#3e8948;stroke:#265c42;stroke-width:3.5px"/>`)},
 			want:     `stroke-width="3.5px" is thinner than 4 px`,
+		},
+		{
+			name:     "a prop with no outline at all is rejected",
+			manifest: propOnly,
+			files:    map[string]string{prop: page(128, 128, `<circle cx="64" cy="64" r="40" fill="#3e8948"/>`)},
+			want:     "no shape has an 8 px outline",
+		},
+		{
+			name:     "a prop whose only stroke is thinner than one world pixel is rejected",
+			manifest: propOnly,
+			files:    map[string]string{prop: page(128, 128, `<circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#265c42" stroke-width="4" `+round+`/>`)},
+			want:     "no shape has an 8 px outline",
+		},
+		{
+			name:     "a prop outlined in ink is rejected",
+			manifest: propOnly,
+			files:    map[string]string{prop: page(128, 128, `<circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#181425" stroke-width="8" `+round+`/>`)},
+			want:     `stroke="#181425": props are never outlined in ink or black`,
+		},
+		{
+			name:     "a prop outlined in black in a style declaration is rejected",
+			manifest: propOnly,
+			files: map[string]string{prop: page(128, 128,
+				`<circle cx="64" cy="64" r="40" fill="#3e8948" style="stroke:#000000;stroke-width:8px;stroke-linejoin:round;stroke-linecap:round"/>`)},
+			want: `stroke="#000000": props are never outlined in ink or black`,
+		},
+		{
+			name:     "a prop stroke with mitred joins is rejected",
+			manifest: propOnly,
+			files: map[string]string{prop: page(128, 128,
+				`<rect width="64" height="64" fill="#b86f50" stroke="#733e39" stroke-width="8" stroke-linejoin="miter" stroke-linecap="round"/>`)},
+			want: `<rect> stroke="#733e39" has stroke-linejoin="miter" stroke-linecap="round", want round joins and caps`,
+		},
+		{
+			name:     "a prop stroke with no caps set gets SVG's butt caps and is rejected",
+			manifest: propOnly,
+			files: map[string]string{prop: page(128, 128,
+				`<path d="M8 8 L64 64" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round"/>`)},
+			want: `<path> stroke="#733e39" has stroke-linejoin="round" stroke-linecap="butt", want round joins and caps`,
+		},
+		{
+			name:     "a prop whose outline, joins and caps come from a parent's style passes",
+			manifest: propOnly,
+			files: map[string]string{prop: page(128, 128,
+				`<g style="stroke:#265c42;stroke-width:8;stroke-linejoin:round;stroke-linecap:round"><circle cx="64" cy="64" r="40" fill="#3e8948"/></g>`)},
 		},
 	}
 	for _, tc := range tests {
@@ -314,12 +375,14 @@ func lintDrawing(path, rel string, size worldSize, palette map[string]bool) []st
 	defer f.Close()
 
 	ground := strings.HasPrefix(rel, "tiles/")
+	prop := strings.HasPrefix(rel, propsFolder)
+	outlined := false
 	var problems []string
 	dec := xml.NewDecoder(f)
 	sawRoot := false
 	// strokes holds the stroke inherited by each open element; the top is the
 	// innermost. The root's parent draws no stroke and has no width set.
-	strokes := []inheritedStroke{{stroke: "none"}}
+	strokes := []inheritedStroke{{stroke: "none", width: 1, linejoin: "miter", linecap: "butt"}}
 	for {
 		tok, err := dec.Token()
 		if errors.Is(err, io.EOF) {
@@ -352,8 +415,8 @@ func lintDrawing(path, rel string, size worldSize, palette map[string]bool) []st
 		if reason, banned := bannedElements[strings.ToLower(elem)]; banned {
 			problems = append(problems, fmt.Sprintf("<%s>: %s", elem, reason))
 		}
-		for _, prop := range props {
-			problems = append(problems, checkProperty(elem, prop.name, prop.value, ground, palette)...)
+		for _, p := range props {
+			problems = append(problems, checkProperty(elem, p.name, p.value, ground, prop, palette)...)
 		}
 		// A shape that strokes with no stroke-width on it or any parent gets
 		// SVG's default 1 px hairline. Ground tiles already report the stroke.
@@ -362,9 +425,24 @@ func lintDrawing(path, rel string, size worldSize, palette map[string]bool) []st
 				"<%s> stroke=%q has no stroke-width on it or a parent, so it is SVG's default 1 px, thinner than %d px (half a world pixel)",
 				elem, stroke.stroke, minStrokeWidth))
 		}
+		if prop && shapeElements[elem] && stroke.stroke != "none" {
+			if stroke.width == outlineWidth {
+				outlined = true
+			}
+			if stroke.linejoin != "round" || stroke.linecap != "round" {
+				problems = append(problems, fmt.Sprintf(
+					"<%s> stroke=%q has stroke-linejoin=%q stroke-linecap=%q, want round joins and caps",
+					elem, stroke.stroke, stroke.linejoin, stroke.linecap))
+			}
+		}
 	}
 	if !sawRoot {
-		problems = append(problems, "no <svg> root element")
+		return append(problems, "no <svg> root element")
+	}
+	if prop && !outlined {
+		problems = append(problems, fmt.Sprintf(
+			"no shape has an %d px outline (one world pixel); props need one in the darker palette colour paired with the fill",
+			outlineWidth))
 	}
 	return problems
 }
@@ -380,11 +458,14 @@ var shapeElements = map[string]bool{
 	"polygon":  true,
 }
 
-// inheritedStroke is the stroke and whether a stroke-width is set, as an
-// element inherits them from its parents.
+// inheritedStroke is the stroke, its width (and whether one is set), joins
+// and caps, as an element inherits them from its parents. Unset, SVG draws a
+// 1 px stroke with mitred joins and butt caps.
 type inheritedStroke struct {
-	stroke   string
-	widthSet bool
+	stroke            string
+	widthSet          bool
+	width             float64 // -1 when the width is not a number of px
+	linejoin, linecap string
 }
 
 // with returns the stroke an element with props ends up with, given that its
@@ -400,6 +481,11 @@ func (s inheritedStroke) with(props []property) inheritedStroke {
 			s.stroke = strings.ToLower(p.value)
 		case "stroke-width":
 			s.widthSet = true
+			s.width = pagePx(p.value)
+		case "stroke-linejoin":
+			s.linejoin = strings.ToLower(p.value)
+		case "stroke-linecap":
+			s.linecap = strings.ToLower(p.value)
 		}
 	}
 	return s
@@ -477,10 +563,14 @@ func properties(start xml.StartElement) []property {
 	return append(props, styles...)
 }
 
-// checkProperty returns the problems with one presentation property.
-func checkProperty(elem, name, value string, ground bool, palette map[string]bool) []string {
+// checkProperty returns the problems with one presentation property of a
+// drawing; ground and prop say whether it is a ground tileset or a prop.
+func checkProperty(elem, name, value string, ground, prop bool, palette map[string]bool) []string {
 	var problems []string
 	at := fmt.Sprintf("<%s> %s=%q", elem, name, value)
+	if prop && name == "stroke" && bannedOutlines[strings.ToLower(value)] {
+		return []string{at + ": props are never outlined in ink or black; use the darker palette colour paired with the fill"}
+	}
 	if colourProperties[name] {
 		if prob := checkColour(value, palette); prob != "" {
 			problems = append(problems, at+": "+prob)
