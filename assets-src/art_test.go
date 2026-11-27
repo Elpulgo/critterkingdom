@@ -183,6 +183,24 @@ func TestArt_LintRejectsDrawingsThatBreakTheArtBible(t *testing.T) {
 			want:     `stroke-width="2" is thinner than 4 px`,
 		},
 		{
+			name:     "a stroked prop with no stroke-width anywhere gets the 1 px default and is rejected",
+			manifest: spriteOnly,
+			files:    map[string]string{sprite: page(128, 128, `<circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#265c42"/>`)},
+			want:     `<circle> stroke="#265c42" has no stroke-width on it or a parent, so it is SVG's default 1 px`,
+		},
+		{
+			name:     "a stroke inherited from a parent group with no stroke-width anywhere is rejected",
+			manifest: spriteOnly,
+			files:    map[string]string{sprite: page(128, 128, `<g style="stroke:#265c42"><path d="M0 0 L8 8" fill="none"/></g>`)},
+			want:     `<path> stroke="#265c42" has no stroke-width on it or a parent`,
+		},
+		{
+			name:     "a stroked prop whose stroke-width is set on a parent group passes",
+			manifest: spriteOnly,
+			files: map[string]string{sprite: page(128, 128,
+				`<g stroke-width="8"><circle cx="64" cy="64" r="40" fill="#3e8948" stroke="#265c42"/></g>`)},
+		},
+		{
 			name:     "a stroke-width under 4 px in a style declaration is rejected",
 			manifest: spriteOnly,
 			files:    map[string]string{sprite: page(128, 128, `<circle cx="64" cy="64" r="40" style="fill:#3e8948;stroke:#265c42;stroke-width:3.5px"/>`)},
@@ -282,6 +300,9 @@ func lintDrawing(path, rel string, size worldSize, palette map[string]bool) []st
 	var problems []string
 	dec := xml.NewDecoder(f)
 	sawRoot := false
+	// strokes holds the stroke inherited by each open element; the top is the
+	// innermost. The root's parent draws no stroke and has no width set.
+	strokes := []inheritedStroke{{stroke: "none"}}
 	for {
 		tok, err := dec.Token()
 		if errors.Is(err, io.EOF) {
@@ -290,10 +311,17 @@ func lintDrawing(path, rel string, size worldSize, palette map[string]bool) []st
 		if err != nil {
 			return append(problems, "not well-formed XML: "+err.Error())
 		}
+		if _, ok := tok.(xml.EndElement); ok {
+			strokes = strokes[:len(strokes)-1]
+			continue
+		}
 		start, ok := tok.(xml.StartElement)
 		if !ok {
 			continue
 		}
+		props := properties(start)
+		stroke := strokes[len(strokes)-1].with(props)
+		strokes = append(strokes, stroke)
 		elem := start.Name.Local
 		if !sawRoot {
 			sawRoot = true
@@ -307,14 +335,57 @@ func lintDrawing(path, rel string, size worldSize, palette map[string]bool) []st
 		if reason, banned := bannedElements[strings.ToLower(elem)]; banned {
 			problems = append(problems, fmt.Sprintf("<%s>: %s", elem, reason))
 		}
-		for _, prop := range properties(start) {
+		for _, prop := range props {
 			problems = append(problems, checkProperty(elem, prop.name, prop.value, ground, palette)...)
+		}
+		// A shape that strokes with no stroke-width on it or any parent gets
+		// SVG's default 1 px hairline. Ground tiles already report the stroke.
+		if !ground && shapeElements[elem] && stroke.stroke != "none" && !stroke.widthSet {
+			problems = append(problems, fmt.Sprintf(
+				"<%s> stroke=%q has no stroke-width on it or a parent, so it is SVG's default 1 px, thinner than %d px (half a world pixel)",
+				elem, stroke.stroke, minStrokeWidth))
 		}
 	}
 	if !sawRoot {
 		problems = append(problems, "no <svg> root element")
 	}
 	return problems
+}
+
+// shapeElements are the SVG elements that draw a stroke themselves.
+var shapeElements = map[string]bool{
+	"path":     true,
+	"rect":     true,
+	"circle":   true,
+	"ellipse":  true,
+	"line":     true,
+	"polyline": true,
+	"polygon":  true,
+}
+
+// inheritedStroke is the stroke and whether a stroke-width is set, as an
+// element inherits them from its parents.
+type inheritedStroke struct {
+	stroke   string
+	widthSet bool
+}
+
+// with returns the stroke an element with props ends up with, given that its
+// parent's is s. The style attribute's declarations come after the
+// presentation attributes in props, so they win, as in SVG.
+func (s inheritedStroke) with(props []property) inheritedStroke {
+	for _, p := range props {
+		if p.value == "inherit" {
+			continue
+		}
+		switch p.name {
+		case "stroke":
+			s.stroke = strings.ToLower(p.value)
+		case "stroke-width":
+			s.widthSet = true
+		}
+	}
+	return s
 }
 
 // checkPage returns a problem when the root element's page is not size at
@@ -363,10 +434,11 @@ func numbers(v string) []float64 {
 
 type property struct{ name, value string }
 
-// properties returns an element's presentation attributes and the
-// declarations of its style attribute, with lower-case names.
+// properties returns an element's presentation attributes and then the
+// declarations of its style attribute, with lower-case names. Style comes last
+// because it overrides the attributes.
 func properties(start xml.StartElement) []property {
-	var props []property
+	var props, styles []property
 	for _, a := range start.Attr {
 		name := strings.ToLower(a.Name.Local)
 		if a.Name.Space != "" && name != "style" {
@@ -382,10 +454,10 @@ func properties(start xml.StartElement) []property {
 			if !ok {
 				continue
 			}
-			props = append(props, property{strings.ToLower(strings.TrimSpace(prop)), strings.TrimSpace(val)})
+			styles = append(styles, property{strings.ToLower(strings.TrimSpace(prop)), strings.TrimSpace(val)})
 		}
 	}
-	return props
+	return append(props, styles...)
 }
 
 // checkProperty returns the problems with one presentation property.
