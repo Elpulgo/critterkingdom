@@ -428,7 +428,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 - [ ] NPC entities: idle and wander, face the player, "…" bubble
 - [ ] Dialogue box: portrait, name, typewriter text, at most two big choice buttons
 - [ ] Dialogue data format, runner and tests
-- [ ] i18n with sv and en string tables; a font with å, ä and ö
+- [x] i18n with sv and en string tables; a font with å, ä and ö
 - [ ] Read-aloud via speechSynthesis with a toggle
 
 **Done when** three villagers chat in two languages and are read aloud.
