@@ -2,11 +2,13 @@ package engine
 
 import "github.com/Elpulgo/critterkingdom/internal/geom"
 
-// The world is drawn at a low resolution and scaled up by a whole number, so
-// pixel art stays crisp on every screen. The scale is the largest that still
-// shows at least minWorldWidth by minWorldHeight world pixels. The view then
-// grows to fill the screen, up to maxWorldWidth by maxWorldHeight, so wide
-// and tall screens see more of the world instead of black bars.
+// The world is measured in world pixels and drawn straight onto the screen at
+// a whole-number scale, so edges on whole world pixels, such as where two
+// tiles meet, land on whole screen pixels and stay sharp. The scale is the
+// largest that still shows at least minWorldWidth by minWorldHeight world
+// pixels. The view then grows to fill the screen, up to maxWorldWidth by
+// maxWorldHeight, so wide and tall screens see more of the world instead of
+// black bars.
 const (
 	minWorldWidth  = 240
 	minWorldHeight = 180
@@ -14,15 +16,15 @@ const (
 	maxWorldHeight = 240
 )
 
-// View says how the world image maps onto the screen.
+// View says how the world maps onto the screen.
 type View struct {
 	// Scale is how many screen pixels one world pixel covers.
 	Scale int
 	// W and H are the size of the visible world, in world pixels.
 	W, H int
-	// OffX and OffY are where the top-left corner of the world image lands on
-	// the screen, in screen pixels. They are negative when the scaled world
-	// image is a little larger than the screen.
+	// OffX and OffY are where the top-left corner of the view lands on the
+	// screen, in screen pixels. They are negative when the scaled view is a
+	// little larger than the screen.
 	OffX, OffY int
 }
 

@@ -12,8 +12,8 @@ import (
 	"github.com/Elpulgo/critterkingdom/internal/geom"
 )
 
-// Placeholder art drawn with shapes, in colours from the Endesga 32 palette.
-// Sprites drawn in Aseprite replace it later.
+// Placeholder art drawn in code with smooth shapes, in colours from the
+// Endesga 32 palette. Sprites made from vector drawings replace it later.
 var (
 	grass       = color.NRGBA{0x63, 0xc7, 0x4d, 0xff}
 	grassDark   = color.NRGBA{0x3e, 0x89, 0x48, 0xff}
@@ -38,112 +38,144 @@ const (
 	bodyRadius = 7
 )
 
-// drawMeadow draws grass, tufts and flowers, with a hedge around the edge.
-// Decorations only go inside inner. The same seed gives the same meadow
-// every time.
-func drawMeadow(dst *ebiten.Image, inner geom.Rect) {
-	dst.Fill(grass)
+// meadow says where the tufts of grass, the flowers and the round bushes of
+// the hedge go, in world pixels. The same seed gives the same meadow every
+// time.
+type meadow struct {
+	size    geom.Vec
+	tufts   []geom.Vec
+	flowers []flower
+	bushes  []geom.Vec
+}
+
+type flower struct {
+	at    geom.Vec
+	petal color.NRGBA
+}
+
+// newMeadow lays out a meadow of the given size with a hedge around the
+// edge. Tufts and flowers only go inside inner.
+func newMeadow(size geom.Vec, inner geom.Rect) *meadow {
+	m := &meadow{size: size}
 	rng := rand.New(rand.NewPCG(1, 2))
 	for range 70 {
-		x, y := randomSpot(rng, inner)
-		drawTuft(dst, x, y)
+		m.tufts = append(m.tufts, randomSpot(rng, inner))
 	}
 	petals := []color.NRGBA{petalWhite, petalPink}
 	for range 40 {
-		x, y := randomSpot(rng, inner)
-		drawFlower(dst, x, y, petals[rng.IntN(len(petals))])
+		at := randomSpot(rng, inner)
+		m.flowers = append(m.flowers, flower{at: at, petal: petals[rng.IntN(len(petals))]})
 	}
-	b := dst.Bounds()
-	drawHedge(dst, float32(b.Dx()), float32(b.Dy()))
-}
-
-func randomSpot(rng *rand.Rand, r geom.Rect) (x, y float32) {
-	x = float32(math.Floor(r.Min.X + rng.Float64()*(r.Max.X-r.Min.X)))
-	y = float32(math.Floor(r.Min.Y + rng.Float64()*(r.Max.Y-r.Min.Y)))
-	return x, y
-}
-
-func drawTuft(dst *ebiten.Image, x, y float32) {
-	vector.FillRect(dst, x-2, y-2, 1, 2, grassDark, false)
-	vector.FillRect(dst, x, y-3, 1, 3, grassDark, false)
-	vector.FillRect(dst, x+2, y-2, 1, 2, grassDark, false)
-}
-
-func drawFlower(dst *ebiten.Image, x, y float32, petal color.NRGBA) {
-	vector.FillRect(dst, x-1, y, 3, 1, petal, false)
-	vector.FillRect(dst, x, y-1, 1, 3, petal, false)
-	vector.FillRect(dst, x, y, 1, 1, flowerHeart, false)
-}
-
-// drawHedge draws a band of hedge around the edge of a w by h meadow, with
-// round bushes along its inner side.
-func drawHedge(dst *ebiten.Image, w, h float32) {
-	t := float32(hedgeWidth)
-	vector.FillRect(dst, 0, 0, w, t, hedgeDark, false)
-	vector.FillRect(dst, 0, h-t, w, t, hedgeDark, false)
-	vector.FillRect(dst, 0, 0, t, h, hedgeDark, false)
-	vector.FillRect(dst, w-t, 0, t, h, hedgeDark, false)
-	for x := t / 2; x < w; x += 12 {
-		drawBush(dst, x, t-2)
-		drawBush(dst, x, h-t+2)
+	t := float64(hedgeWidth)
+	for x := t / 2; x < size.X; x += 12 {
+		m.bushes = append(m.bushes, geom.Vec{X: x, Y: t - 2}, geom.Vec{X: x, Y: size.Y - t + 2})
 	}
-	for y := t / 2; y < h; y += 12 {
-		drawBush(dst, t-2, y)
-		drawBush(dst, w-t+2, y)
+	for y := t / 2; y < size.Y; y += 12 {
+		m.bushes = append(m.bushes, geom.Vec{X: t - 2, Y: y}, geom.Vec{X: size.X - t + 2, Y: y})
+	}
+	return m
+}
+
+func randomSpot(rng *rand.Rand, r geom.Rect) geom.Vec {
+	return geom.Vec{
+		X: r.Min.X + rng.Float64()*(r.Max.X-r.Min.X),
+		Y: r.Min.Y + rng.Float64()*(r.Max.Y-r.Min.Y),
 	}
 }
 
-func drawBush(dst *ebiten.Image, x, y float32) {
-	vector.FillCircle(dst, x, y, 5, grassDark, false)
-	vector.FillRect(dst, x-3, y-3, 2, 1, grass, false)
+// reach is how far a tuft, a flower or a bush reaches from its spot, in
+// world pixels. Ones further than this outside the view are not drawn.
+const reach = 6
+
+// drawMeadow draws the grass, tufts and flowers of the meadow, with a hedge
+// around the edge. It skips the tufts, flowers and bushes outside visible.
+func drawMeadow(p *pen, m *meadow, visible geom.Rect) {
+	near := visible.Inset(-reach)
+	p.rect(0, 0, m.size.X, m.size.Y, grass)
+	for _, t := range m.tufts {
+		if near.Contains(t) {
+			drawTuft(p, t.X, t.Y)
+		}
+	}
+	for _, f := range m.flowers {
+		if near.Contains(f.at) {
+			drawFlower(p, f.at.X, f.at.Y, f.petal)
+		}
+	}
+	drawHedge(p, m, near)
+}
+
+// drawTuft draws three pointed blades of grass standing on y.
+func drawTuft(p *pen, x, y float64) {
+	p.polygon(grassDark, x-2.6, y, x-1.4, y, x-2.4, y-2.4)
+	p.polygon(grassDark, x-0.6, y, x+0.6, y, x, y-3.4)
+	p.polygon(grassDark, x+1.4, y, x+2.6, y, x+2.4, y-2.4)
+}
+
+// drawFlower draws four round petals around a heart.
+func drawFlower(p *pen, x, y float64, petal color.NRGBA) {
+	p.circle(x-0.9, y, 0.7, petal)
+	p.circle(x+0.9, y, 0.7, petal)
+	p.circle(x, y-0.9, 0.7, petal)
+	p.circle(x, y+0.9, 0.7, petal)
+	p.circle(x, y, 0.6, flowerHeart)
+}
+
+// drawHedge draws a band of hedge around the edge of the meadow, with round
+// bushes along its inner side. Only the bushes inside near are drawn.
+func drawHedge(p *pen, m *meadow, near geom.Rect) {
+	t := float64(hedgeWidth)
+	w, h := m.size.X, m.size.Y
+	p.rect(0, 0, w, t, hedgeDark)
+	p.rect(0, h-t, w, t, hedgeDark)
+	p.rect(0, 0, t, h, hedgeDark)
+	p.rect(w-t, 0, t, h, hedgeDark)
+	for _, b := range m.bushes {
+		if near.Contains(b) {
+			drawBush(p, b.X, b.Y)
+		}
+	}
+}
+
+func drawBush(p *pen, x, y float64) {
+	p.circle(x, y, 5, grassDark)
+	p.ellipse(x-2, y-2.5, 1.2, 0.6, grass)
 }
 
 // drawCritter draws the placeholder critter, a round orange fox, with its
-// feet at x, y and its body lifted off the ground by lift pixels.
-func drawCritter(dst *ebiten.Image, x, y, lift float32, facing entity.Facing) {
+// feet at the world point x, y and its body lifted lift world pixels off the
+// ground.
+func drawCritter(p *pen, x, y, lift float64, facing entity.Facing) {
 	// The shadow stays on the ground while the critter hops.
-	vector.FillRect(dst, x-4, y-2, 8, 1, shadow, false)
-	vector.FillRect(dst, x-5, y-1, 10, 2, shadow, false)
-	vector.FillRect(dst, x-4, y+1, 8, 1, shadow, false)
+	p.ellipse(x, y, 5, 2, shadow)
 
 	by := y - bodyRadius - lift // centre of the body
-	fillTriangle(dst, x-6, by-3, x-5, by-10, x-1, by-6, fur)
-	fillTriangle(dst, x+6, by-3, x+5, by-10, x+1, by-6, fur)
+	p.polygon(fur, x-6, by-3, x-5, by-10, x-1, by-6)
+	p.polygon(fur, x+6, by-3, x+5, by-10, x+1, by-6)
 
 	switch facing {
 	case entity.FacingUp:
-		vector.FillCircle(dst, x, by, bodyRadius, fur, false)
-		vector.FillCircle(dst, x, by+5, 2, cream, false)
+		p.circle(x, by, bodyRadius, fur)
+		p.circle(x, by+5, 2, cream)
 	case entity.FacingLeft:
-		vector.FillCircle(dst, x+7, by+3, 2, cream, false)
-		vector.FillCircle(dst, x, by, bodyRadius, fur, false)
-		vector.FillCircle(dst, x-2, by+2, 3, cream, false)
-		vector.FillRect(dst, x-4, by-2, 1, 2, ink, false)
-		vector.FillRect(dst, x-6, by, 1, 1, cocoa, false)
+		p.circle(x+7, by+3, 2, cream)
+		p.circle(x, by, bodyRadius, fur)
+		p.circle(x-2, by+2, 3, cream)
+		p.ellipse(x-3.5, by-1, 0.6, 1.05, ink)
+		p.circle(x-5.5, by+0.5, 0.6, cocoa)
 	case entity.FacingRight:
-		vector.FillCircle(dst, x-7, by+3, 2, cream, false)
-		vector.FillCircle(dst, x, by, bodyRadius, fur, false)
-		vector.FillCircle(dst, x+2, by+2, 3, cream, false)
-		vector.FillRect(dst, x+3, by-2, 1, 2, ink, false)
-		vector.FillRect(dst, x+5, by, 1, 1, cocoa, false)
+		p.circle(x-7, by+3, 2, cream)
+		p.circle(x, by, bodyRadius, fur)
+		p.circle(x+2, by+2, 3, cream)
+		p.ellipse(x+3.5, by-1, 0.6, 1.05, ink)
+		p.circle(x+5.5, by+0.5, 0.6, cocoa)
 	default:
-		vector.FillCircle(dst, x, by, bodyRadius, fur, false)
-		vector.FillCircle(dst, x, by+3, 4, cream, false)
-		vector.FillRect(dst, x-3, by-2, 1, 2, ink, false)
-		vector.FillRect(dst, x+2, by-2, 1, 2, ink, false)
-		vector.FillRect(dst, x-1, by, 2, 1, cocoa, false)
+		p.circle(x, by, bodyRadius, fur)
+		p.circle(x, by+3, 4, cream)
+		p.ellipse(x-2.5, by-1, 0.6, 1.05, ink)
+		p.ellipse(x+2.5, by-1, 0.6, 1.05, ink)
+		p.ellipse(x, by+0.5, 1.1, 0.6, cocoa)
 	}
-}
-
-func fillTriangle(dst *ebiten.Image, x0, y0, x1, y1, x2, y2 float32, clr color.Color) {
-	var p vector.Path
-	p.MoveTo(x0, y0)
-	p.LineTo(x1, y1)
-	p.LineTo(x2, y2)
-	p.Close()
-	op := &vector.DrawPathOptions{}
-	op.ColorScale.ScaleWithColor(clr)
-	vector.FillPath(dst, &p, nil, op)
 }
 
 // fillBubble fills a speech bubble with rounded corners of radius r. The

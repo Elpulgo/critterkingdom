@@ -15,8 +15,8 @@ import (
 type debugScene interface {
 	// DebugLines returns extra lines of text for the overlay.
 	DebugLines() []string
-	// DrawDebug draws on the world image after the scene has drawn the world.
-	DrawDebug(world *ebiten.Image)
+	// DrawDebug draws on the canvas after the scene has drawn the world.
+	DrawDebug(c Canvas)
 }
 
 var debugBackdrop = color.NRGBA{0x18, 0x14, 0x25, 0xb0}
@@ -48,12 +48,12 @@ func (d *debugOverlay) update(in Input, fingers int) {
 	d.fingers = fingers
 }
 
-func (d *debugOverlay) drawWorld(world *ebiten.Image, scene Scene) {
+func (d *debugOverlay) drawWorld(c Canvas, scene Scene) {
 	if d.hidden {
 		return
 	}
 	if s, ok := scene.(debugScene); ok {
-		s.DrawDebug(world)
+		s.DrawDebug(c)
 	}
 }
 

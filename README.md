@@ -52,9 +52,9 @@ build, F3 shows and hides the overlay.
 
 ## Art
 
-Sprites are drawn in [Aseprite](https://www.aseprite.org/) and kept in
-`assets-src/`. `make art` exports them into `assets/`, which the game embeds.
-Set `ASEPRITE` to the program's path if `make art` cannot find it.
+The placeholder art is drawn in code with smooth shapes at full screen
+resolution. Real art will be drawn in [Inkscape](https://inkscape.org/) and
+exported to PNG; section 6 of [docs/PLAN.md](docs/PLAN.md) has the plan.
 
 ## Licence
 

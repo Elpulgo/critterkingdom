@@ -18,6 +18,16 @@ func CameraFor(focus geom.Vec, w, h int, bounds geom.Rect) geom.Vec {
 	}
 }
 
+// SmoothCameraFor is CameraFor for a world drawn straight onto the screen,
+// with scale screen pixels to a world pixel. The corner is rounded down to
+// whole screen pixels instead of whole world pixels, so the view glides
+// smoothly and the world still does not shimmer while it scrolls.
+func SmoothCameraFor(focus geom.Vec, w, h int, bounds geom.Rect, scale int) geom.Vec {
+	s := float64(scale)
+	onScreen := geom.Rect{Min: bounds.Min.Scale(s), Max: bounds.Max.Scale(s)}
+	return CameraFor(focus.Scale(s), w*scale, h*scale, onScreen).Scale(1 / s)
+}
+
 func cameraAxis(focus, size, lo, hi float64) float64 {
 	if hi-lo <= size {
 		return math.Floor(lo - (size-(hi-lo))/2)

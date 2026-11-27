@@ -28,6 +28,11 @@ const (
 	focusLift = 8
 	// stepTime is how long each step of the walk bob lasts, in seconds.
 	stepTime = 0.15
+	// bobPace is how fast the walk bob swings, in radians per second, so it
+	// rises and falls once every two steps. It is also the fastest the bob
+	// may change, in world pixels per second, which lets it follow the swing
+	// and settle softly when the critter stops.
+	bobPace = math.Pi / (2 * stepTime)
 )
 
 const (
@@ -52,9 +57,12 @@ const (
 type Scene struct {
 	bounds   geom.Rect // the whole meadow, in world pixels
 	walkable geom.Rect // where the critter's feet may go
-	ground   *ebiten.Image
+	meadow   *meadow
 	player   *entity.Player
 	camera   geom.Vec // top-left corner of the view, in world pixels
+	viewSize geom.Vec // size of the view, in world pixels
+	pen      pen
+	bob      float64 // how far the walk bob lifts the critter, in world pixels
 
 	walked     float64 // seconds the critter has spent walking
 	greet      float64 // seconds left of the greeting
@@ -70,6 +78,7 @@ func NewScene(font *text.GoTextFaceSource) *Scene {
 	return &Scene{
 		bounds:     bounds,
 		walkable:   bounds.Inset(edgeGap),
+		meadow:     newMeadow(bounds.Max.Sub(bounds.Min), bounds.Inset(hedgeWidth+6)),
 		player:     entity.NewPlayer(geom.Vec{X: bounds.Max.X / 2, Y: bounds.Max.Y / 2}),
 		titleAlpha: 1,
 		titleFace:  engine.NewFace(font, titleTextSize, titleWeight),
@@ -94,28 +103,32 @@ func (s *Scene) Update(f engine.Frame) error {
 	if s.walked >= titleWalk {
 		s.titleAlpha = math.Max(0, s.titleAlpha-f.DT/titleFade)
 	}
+	s.updateBob(f.DT)
+
+	s.viewSize = geom.Vec{X: float64(f.View.W), Y: float64(f.View.H)}
 	focus := s.player.Pos.Sub(geom.Vec{Y: focusLift})
-	s.camera = engine.CameraFor(focus, f.View.W, f.View.H, s.bounds)
+	s.camera = engine.SmoothCameraFor(focus, f.View.W, f.View.H, s.bounds, f.View.Scale)
 	return nil
 }
 
-// DrawWorld draws the meadow and the critter.
-func (s *Scene) DrawWorld(world *ebiten.Image) {
-	if s.ground == nil {
-		s.ground = ebiten.NewImage(int(s.bounds.Max.X-s.bounds.Min.X), int(s.bounds.Max.Y-s.bounds.Min.Y))
-		drawMeadow(s.ground, s.bounds.Inset(hedgeWidth+6))
+// updateBob swings the walk bob while the critter walks and lets it
+// settle back to the ground when it stops.
+func (s *Scene) updateBob(dt float64) {
+	target := 0.0
+	if s.player.Moved() {
+		swing := math.Sin(bobPace * s.walked)
+		target = swing * swing
 	}
-	world.Fill(hedgeDark)
-	var op ebiten.DrawImageOptions
-	op.GeoM.Translate(s.bounds.Min.X-s.camera.X, s.bounds.Min.Y-s.camera.Y)
-	world.DrawImage(s.ground, &op)
+	s.bob += math.Max(-bobPace*dt, math.Min(bobPace*dt, target-s.bob))
+}
 
-	feet := s.feetInView()
-	lift := math.Round(s.player.HopHeight())
-	if s.player.Moved() && int(s.walked/stepTime)%2 == 1 {
-		lift++
-	}
-	drawCritter(world, float32(feet.X), float32(feet.Y), float32(lift), s.player.Facing)
+// DrawWorld draws the meadow and the critter.
+func (s *Scene) DrawWorld(c engine.Canvas) {
+	c.Image.Fill(hedgeDark)
+	s.pen.begin(c, s.camera)
+	drawMeadow(&s.pen, s.meadow, geom.Rect{Min: s.camera, Max: s.camera.Add(s.viewSize)})
+	feet := s.player.Pos
+	drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
 }
 
 // DrawUI draws the title and the greeting bubble at full screen resolution.
@@ -145,7 +158,7 @@ func (s *Scene) drawGreeting(screen *ebiten.Image, ui engine.UI) {
 	w := text.Advance(greeting, s.bubbleFace) + 2*padX
 	h := engine.LineHeight(s.bubbleFace) + 2*padY
 
-	head := s.feetInView().Sub(geom.Vec{Y: critterHeight + math.Round(s.player.HopHeight()) + 1})
+	head := s.feetInView().Sub(geom.Vec{Y: critterHeight + s.player.HopHeight() + 1})
 	hx, hy := ui.View.ViewToScreen(head)
 	sw := float64(screen.Bounds().Dx())
 	x := math.Max(w/2+margin, math.Min(hx, sw-w/2-margin))
@@ -156,11 +169,9 @@ func (s *Scene) drawGreeting(screen *ebiten.Image, ui engine.UI) {
 	engine.DrawText(screen, greeting, s.bubbleFace, x, bottom-h+padY, text.AlignCenter, fade(cocoa, alpha))
 }
 
-// feetInView returns where the critter's feet are in the view, in whole
-// pixels.
+// feetInView returns where the critter's feet are in the view.
 func (s *Scene) feetInView() geom.Vec {
-	p := s.player.Pos.Sub(s.camera)
-	return geom.Vec{X: math.Floor(p.X), Y: math.Floor(p.Y)}
+	return s.player.Pos.Sub(s.camera)
 }
 
 // DebugLines adds the critter's position, the camera and the walk target to
@@ -178,19 +189,19 @@ func (s *Scene) DebugLines() []string {
 }
 
 // DrawDebug outlines where the critter may walk and marks its feet and its
-// walk target.
-func (s *Scene) DrawDebug(world *ebiten.Image) {
-	topLeft := s.walkable.Min.Sub(s.camera)
+// walk target. Sizes are in world pixels, so the marks grow with the view.
+func (s *Scene) DrawDebug(c engine.Canvas) {
+	k := float32(c.Scale)
+	left, top := c.At(s.walkable.Min.Sub(s.camera))
 	size := s.walkable.Max.Sub(s.walkable.Min)
-	vector.StrokeRect(world, float32(topLeft.X), float32(topLeft.Y), float32(size.X), float32(size.Y), 1, debugColor, false)
+	vector.StrokeRect(c.Image, left, top, float32(size.X)*k, float32(size.Y)*k, k, debugColor, true)
 
-	feet := s.feetInView()
-	vector.FillRect(world, float32(feet.X)-1, float32(feet.Y)-1, 2, 2, debugColor, false)
+	fx, fy := c.At(s.feetInView())
+	vector.FillRect(c.Image, fx-k, fy-k, 2*k, 2*k, debugColor, true)
 
 	if t, ok := s.player.Target(); ok {
-		c := t.Sub(s.camera)
-		x, y := float32(c.X), float32(c.Y)
-		vector.StrokeLine(world, x-3, y-3, x+3, y+3, 1, debugColor, false)
-		vector.StrokeLine(world, x-3, y+3, x+3, y-3, 1, debugColor, false)
+		x, y := c.At(t.Sub(s.camera))
+		vector.StrokeLine(c.Image, x-3*k, y-3*k, x+3*k, y+3*k, k, debugColor, true)
+		vector.StrokeLine(c.Image, x-3*k, y+3*k, x+3*k, y-3*k, k, debugColor, true)
 	}
 }

@@ -10,7 +10,7 @@ PORT ?= 8080
 WEB_OUT := build/web
 LDFLAGS := -s -w
 
-.PHONY: help run build serve web test check art clean
+.PHONY: help run build serve web test check clean
 
 help: ## List the commands
 	@grep -E '^[a-z]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN { FS = ":.*## " } { printf "  make %-6s %s\n", $$1, $$2 }'
@@ -44,9 +44,6 @@ check: ## Formatting, go.mod, vet for desktop and browser, and tests
 	GOOS=js GOARCH=wasm $(GO) vet ./...
 	GOOS=js GOARCH=wasm $(GO) vet -tags debug ./...
 	$(GO) test ./...
-
-art: ## Export Aseprite sources in assets-src/ to assets/
-	sh tools/export-art.sh
 
 clean: ## Remove build output
 	rm -rf build

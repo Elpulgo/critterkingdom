@@ -33,3 +33,11 @@ func TestCameraFor_CentresAMapSmallerThanTheView(t *testing.T) {
 		t.Errorf("CameraFor = %v, want %v", got, want)
 	}
 }
+
+func TestSmoothCameraFor_MovesInWholeScreenPixels(t *testing.T) {
+	meadow := geom.Rect{Max: geom.Vec{X: 640, Y: 384}}
+	// At 4 screen pixels to a world pixel, the corner moves in quarter world pixels.
+	if got, want := SmoothCameraFor(geom.Vec{X: 300.6, Y: 100.4}, 320, 180, meadow, 4), (geom.Vec{X: 140.5, Y: 10.25}); got != want {
+		t.Errorf("SmoothCameraFor = %v, want %v", got, want)
+	}
+}

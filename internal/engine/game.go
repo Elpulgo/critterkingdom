@@ -1,23 +1,25 @@
 // Package engine glues the game to Ebitengine: the game loop, the input
-// abstraction, the touch controls, the camera and the low-resolution world
-// view that is scaled up to the screen.
+// abstraction, the touch controls, the camera and the view that places the
+// world on the screen.
 package engine
 
 import (
+	"image"
 	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+
+	"github.com/Elpulgo/critterkingdom/internal/geom"
 )
 
 // Scene is one screen of the game, such as the meadow.
 type Scene interface {
 	// Update advances the scene by one tick.
 	Update(f Frame) error
-	// DrawWorld draws the world at world resolution. The image is View.W by
-	// View.H pixels and is scaled up to the screen afterwards.
-	DrawWorld(world *ebiten.Image)
+	// DrawWorld draws the world on the canvas.
+	DrawWorld(c Canvas)
 	// DrawUI draws text and other interface over the world at full screen
 	// resolution, so text stays sharp.
 	DrawUI(screen *ebiten.Image, ui UI)
@@ -29,6 +31,21 @@ type Frame struct {
 	View  View
 	// DT is the length of a tick, in seconds.
 	DT float64
+}
+
+// Canvas is the part of the screen that shows the world. Scenes draw on it
+// at full screen resolution.
+type Canvas struct {
+	Image *ebiten.Image
+	// Scale is how many screen pixels one world pixel covers.
+	Scale float64
+	// OffX and OffY are where the top-left corner of the view lands on Image.
+	OffX, OffY float64
+}
+
+// At returns where the point p, in view pixels, lands on Image.
+func (c Canvas) At(p geom.Vec) (x, y float32) {
+	return float32(p.X*c.Scale + c.OffX), float32(p.Y*c.Scale + c.OffY)
 }
 
 // UI tells a scene how to place its interface on the screen.
@@ -65,7 +82,6 @@ type Game struct {
 	screenW, screenH int
 	unit             float64
 	view             View
-	world            *ebiten.Image
 }
 
 // NewGame returns a game that runs scene.
@@ -118,32 +134,32 @@ func (g *Game) Update() error {
 	return g.scene.Update(Frame{Input: in, View: g.view, DT: 1 / float64(tps)})
 }
 
-// Draw draws the world at world resolution, scales it up to the screen and
-// draws the interface on top.
+// Draw draws the world and then the interface on top, both at full screen
+// resolution.
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(borderColor)
-
-	if g.world == nil || g.world.Bounds().Dx() != g.view.W || g.world.Bounds().Dy() != g.view.H {
-		if g.world != nil {
-			g.world.Deallocate()
-		}
-		g.world = ebiten.NewImage(g.view.W, g.view.H)
-	}
-	g.world.Clear()
-	g.scene.DrawWorld(g.world)
-	if debugEnabled {
-		g.debug.drawWorld(g.world, g.scene)
-	}
-
-	var op ebiten.DrawImageOptions
-	op.GeoM.Scale(float64(g.view.Scale), float64(g.view.Scale))
-	op.GeoM.Translate(float64(g.view.OffX), float64(g.view.OffY))
-	screen.DrawImage(g.world, &op)
-
+	g.drawWorld(screen)
 	g.scene.DrawUI(screen, UI{View: g.view, Unit: g.unit})
 	g.input.touch.draw(screen, g.touchLayout())
 	if debugEnabled {
 		g.debug.draw(screen, g)
+	}
+}
+
+// drawWorld lets the scene draw on the part of the screen that shows the
+// world, so nothing spills onto the border.
+func (g *Game) drawWorld(screen *ebiten.Image) {
+	v := g.view
+	area := image.Rect(v.OffX, v.OffY, v.OffX+v.W*v.Scale, v.OffY+v.H*v.Scale)
+	c := Canvas{
+		Image: screen.SubImage(area).(*ebiten.Image),
+		Scale: float64(v.Scale),
+		OffX:  float64(v.OffX),
+		OffY:  float64(v.OffY),
+	}
+	g.scene.DrawWorld(c)
+	if debugEnabled {
+		g.debug.drawWorld(c, g.scene)
 	}
 }
 

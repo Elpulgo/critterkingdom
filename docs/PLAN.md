@@ -1,9 +1,11 @@
 # Critter Kingdom: Project Plan
 
-Status: draft v0.3, 2026-11-27. Changes since v0.2: M0 is implemented, and
-sections 4.2 to 4.5, 6.6 and Appendix B now describe the code as built. The
-tablet playtest and the first deploy are still open. v0.2 added
-real-time fights (section 2.7) and milestone M5.
+Status: draft v0.4, 2026-11-27. Changes since v0.3: the art is smooth instead
+of pixel art, after comparing the two with the same placeholder art. Sections
+0, 4, 5, 6, 7 and 8 follow from that, and section 9 says why. v0.3 marked M0
+as implemented and made sections 4.2 to 4.5, 6.6 and Appendix B describe the
+code as built; the tablet playtest and the first deploy are still open. v0.2
+added real-time fights (section 2.7) and milestone M5.
 
 How to use it: each milestone in section 5 is meant to become its own spec and
 branch. Tick the boxes as work lands. When a decision changes, update the
@@ -13,7 +15,7 @@ decision log in section 9 instead of rewriting history.
 
 Critter Kingdom is a cozy 2D top-down adventure for children aged 5 to 9. You
 play a small critter (fox, bunny or hedgehog) in a kingdom of talking animals.
-You explore a pixel-art world, chat with villagers, take on small quests,
+You explore a storybook world, chat with villagers, take on small quests,
 befriend wild critters and collect them in a sticker book, bonk grumpy critters
 with your stick, and solve gentle puzzles in tiny dungeons. It is written in Go
 with Ebitengine, compiled to WebAssembly and played in the browser on a tablet
@@ -282,7 +284,7 @@ critterkingdom/
   internal/
     engine/            game loop glue, scene stack, camera, input abstraction (Move vector, Paw, Menu, Pointing),
                        touch controls (paw button, pad) until ui/ exists
-    assets/            embed.FS + loaders (images, Aseprite JSON, audio, fonts), caching
+    assets/            embed.FS + loaders (images, part layouts, audio, fonts), caching
     world/             Tiled map loading, layers, collision grid, warps, triggers, y-sorting, A* pathfinding
     entity/            player, npc, critter, enemy, item, prop; animation controller
     combat/            hitboxes, petals and damage rules, invulnerability, knockback, aim assist,
@@ -299,7 +301,7 @@ critterkingdom/
     audio/             music and sfx manager, volume, unlock
     content/           content lint: validates all data cross-references    [test]
   assets/              exported, embedded game data (see 6.6)
-  assets-src/          Aseprite, Tiled and BeepBox sources (not embedded)
+  assets-src/          Inkscape, Tiled and BeepBox sources (not embedded)
   web/                 index.html and loader.js (loading bar, tap-to-start); later manifest.webmanifest, sw.js
   tools/               asset export helpers
   docs/                PLAN.md (this), later ART-BIBLE.md, CREDITS.md, PLAYTEST-LOG.md
@@ -318,11 +320,12 @@ Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
 
 | Topic | Decision | Why |
 |---|---|---|
-| Resolution | The world is rendered to an offscreen image and drawn at the largest whole-number scale that still shows at least 240 by 180 world pixels. At that scale the image fills the screen, up to 480 by 240 world pixels: 320 by 180 on 16:9, 256 by 192 on a 2048 by 1536 iPad. Only screens beyond that cap get a border. UI and text are drawn at full screen resolution. | Chunky pixel art plus crisp, large, readable text for early readers. No letterboxing on tablets, and no very wide or very tall screen sees too much of a map. |
-| Tiles | 16 by 16 grid. Player and villagers drawn in a 32 by 32 box (big heads), small critters 16 or 24 px. | Tiles are fast to produce; characters stay cute and readable. |
+| Resolution | The world is measured in world pixels and drawn straight onto the screen at full resolution, with the largest whole-number scale that still shows at least 240 by 180 world pixels. At that scale the world fills the screen, up to 480 by 240 world pixels: 320 by 180 on 16:9, 256 by 192 on a 2048 by 1536 iPad. Only screens beyond that cap get a border. UI and text are drawn at full screen resolution too. | Smooth, soft art plus crisp, large, readable text for early readers. The whole-number scale puts tile edges on whole screen pixels, so tiles meet without seams. No letterboxing on tablets, and no very wide or very tall screen sees too much of a map. |
+| Tiles | 16 by 16 world pixel grid. Player and villagers drawn in a 32 by 32 box (big heads), small critters 16 or 24. | Tiles are fast to produce; characters stay cute and readable. Sizes are in world pixels, so maps, collision and the camera do not depend on how detailed the art is. |
+| Art | Smooth shapes at full screen resolution, never scaled-up pixels. Placeholders are drawn in code. Real art is drawn in Inkscape and exported to PNG at 8 px per world pixel, which is 1:1 at scale 8 (a 2048 by 1536 iPad) and a little softer at other scales. Characters are sets of parts that the engine moves, turns and squashes (section 6.3). | Chosen over pixel art after comparing the two. Animating parts in code avoids drawing every frame, which is the slow part of smooth art. |
 | Maps | Tiled, exported as JSON (`.tmj`), read by a small loader of our own (the format is plain JSON: layers, tile ids, objects with properties). `go-tiled` reads the TMX format if you would rather not write one. | Mature, free, terrain brushes, object layers for spawns, warps and triggers. LDtk is the alternative. |
 | Content | Data-driven JSON: critters, enemies, quests, dialogue, strings, items. Adding a quest means adding a file, not code. | Fast iteration, testable, and later the kids' ideas go in as data. |
-| Assets | `embed.FS` into the binary to start. Move large audio to fetched-at-runtime if the compressed WASM passes about 10 MB. | Simplest first; optimise when measured. |
+| Assets | `embed.FS` into the binary to start. Move large audio, then art, to fetched-at-runtime if the compressed WASM passes about 10 MB. | Simplest first; optimise when measured. Smooth art at 8 px per world pixel takes more space than pixel art would. |
 | Save | A versioned JSON `SaveGame`; a `Store` interface with a localStorage implementation (js build tag) and a file implementation (desktop). Autosave. | Offline, no accounts. The version number allows migrations. |
 | Languages | Swedish and English from day one. All text goes through `i18n.T(key)`. The font must include å, ä and ö. | Retrofitting i18n is painful; both are needed at home. |
 | Read-aloud | Web Speech API (`speechSynthesis`) through `syscall/js`, with a settings toggle. | Free, instant, supports sv and en. Voice quality varies by device; recorded voices can replace it later. |
@@ -390,10 +393,10 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 ### M0 Foundation: "Hello Critter" (1 to 2 weeks)
 
-- [x] `go mod init`, the folder layout above, a Makefile (`run`, `web`, `test`, `art`, `check`)
+- [x] `go mod init`, the folder layout above, a Makefile (`run`, `web`, `test`, `check`)
 - [x] GitHub Actions workflow in `.github/workflows/ci.yml`
 - [x] Ebitengine window: a placeholder critter moves with keyboard, touch (tap-to-walk and pad), gamepad and mouse, through the input abstraction in `engine`
-- [x] Offscreen world render with integer scaling and full-resolution text; adaptive logical width
+- [x] World drawn at full screen resolution with a whole-number scale, full-resolution text and an adaptive logical width
 - [x] The same build served by wasmserve (`make serve`)
 - [ ] Tested on an iPad or Android tablet
 - [x] `web/index.html` with tap-to-start
@@ -407,7 +410,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 - [ ] Tiled JSON loading, layers, collision grid, animated tiles (water)
 - [ ] Camera follow and clamp; y-sorted props; "above" layer
 - [ ] Warps: village to meadow, village to house interior
-- [ ] Player sprite with four-direction idle and walk (a placeholder pack is fine)
+- [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
 - [ ] A* tap-to-walk, joystick alternative
 - [ ] Audio manager: one music loop, footsteps, unlock on first tap
 
@@ -439,7 +442,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 - [ ] Critter AI: idle, hop, notice the player
 - [ ] Snack Time mini-game
 - [ ] Sticker Book UI; companion follows (trail) and can be petted
-- [ ] Five critters with sheets and stickers; the "Scared Little Mouse" quest
+- [ ] Five critters with their parts and stickers; the "Scared Little Mouse" quest
 - [ ] Sleep in bed to change time of day; night tint
 
 **Done when** all five critters can be befriended, show up in the book, and one follows you.
@@ -492,7 +495,7 @@ Follow the Bounce mini-game.
 
 Local co-op (a second player steers the companion with a gamepad and can
 fight too), a Leaf Shield that blocks on its own while you stand still,
-draw-your-own-critter pixel editor, a tiny garden (plant a seed, berries after
+make-your-own-critter from parts, a tiny garden (plant a seed, berries after
 you sleep), a birthday party event on a date set by a parent, photo mode
 (saves a PNG), desktop and mobile store builds, optional cloud save through a
 small Go server using a six-letter family code (no accounts).
@@ -505,119 +508,151 @@ plus the art time in 6.7.
 ### 6.1 Art direction on one page (write it down as `docs/ART-BIBLE.md` before drawing)
 
 - **Mood words**: sunny, soft, round, friendly, storybook.
+- **Look**: smooth vector shapes drawn at full screen resolution, never
+  scaled-up pixels.
 - **Palette**: pick one from Lospec and stick to it. Recommended: *Endesga 32*
-  (bright, great for cute games) or *Resurrect 64* (more range). Import it
-  into Aseprite and never eyedrop colours from elsewhere.
-- **Sizes**: tiles 16 by 16; player and villagers in a 32 by 32 box (feet at
-  bottom centre, collision box about 12 by 10 at the feet); small critters and
-  enemies 16 or 24 px, the boss 48 by 48; portraits 64 by 64 with three
-  expressions; stickers 48 by 48 with a white "sticker" border; icons 16 px
-  (HUD) and 32 px (menus); 9-slice panel 48 by 48 with 16 px borders.
-- **Shapes**: big heads (about half the height), big eyes with a highlight,
-  rounded everything, no sharp angles.
+  (bright, great for cute games), which the placeholder art uses, or
+  *Resurrect 64* (more range). Load it into Inkscape as a swatch palette and
+  never eyedrop colours from elsewhere.
+- **Sizes**, in world pixels: tiles 16 by 16; player and villagers in a 32 by
+  32 box (feet at bottom centre, collision box about 12 by 10 at the feet);
+  small critters and enemies 16 or 24, the boss 48 by 48. Drawings are made at
+  8 px per world pixel, so a tile is 128 by 128 px and a villager's box 256 by
+  256. The UI is sized in CSS pixels, like the touch targets in section 3, and
+  drawn at 2 px per CSS pixel: portraits about 160 by 160 with three
+  expressions, stickers about 96 by 96 with a white "sticker" border, icons 32
+  (HUD) and 64 (menus).
+- **Shapes**: build everything from simple shapes (circles, ellipses, rounded
+  triangles), as the M0 critter is. Big heads (about half the height), big
+  eyes with a highlight, rounded everything, no sharp angles.
 - **Enemies look grumpy, never scary**: furrowed eyebrows and a pout, no
   fangs, no blood, no glowing red eyes. A defeated enemy smiles.
-- **Lines and shading**: a 1 px outline in a darker version of the fill colour
-  (not black); two or three shades per material; light from top-left; no
-  dithering, so kids get a clean read.
+- **Lines and shading**: characters and props get an outline about 1 world
+  pixel thick (8 px in the drawing) in a darker version of the fill colour
+  (not black); the ground gets none. Flat fills with one shade and one
+  highlight per material; light from top-left; no textures, so kids get a
+  clean read. Nothing thinner than half a world pixel, so details survive on
+  a small laptop screen.
 - **Contrast rule**: ground tiles are lighter and less saturated than
   characters, so characters pop.
-- **Animation**: idle 2 to 4 frames at 4 to 6 fps (a small bob or squash);
-  walk 4 frames at 8 to 10 fps; swing 3 frames at 12 fps; hurt 1 frame; hop 3
-  frames for small critters. Enemies: idle 2, move 4, telegraph 2, attack 2 to
-  3, hurt 1, poof 4. Draw down, up and side; the engine mirrors the side view.
-  Shared emote sprites (heart, exclamation, zzz, sweat, music note) that float
-  above anyone.
-- **References**: Kitaria Fables, Animal Crossing, Stardew Valley, Link's
-  Awakening (Switch), Tunic (for colour and softness). Collect screenshots in
-  a PureRef board.
+- **Animation**: characters are sets of parts (head, body, ears, tail, feet,
+  eyes) that the engine moves, turns and squashes, instead of drawn frames.
+  Idle is a slow breathing squash and a blink every few seconds; walk is a
+  bob with pattering feet and bouncing ears (the M0 critter already bobs);
+  swing is a lean with the stick swept through an arc; hurt is a flash and a
+  squash; small critters hop and squash on landing. Enemies: idle, move,
+  telegraph, attack, hurt and poof, made the same way. Draw down, up and side
+  views; the engine mirrors the side view. Shared emote sprites (heart,
+  exclamation, zzz, sweat, music note) float above anyone.
+- **References**: Cozy Grove and Spiritfarer (soft, hand-drawn, cozy), Sago
+  Mini and Toca Boca (simple shapes young children read at a glance), Animal
+  Crossing, Link's Awakening (Switch), Tunic (for colour and softness).
+  Collect screenshots in a PureRef board.
 
 ### 6.2 Tools
 
 | Need | Recommended | Free alternative |
 |---|---|---|
-| Pixel art and animation | Aseprite (about 20 USD; can also be built from source) | Libresprite, Pixelorama, Piskel (browser) |
+| Drawing | Inkscape (free; its command line does the export for `make art`) | Affinity (free since late 2025, with a Canva account) or Figma, exporting PNGs by hand |
+| Animation | In code: the engine moves, turns and squashes each character's parts | |
 | Maps | Tiled | LDtk |
 | Sound effects | jsfxr or ChipTone (browser, instant) | Bfxr |
 | Music | Bosca Ceoil Blue or BeepBox (browser) | LMMS, FamiStudio |
 | Audio editing and conversion | Audacity, ffmpeg | |
-| Fonts | Google Fonts: Fredoka, Baloo 2 or Nunito (rounded, readable, OFL licence, include å ä ö) | Pixelify Sans (pixel look), m5x7 |
-| Palettes | Lospec | |
-| Placeholder art while you build | Kenney.nl (CC0), Ninja Adventure pack (CC0), Sprout Lands (check licence) | OpenGameArt (check each licence) |
+| Fonts | Google Fonts: Fredoka, Baloo 2 or Nunito (rounded, readable, OFL licence, include å ä ö) | Andika (made for beginning readers) |
+| Palettes | Lospec (download as a GIMP `.gpl` file, which Inkscape reads as swatches) | |
+| Placeholder art while you build | Shapes drawn in code, as in M0; Kenney.nl (CC0, much of it in a flat vector style) | OpenGameArt (check each licence) |
 | Reference boards | PureRef | |
 
-AI image tools are fine for mood boards and quick concept drafts. Final sprites
-still need hand clean-up for palette and consistency, and each tool's licence
-terms need checking.
+AI image tools are fine for mood boards and quick concept drafts. Final art is
+still redrawn as vector parts in the palette, for consistency, and each tool's
+licence terms need checking.
 
 ### 6.3 Step by step: characters and enemies
 
 1. Make the **style sheet first**: one grass tile, one tree, one critter, one
-   enemy, one UI panel and one portrait, placed on a 320 by 180 mock screen
-   and viewed at 4x. Iterate until it feels cute. Show it to the kids and ask
-   which one they like.
-2. New 32 by 32 file in Aseprite with the palette loaded. Block the
-   silhouette: head circle about 16 px, body about 10 px, feet on row 30.
-3. Flat colours, then shading, then outline, then eyes and highlight.
-4. Duplicate for the up and side views. The side view is mirrored by the
-   engine (`flipX`).
-5. Animate with tags: `idle_down`, `walk_down`, `swing_down`, `idle_up`, and
-   so on. Use onion skin. Idle is a 1 px squash; walk is a bounce with
-   alternating feet; swing is anticipation, hit and recover, with a shared
-   white "swoosh" arc sprite drawn on top.
-6. Export a sheet plus JSON:
-   ```
-   aseprite -b fox.aseprite --sheet fox.png --data fox.json --format json-array --list-tags --sheet-type packed
-   ```
-   The Go loader reads `frames` and `frameTags`, so there are no hand-written
-   frame tables.
-7. Portrait: a 64 by 64 file, same palette, tags `neutral`, `happy`, `sad`.
-8. Cheap variants: palette swaps (bunny to brown bunny), or a shared body with
-   swappable head, ear and tail layers.
-9. Enemies: the same process in a 16 by 16 or 24 by 24 box with tags `idle`,
-   `move`, `telegraph`, `attack`, `hurt`, `poof`. The telegraph frames are the
-   most important ones in the game: make them big and obvious (puff up, shake,
-   flash) so a 5-year-old sees the attack coming.
+   enemy, one UI panel and one portrait, placed on a 320 by 180 world pixel
+   mock screen (2560 by 1440 px in the drawing) and viewed on the tablet.
+   Iterate until it feels cute. Show it to the kids and ask which one they
+   like.
+2. One Inkscape file per character, at 8 px per world pixel, with the palette
+   loaded: a villager's 32 by 32 box is 256 by 256 px. Set the document's
+   units to px with a scale of 1 (Document Properties), so a px in the
+   drawing is a pixel in the PNG. Block the silhouette with circles and
+   ellipses: head about 16 world pixels across, body about 10, feet at the
+   bottom centre.
+3. Flat colours, then the shade and highlight, then the outline, then eyes
+   and highlight.
+4. Split it into parts, each its own object with an id named `<view>_<part>`:
+   `down_head`, `down_body`, `down_ear_left`, `down_tail`, and so on, plus
+   spare parts for expressions (`down_eyes_closed`, `down_eyes_happy`). Draw
+   the down, up and side views; the engine mirrors the side view (`flipX`).
+5. Mark the point each part turns around (the base of an ear, the root of the
+   tail) with a tiny circle named `<view>_<part>_pivot`, and the feet with one
+   named `<view>_feet`.
+6. `make art` exports every part to its own PNG and writes a JSON file with
+   where each part sits and turns, read from Inkscape's `--query-all`, so
+   there are no hand-written offset tables.
+7. Animate in code with a few motions every character shares: breathe, blink,
+   bob, patter, wiggle, lean, squash and flash. A character's data picks the
+   motions and their sizes and speeds, so a new critter needs no new code.
+8. Portrait: the same parts approach at 2 px per CSS pixel, with `neutral`,
+   `happy` and `sad` made by swapping eyes and mouth.
+9. Cheap variants: recolour a copy (Edit, Select Same, Fill Color), or share
+   a body and swap head, ear and tail parts.
+10. Enemies: the same process in a 16 by 16 or 24 by 24 box, with motions for
+    `idle`, `move`, `telegraph`, `attack`, `hurt` and `poof`. The telegraph is
+    the most important animation in the game: make it big and obvious (puff
+    up, shake, flash) so a 5-year-old sees the attack coming.
 
-Frame budget per playable critter: 3 directions times (2 idle + 4 walk + 3
-swing), plus hurt, sleep and happy, about 30 frames. Villagers: 18 (or 6 if
-they stand still). Small critters: 5 to 10. Enemies: about 15. The boss: about
-30.
+Part budget per playable critter: 3 views of about 8 parts, plus spare eyes
+and mouths and the stick, about 30 parts. Villagers: about 20 (or 8 if they
+only face down). Small critters: 5 to 10. Enemies: about 12. The boss: about
+20.
 
 ### 6.4 Step by step: tiles, props and maps
 
-1. Base terrain in Aseprite's **Tiled Mode** (View, Tiled Mode) so edges wrap
-   seamlessly: grass plus two or three variants with tiny flowers, dirt path,
-   sand, water (4-frame animation), cave floor, cliff edges.
-2. Transitions: a 16-tile corner set per pair (grass to dirt, grass to water,
-   sand to water). In Tiled, define a **Terrain Set** so you paint transitions
-   with one brush.
-3. Props as multi-tile images: tree (32 by 48), bush, berry bush (full and
-   empty), rock, fence set, sign, house (64 by 64) with door, chest (closed and
-   open), pot, push block, flower switch (off and on), mushroom (off and on),
-   bramble, plank bridge, room door (open and locked), sunflower checkpoint.
-4. Interior set: floor, walls, window, bed, table, rug, shelf.
-5. Tilesets in Tiled: `tileset_outdoor.png`, `tileset_indoor.png` and
-   `tileset_cave.png` as regular tilesets; props as an *image collection*
-   tileset so each prop keeps its own size.
-6. Map layout in Tiled (orthogonal, 16 by 16, about 40 by 30). Layers:
+1. Base terrain on a 128 by 128 px page, which is one 16 by 16 world pixel
+   tile: grass plus two or three variants, dirt path, sand, water (a few
+   frames of moving ripples), cave floor, cliff edges. Keep the ground plain
+   and soft. Anything that crosses an edge gets a copy 128 px over on the
+   opposite side, so the tile wraps seamlessly.
+2. Transitions: soft, wavy edges as a 16-tile corner set per pair (grass to
+   dirt, grass to water, sand to water). Draw one edge and one corner, then
+   duplicate, turn and mirror them. In Tiled, define a **Terrain Set** so you
+   paint transitions with one brush.
+3. Ground decorations to break up the plain ground: tufts, flowers, pebbles
+   and leaves, placed freely as tile objects or scattered over a zone with a
+   seeded random generator, as the M0 meadow does.
+4. Props as separate images: tree (32 by 48 world pixels), bush, berry bush
+   (full and empty), rock, fence set, sign, house (64 by 64) with door, chest
+   (closed and open), pot, push block, flower switch (off and on), mushroom
+   (off and on), bramble, plank bridge, room door (open and locked),
+   sunflower checkpoint.
+5. Interior set: floor, walls, window, bed, table, rug, shelf.
+6. Tilesets in Tiled: `tileset_outdoor.png`, `tileset_indoor.png` and
+   `tileset_cave.png` as regular tilesets; props and decorations as an
+   *image collection* tileset so each keeps its own size.
+7. Map layout in Tiled (orthogonal, 128 px tiles, about 40 by 30). Layers:
    `ground`, `decor`, `props` (object layer with tile objects, y-sorted),
    `above` (tree tops, roofs), `collision` (a one-tile "solid" tileset, or
    rectangles), `objects` (`player_spawn`, `npc` with `id`, `warp` with
    `target_map` and `target_spawn`, `spawn_zone` with `habitat`, `enemy` with
    `id`, `room` rectangles with `locks_doors`, `item` with `item_id`,
    `trigger` with `event`, puzzle objects). Map properties: `music`, `biome`,
-   `dark`.
-7. Turn on "Repeat last export on save" in Tiled so the `.tmj` in
+   `dark`. The loader divides Tiled's positions by 8, so the game works in
+   world pixels.
+8. Turn on "Repeat last export on save" in Tiled so the `.tmj` in
    `assets/maps/` is always current. Test with `go run ./cmd/game -map meadow`.
 
 ### 6.5 Step by step: UI, fonts, audio and voice
 
 **UI**
 
-- 9-slice panel (48 by 48, 16 px borders), rounded with a soft shadow; a
-  button in normal and pressed states; a "next" arrow; a checkmark.
-- Icon set at 16 and 32 px: speech, footsteps, berry, hat, heart, star,
+- Panels drawn in code as rounded shapes with a soft shadow, like the M0
+  speech bubble, or as 9-slice images where they need decoration; a button in
+  normal and pressed states; a "next" arrow; a checkmark.
+- Icon set at 32 and 64 CSS px: speech, footsteps, berry, hat, heart, star,
   sticker, backpack, gear, speaker, flags, snacks, key, lantern, zzz, stick,
   sturdy stick, wand.
 - Petals HUD (full and empty petal), the boss's row of stars.
@@ -648,15 +683,15 @@ words comes from the browser's speech voices; later, family-recorded lines can
 replace them.
 
 **Fonts** must include Latin Extended for å, ä and ö. Fredoka, Baloo 2, Nunito
-and Pixelify Sans do, all under the SIL Open Font License (keep the licence
+and Andika do, all under the SIL Open Font License (keep the licence
 text in `CREDITS.md`).
 
 ### 6.6 Pipeline and folders
 
 ```
-assets-src/   .aseprite, .tmx/.tsx, BeepBox .json, raw .wav   (sources of truth; consider git LFS)
+assets-src/   Inkscape .svg, .tmx/.tsx, BeepBox .json, raw .wav   (sources of truth; consider git LFS for audio)
 assets/       exported and embedded
-  sprites/    critters/fox.png + fox.json, npcs/, enemies/, props/, effects/, ui/, emotes/
+  sprites/    critters/fox/*.png + fox.json (where parts sit and turn), npcs/, enemies/, props/, effects/, ui/, emotes/
   tiles/      tileset_outdoor.png ...
   maps/       village.tmj, meadow.tmj, ...
   audio/      music/*.ogg, sfx/*.ogg|wav, voices/
@@ -664,13 +699,15 @@ assets/       exported and embedded
   data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
 ```
 
-- `make art` runs Aseprite's CLI export on changed sources
-  (`tools/export-art.sh`); later `make audio` runs ffmpeg; `make check` runs
-  gofmt, `go mod tidy -diff`, vet for desktop and browser and every test,
-  which will include the content lint test; `make web` builds the wasm bundle
-  into `build/web/`.
-- Naming: lower_snake_case, one sheet per character, tags named
-  `<anim>_<dir>`.
+- `make art` arrives with the first drawing in M1: a script in `tools/` will
+  run Inkscape's command line on changed sources, export each part, tile and
+  prop to PNG at 8 px per world pixel and write the part JSON. Until then the
+  placeholder art is drawn in code. Later `make audio` runs ffmpeg;
+  `make check` runs gofmt, `go mod tidy -diff`, vet for desktop and browser
+  and every test, which will include the content lint test; `make web` builds
+  the wasm bundle into `build/web/`.
+- Naming: lower_snake_case, one drawing per character, parts named
+  `<view>_<part>`.
 - Licences: prefer CC0; CC-BY needs an entry in `CREDITS.md`; avoid NC and ND
   material in case the game is ever sold. Decide a licence for your own art
   too (the repo is MIT, which covers code; art can be the same or CC-BY).
@@ -679,23 +716,27 @@ assets/       exported and embedded
 
 | Asset | Count | Hours |
 |---|---|---|
-| Terrain tiles and transitions | about 60 | 12 to 15 |
+| Terrain tiles and transitions, with plain ground | about 40 | 8 to 10 |
+| Ground decorations (tufts, flowers, pebbles, leaves) | about 15 | 3 |
 | Props and interiors | about 30 | 10 |
-| Playable critters (fox, bunny, hedgehog via swaps), incl. swing and hurt | 3 | 11 to 13 |
-| Villagers | 5 | 12 to 15 |
-| Wild critters | 5 | 8 to 10 |
-| Enemies (slime, thistle beast, mushroom) | 3 | 10 to 12 |
-| Boss (the Grumbling Grub) | 1 | 6 to 8 |
-| Portraits (three expressions each) | 6 | 6 |
+| Playable critters (fox, bunny, hedgehog via swaps), as parts in three views | 3 | 8 to 10 |
+| Villagers | 5 | 10 to 12 |
+| Wild critters | 5 | 6 to 8 |
+| Enemies (slime, thistle beast, mushroom) | 3 | 8 to 10 |
+| Boss (the Grumbling Grub) | 1 | 5 to 6 |
+| Portraits (three expressions each, by swapping eyes and mouths) | 6 | 6 |
 | UI, icons, pad, logo, petals, effects | about 55 pieces | 12 |
 | Sound effects | about 22 | 4 |
 | Music loops | 4 | 8 |
-| **Total** | | **about 100 to 115** |
+| **Total** | | **about 90 to 100** |
 
-Strategy for a non-artist: build the whole game on CC0 placeholders, replace
-one category at a time, keep frame counts low, reuse a base body with palette
-swaps. Buying an itch.io pack (5 to 30 EUR) or commissioning a few key sprites
-is a legitimate shortcut.
+Strategy for a non-artist: build the whole game on placeholders (shapes drawn
+in code, CC0 packs), replace one category at a time, build characters from
+circles and ellipses, let the code animate parts instead of drawing frames,
+and reuse a base body with colour swaps. The animation code (breathe, blink,
+bob, lean, squash) is engine work in M1 and M5, not art time. Buying a pack in
+a matching smooth style (5 to 30 EUR) or commissioning a few key characters is
+a legitimate shortcut.
 
 ## 7. Suggestions beyond the brief
 
@@ -704,8 +745,8 @@ is a legitimate shortcut.
 2. **Tap-to-walk as the default touch control** turns the game into
    point-and-click for the youngest.
 3. **Two languages from day one**; never hard-code a string.
-4. **Low-res world, full-res text**: crisp, readable text without giving up
-   the pixel look.
+4. **Smooth art, full-res text**: the world is drawn at full screen
+   resolution, so shapes stay soft and text stays crisp and readable.
 5. **Age presets** ("Little Explorer" and "Explorer") instead of a difficulty
    menu.
 6. **Grumpies become friends.** Every enemy is a grumpy version of a critter.
@@ -714,8 +755,9 @@ is a legitimate shortcut.
    fighting it.
 7. **PWA**: an icon on the tablet home screen that works offline, including in
    the car.
-8. **Draw-your-own-critter**: a 16 by 16 in-game pixel editor with the game
-   palette. Cheap in Ebitengine, huge for kids.
+8. **Make-your-own-critter**: pick ears, tails, patterns and colours from the
+   game's parts and palette, and paint on the body with a finger. Cheap with
+   critters made of parts, huge for kids.
 9. **Birthday party event**: a parent sets a date in settings and the village
    celebrates that day.
 10. **Photo mode**: one button saves a screenshot for showing grandparents.
@@ -740,7 +782,8 @@ is a legitimate shortcut.
 | iOS Safari quirks (memory, touch, speech, no orientation lock) | Test on an iPad from M0; orientation hint; keep memory under about 300 MB |
 | Fights too hard or too scary for the youngest | Telegraphs of at least 0.6 s, generous hitboxes, slow petal regrowth, age presets, Peaceful mode, grumpy-not-monstrous art rule, playtests with real 5-year-olds |
 | Accidental swings at villagers or during dialogue | Interact has priority over swing; villagers have no hurt-box; overlays swallow the paw button |
-| Art is the long pole | Placeholder packs first; art bible; low frame counts; palette swaps |
+| Art is the long pole | Placeholders drawn in code and CC0 packs first; art bible; parts animated in code instead of drawn frames; colour swaps |
+| Smooth art is 1:1 at only one scale, and larger than pixel art | Export at 8 px per world pixel, 1:1 on a 2048 by 1536 iPad and a little softer elsewhere; vector sources make another density one more export; fetch art at runtime if the bundle passes the size budget |
 | Scope creep | Vertical slice M0 to M7 before any content expansion; the stretch list stays a list |
 | Save data lost when browser storage is cleared | Autosave often; export and import "magic word"; later an optional cloud save |
 | Text too hard for 5-year-olds | Icons everywhere, read-aloud, max two lines, playtests |
@@ -761,6 +804,8 @@ is a legitimate shortcut.
 | 2026-11-27 | sv and en from day one | English only | Needed at home; retrofitting is painful |
 | 2026-11-27 | View: the largest whole-number scale that shows at least 240 by 180 world px; the world fills the screen at that scale, up to 480 by 240 | A fixed 180 px height with adaptive width | A 2048 by 1536 iPad fills the screen at scale 8 instead of getting a border, and very wide or very tall screens cannot see too much of a map |
 | 2026-11-27 | Input reports Pointing, a finger or mouse button held at a point, instead of a one-off TapAt | TapAt events | One rule covers tap-to-walk and leading the critter with a held finger; a tap is a short hold |
+| 2026-11-27 | Smooth art drawn at full screen resolution, replacing pixel art drawn small and scaled up; sizes stay in world pixels at a whole-number scale | Pixel art; finer pixel art at a higher logical resolution | Pixel art and smooth art were compared with the same placeholder art, and the smooth version looked better. Finer pixels would still look pixelated, with more pixels to draw. Keeping world pixels and the whole-number scale left maps, collision, the camera and their tests as they were, and tiles still meet on whole screen pixels |
+| 2026-11-27 | Art drawn in Inkscape and exported by `make art` to PNG at 8 px per world pixel; characters are parts animated in code | Aseprite frames; SVG drawn at run time (for example with oksvg); Spine | Free, with a command line for the export, and 1:1 at scale 8. Parts and code motions avoid drawing every frame, the slow part of smooth art. SVG drawn at run time would be sharp at every scale, but Go's SVG renderers support only part of SVG, and drawing it costs load time in the browser |
 
 ## Appendix A: data format sketches
 
@@ -865,8 +910,9 @@ cp web/index.html web/loader.js build/web/
 cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" build/web/      # Go 1.23 and older: misc/wasm/wasm_exec.js
 
 # assets
-aseprite -b assets-src/fox.aseprite --sheet assets/sprites/critters/fox.png \
-  --data assets/sprites/critters/fox.json --format json-array --list-tags --sheet-type packed
+inkscape assets-src/fox.svg --export-id=down_head --export-id-only \
+  --export-filename=assets/sprites/critters/fox/down_head.png   # one part, at 8 px per world pixel
+inkscape assets-src/fox.svg --query-all                          # id,x,y,width,height of every object
 ffmpeg -i in.wav -c:a libvorbis -q:a 4 out.ogg
 
 # tests
@@ -883,11 +929,9 @@ go test ./...
 - go-tiled (TMX loader): https://github.com/lafriks/go-tiled
 - Tiled: https://www.mapeditor.org/ and terrain sets https://doc.mapeditor.org/en/stable/manual/terrain/
 - LDtk: https://ldtk.io/
-- Aseprite: https://www.aseprite.org/ and its CLI https://www.aseprite.org/docs/cli/
+- Inkscape: https://inkscape.org/ and its command line https://inkscape.org/doc/inkscape-man.html
 - Lospec palettes: https://lospec.com/palette-list
 - Kenney (CC0 assets): https://kenney.nl/assets
-- Ninja Adventure pack (CC0): https://pixel-boy.itch.io/ninja-adventure-asset-pack
-- Sprout Lands: https://cupnooble.itch.io/sprout-lands-asset-pack
 - jsfxr: https://sfxr.me/ and ChipTone: https://sfbgames.itch.io/chiptone
 - BeepBox: https://www.beepbox.co/ and Bosca Ceoil Blue: https://github.com/YuriSizov/boscaceoil-blue
 - Google Fonts: https://fonts.google.com/

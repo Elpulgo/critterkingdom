@@ -50,6 +50,11 @@ func (r Rect) Inset(d float64) Rect {
 	return Rect{Min: Vec{r.Min.X + d, r.Min.Y + d}, Max: Vec{r.Max.X - d, r.Max.Y - d}}
 }
 
+// Contains reports whether p is inside r, edges included.
+func (r Rect) Contains(p Vec) bool {
+	return p.X >= r.Min.X && p.X <= r.Max.X && p.Y >= r.Min.Y && p.Y <= r.Max.Y
+}
+
 // Clamp returns the point inside r, edges included, that is closest to p.
 func (r Rect) Clamp(p Vec) Vec {
 	return Vec{
