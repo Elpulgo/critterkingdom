@@ -1,50 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="128" viewBox="0 0 256 128">
   <!-- Prop plank_bridge: a wooden bridge across water, 32 by 16 world px,
-       walked across from left to right. Eight wood brown planks run across
+       walked across from left to right. Seven wood brown planks run across
        the walkway between two side rails; every plank and rail is outlined in
        bark brown, with a light tan highlight on its upper or left edge and a
-       bark brown shade on its lower or right edge. A soft ink shadow falls on
-       the water below the bridge. The plank is drawn once in defs and placed
-       with use. -->
+       bark brown shade on its lower or right edge, each showing 6 px inside
+       the outline. A soft ink shadow falls on the water below the bridge. The
+       plank is drawn once in defs and placed with use. -->
   <defs>
-    <clipPath id="plank_cut"><rect x="0" y="20" width="26" height="88" rx="8"/></clipPath>
-    <clipPath id="rail_top_cut"><rect x="4" y="12" width="248" height="16" rx="8"/></clipPath>
-    <clipPath id="rail_bottom_cut"><rect x="4" y="98" width="248" height="16" rx="8"/></clipPath>
+    <clipPath id="plank_cut"><rect x="0" y="16" width="30" height="88" rx="8"/></clipPath>
+    <clipPath id="rail_top_cut"><rect x="4" y="4" width="248" height="26" rx="12"/></clipPath>
+    <clipPath id="rail_bottom_cut"><rect x="4" y="90" width="248" height="26" rx="12"/></clipPath>
     <g id="plank">
       <g clip-path="url(#plank_cut)" stroke="none">
-        <rect x="0" y="20" width="26" height="88" fill="#b86f50"/>
-        <rect x="0" y="20" width="7" height="88" fill="#e4a672"/>
-        <rect x="19" y="20" width="7" height="88" fill="#733e39"/>
+        <rect x="0" y="16" width="30" height="88" fill="#b86f50"/>
+        <rect x="0" y="16" width="10" height="88" fill="#e4a672"/>
+        <rect x="20" y="16" width="10" height="88" fill="#733e39"/>
       </g>
-      <rect x="0" y="20" width="26" height="88" rx="8" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+      <rect x="0" y="16" width="30" height="88" rx="8" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
     </g>
   </defs>
 
-  <rect x="14" y="108" width="240" height="16" rx="8" fill="#181425" fill-opacity="0.22" stroke="none"/>
+  <rect x="14" y="108" width="240" height="20" rx="8" fill="#181425" fill-opacity="0.22" stroke="none"/>
 
   <!-- Planks -->
-  <use xlink:href="#plank" x="10"/>
-  <use xlink:href="#plank" x="40"/>
-  <use xlink:href="#plank" x="70"/>
-  <use xlink:href="#plank" x="100"/>
-  <use xlink:href="#plank" x="130"/>
-  <use xlink:href="#plank" x="160"/>
-  <use xlink:href="#plank" x="190"/>
-  <use xlink:href="#plank" x="220"/>
+  <use xlink:href="#plank" x="11"/>
+  <use xlink:href="#plank" x="45"/>
+  <use xlink:href="#plank" x="79"/>
+  <use xlink:href="#plank" x="113"/>
+  <use xlink:href="#plank" x="147"/>
+  <use xlink:href="#plank" x="181"/>
+  <use xlink:href="#plank" x="215"/>
 
   <!-- Side rails -->
   <g clip-path="url(#rail_top_cut)" stroke="none">
     <rect x="0" y="0" width="256" height="128" fill="#b86f50"/>
-    <rect x="4" y="12" width="248" height="5" fill="#e4a672"/>
-    <rect x="4" y="23" width="248" height="5" fill="#733e39"/>
+    <rect x="4" y="4" width="248" height="10" fill="#e4a672"/>
+    <rect x="4" y="20" width="248" height="10" fill="#733e39"/>
   </g>
   <g clip-path="url(#rail_bottom_cut)" stroke="none">
     <rect x="0" y="0" width="256" height="128" fill="#b86f50"/>
-    <rect x="4" y="98" width="248" height="5" fill="#e4a672"/>
-    <rect x="4" y="109" width="248" height="5" fill="#733e39"/>
+    <rect x="4" y="90" width="248" height="10" fill="#e4a672"/>
+    <rect x="4" y="106" width="248" height="10" fill="#733e39"/>
   </g>
   <g fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
-    <rect x="4" y="12" width="248" height="16" rx="8"/>
-    <rect x="4" y="98" width="248" height="16" rx="8"/>
+    <rect x="4" y="4" width="248" height="26" rx="12"/>
+    <rect x="4" y="90" width="248" height="26" rx="12"/>
   </g>
 </svg>

@@ -12,8 +12,8 @@
   <!-- Stone arch -->
   <g clip-path="url(#frame)" stroke="none">
     <rect x="0" y="0" width="128" height="128" fill="#8b9bb4"/>
-    <rect x="102" y="0" width="12" height="128" fill="#5a6988"/>
-    <path d="M 24 58 A 40 40 0 0 1 44 21" fill="none" stroke="#c0cbdc" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="104" y="0" width="10" height="128" fill="#5a6988"/>
+    <path d="M 22 56 A 42 42 0 0 1 43 19.6" fill="none" stroke="#c0cbdc" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
   <g fill="none" stroke="#5a6988" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
     <path d="M 14 84 L 34 84"/>
@@ -28,8 +28,8 @@
   <!-- Doorway -->
   <g clip-path="url(#opening)" stroke="none">
     <rect x="0" y="0" width="128" height="128" fill="#b86f50"/>
-    <rect x="34" y="0" width="8" height="128" fill="#e4a672"/>
-    <rect x="86" y="0" width="8" height="128" fill="#733e39"/>
+    <rect x="34" y="0" width="12" height="128" fill="#e4a672"/>
+    <rect x="82" y="0" width="12" height="128" fill="#733e39"/>
   </g>
   <g fill="none" stroke="#733e39" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
     <path d="M 54 34 L 54 112"/>

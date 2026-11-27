@@ -14,7 +14,7 @@
   <!-- Belly -->
   <g clip-path="url(#belly)" stroke="none">
     <rect x="0" y="0" width="128" height="128" fill="#be4a2f"/>
-    <ellipse cx="58" cy="68" rx="38" ry="32" fill="#d77643"/>
+    <ellipse cx="52" cy="62" rx="38" ry="32" fill="#d77643"/>
     <ellipse cx="46" cy="60" rx="12" ry="7" transform="rotate(-35 46 60)" fill="#e4a672"/>
   </g>
   <path d="M 30 80 Q 64 92 98 80" fill="none" stroke="#be4a2f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
