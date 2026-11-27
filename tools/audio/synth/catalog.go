@@ -46,5 +46,11 @@ func Catalog() []Sound {
 	for _, s := range Songs() {
 		c = append(c, Sound{Path: "music/" + s.Name + ".ogg", Kind: Music, Render: s.Render})
 	}
+	for _, v := range Speakers() {
+		for _, syl := range Syllables {
+			render := func() []float64 { return v.Render(syl) }
+			c = append(c, Sound{Path: "voices/" + v.Name + "/" + syl + ".ogg", Kind: Voice, Render: render})
+		}
+	}
 	return c
 }

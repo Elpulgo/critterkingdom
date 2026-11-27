@@ -34,10 +34,12 @@ func TestCatalog_HoldsExactlyTheTwentyOneSoundEffects(t *testing.T) {
 	}
 }
 
-func TestSoundEffects_AreSoftClickFreeAndShort(t *testing.T) {
-	const maxSeconds = 2.5
+func TestShortSounds_AreSoftClickFreeAndShort(t *testing.T) {
+	// The longest each kind of short sound may last, in seconds.
+	maxSeconds := map[Kind]float64{SFX: 2.5, Voice: 0.3}
 	for _, s := range Catalog() {
-		if s.Kind != SFX {
+		limit, ok := maxSeconds[s.Kind]
+		if !ok {
 			continue
 		}
 		t.Run(s.Path, func(t *testing.T) {
@@ -56,8 +58,8 @@ func TestSoundEffects_AreSoftClickFreeAndShort(t *testing.T) {
 			if last := samples[len(samples)-1]; math.Abs(last) > 0.01 {
 				t.Errorf("last sample %.4f is not silent, it would click", last)
 			}
-			if sec := float64(len(samples)) / SampleRate; sec > maxSeconds {
-				t.Errorf("lasts %.2f s, more than %.1f s", sec, maxSeconds)
+			if sec := float64(len(samples)) / SampleRate; sec > limit {
+				t.Errorf("lasts %.2f s, more than %.1f s", sec, limit)
 			}
 		})
 	}
