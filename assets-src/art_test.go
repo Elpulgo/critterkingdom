@@ -28,6 +28,7 @@ type worldSize struct{ w, h int }
 // pixels. A drawing missing from the folders, or a drawing in the folders but
 // not listed here, fails TestArt_EveryDrawingFollowsTheArtBible.
 var manifest = map[string]worldSize{
+	"tiles/tileset_cave.svg":    {128, 16},
 	"tiles/tileset_outdoor.svg": {128, 128},
 }
 
