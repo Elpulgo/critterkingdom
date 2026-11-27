@@ -1,7 +1,9 @@
 # Critter Kingdom: Project Plan
 
-Status: draft v0.2, 2026-11-27. Changes since v0.1: real-time fights (section
-2.7), a new milestone M5 for them, and milestones renumbered M6 to M8.
+Status: draft v0.3, 2026-11-27. Changes since v0.2: M0 is implemented, and
+sections 4.2 to 4.5, 6.6 and Appendix B now describe the code as built. The
+tablet playtest, the CI workflow and the deploy are still open. v0.2 added
+real-time fights (section 2.7) and milestone M5.
 
 How to use it: each milestone in section 5 is meant to become its own spec and
 branch. Tick the boxes as work lands. When a decision changes, update the
@@ -278,7 +280,8 @@ never import Ebitengine, so they can be unit tested.
 critterkingdom/
   cmd/game/            main.go: window setup, scene stack, build tags for js vs desktop
   internal/
-    engine/            game loop glue, scene stack, camera, input abstraction (Move vector, Paw, Menu, TapAt)
+    engine/            game loop glue, scene stack, camera, input abstraction (Move vector, Paw, Menu, Pointing),
+                       touch controls (paw button, pad) until ui/ exists
     assets/            embed.FS + loaders (images, Aseprite JSON, audio, fonts), caching
     world/             Tiled map loading, layers, collision grid, warps, triggers, y-sorting, A* pathfinding
     entity/            player, npc, critter, enemy, item, prop; animation controller
@@ -291,13 +294,13 @@ critterkingdom/
     save/              SaveGame struct, versioning, Store interface (localStorage on js, file on desktop)
     i18n/              string tables sv/en, T(key)
     tts/               read-aloud: speechSynthesis on js, no-op elsewhere
-    ui/                dialogue box, HUD, backpack, sticker book, virtual pad, 9-slice, buttons
+    ui/                dialogue box, HUD, backpack, sticker book, virtual pad and paw button (from engine/), 9-slice, buttons
     minigame/          snack time, follow the bounce
     audio/             music and sfx manager, volume, unlock
     content/           content lint: validates all data cross-references    [test]
   assets/              exported, embedded game data (see 6.6)
   assets-src/          Aseprite, Tiled and BeepBox sources (not embedded)
-  web/                 index.html, wasm_exec.js, manifest.webmanifest, sw.js, loading screen
+  web/                 index.html and loader.js (loading bar, tap-to-start); later manifest.webmanifest, sw.js
   tools/               asset export helpers
   docs/                PLAN.md (this), later ART-BIBLE.md, CREDITS.md, PLAYTEST-LOG.md
 ```
@@ -315,7 +318,7 @@ Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
 
 | Topic | Decision | Why |
 |---|---|---|
-| Resolution | The world is rendered to an offscreen image 180 px tall whose width follows the screen's aspect ratio (320 on 16:9, 240 on a 4:3 iPad), then drawn at the largest integer scale that fits. UI and text are drawn at full screen resolution. | Chunky pixel art plus crisp, large, readable text for early readers. No letterboxing on tablets. |
+| Resolution | The world is rendered to an offscreen image and drawn at the largest whole-number scale that still shows at least 240 by 180 world pixels. At that scale the image fills the screen, up to 480 by 240 world pixels: 320 by 180 on 16:9, 256 by 192 on a 2048 by 1536 iPad. Only screens beyond that cap get a border. UI and text are drawn at full screen resolution. | Chunky pixel art plus crisp, large, readable text for early readers. No letterboxing on tablets, and no very wide or very tall screen sees too much of a map. |
 | Tiles | 16 by 16 grid. Player and villagers drawn in a 32 by 32 box (big heads), small critters 16 or 24 px. | Tiles are fast to produce; characters stay cute and readable. |
 | Maps | Tiled, exported as JSON (`.tmj`), read by a small loader of our own (the format is plain JSON: layers, tile ids, objects with properties). `go-tiled` reads the TMX format if you would rather not write one. | Mature, free, terrain brushes, object layers for spawns, warps and triggers. LDtk is the alternative. |
 | Content | Data-driven JSON: critters, enemies, quests, dialogue, strings, items. Adding a quest means adding a file, not code. | Fast iteration, testable, and later the kids' ideas go in as data. |
@@ -331,8 +334,12 @@ Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
 ### 4.4 Browser specifics
 
 - `web/index.html`: full-screen canvas, a "Tap to start" overlay (unlocks
-  audio, requests fullscreen), `touch-action: none`, no pinch zoom, no text
-  selection, a loading bar.
+  audio, requests fullscreen on touch devices), `touch-action: none`, no pinch
+  zoom, no text selection, a loading bar.
+- `web/loader.js` downloads `main.wasm` with progress. The size comes from the
+  page, where `make web` writes it, or from `Content-Length` under wasmserve.
+  The game starts on the tap. Ebitengine adds its own viewport tag at start,
+  so the loader keeps ours in force.
 - PWA: `manifest.webmanifest` plus a service worker, so the game can be added
   to the tablet home screen and works offline.
 - Portrait on a phone: show a "turn your device" picture (iOS cannot lock
@@ -340,18 +347,21 @@ Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
 - Serve `.wasm` as `application/wasm` with Brotli or gzip. Cloudflare Pages,
   Netlify and GitHub Pages all work as free static hosts; verify compression.
 - Build with `-trimpath -ldflags="-s -w"`; optionally try `wasm-opt -Oz` for a
-  further size cut.
+  further size cut. M0 measured 18.9 MB raw and 4.4 MB with gzip -9.
 
 ### 4.5 Developer loop
 
-- Daily work on desktop: `go run ./cmd/game` (fast compile, debugger works). A
-  `debug` build tag adds an overlay with FPS, position, collision boxes and
-  hitboxes, plus a `-map` flag to jump straight to a map.
-- Browser check: `go run github.com/hajimehoshi/wasmserve@latest ./cmd/game`
-  and open http://localhost:8080. Test on a real tablet over the LAN from
-  milestone 0 onwards.
-- CI (GitHub Actions): `go vet`, `go test ./...`, build desktop and wasm,
-  deploy `web/` on main.
+- Daily work on desktop: `make run` (fast compile, debugger works). The
+  `debug` build tag (`make run TAGS=debug`) adds an overlay, toggled with F3,
+  with FPS, screen and world sizes, the input state and the critter's
+  position. Later it gains collision boxes, hitboxes and a `-map` flag to
+  jump straight to a map.
+- Browser check: `make serve` runs wasmserve, pinned as a Go tool in
+  `go.mod`, and serves http://localhost:8080/web/, rebuilding the game on
+  every reload. Test on a real tablet over the LAN from milestone 0 onwards;
+  `?pad=1` turns on the touch pad.
+- CI (GitHub Actions): `make check`, desktop builds for Linux, Windows and
+  macOS, `make web`, and on main a deploy of `build/web` to GitHub Pages.
 
 ### 4.6 Testing
 
@@ -380,12 +390,15 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 ### M0 Foundation: "Hello Critter" (1 to 2 weeks)
 
-- [ ] `go mod init`, the folder layout above, a Makefile (`run`, `web`, `test`, `art`, `check`), GitHub Actions
-- [ ] Ebitengine window: a placeholder critter moves with keyboard, touch (tap-to-walk and pad), gamepad and mouse, through the input abstraction in `engine`
-- [ ] Offscreen world render with integer scaling and full-resolution text; adaptive logical width
-- [ ] The same build served by wasmserve and tested on an iPad or Android tablet
-- [ ] `web/index.html` with tap-to-start; deployed to a URL from CI
-- [ ] Debug overlay behind a build tag
+- [x] `go mod init`, the folder layout above, a Makefile (`run`, `web`, `test`, `art`, `check`)
+- [ ] GitHub Actions workflow in `.github/workflows/ci.yml`
+- [x] Ebitengine window: a placeholder critter moves with keyboard, touch (tap-to-walk and pad), gamepad and mouse, through the input abstraction in `engine`
+- [x] Offscreen world render with integer scaling and full-resolution text; adaptive logical width
+- [x] The same build served by wasmserve (`make serve`)
+- [ ] Tested on an iPad or Android tablet
+- [x] `web/index.html` with tap-to-start
+- [ ] Deployed to a URL from CI
+- [x] Debug overlay behind a build tag
 
 **Done when** a child moves a square around on a tablet from a link.
 
@@ -651,9 +664,11 @@ assets/       exported and embedded
   data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
 ```
 
-- `make art` runs Aseprite's CLI export on changed sources; `make audio` runs
-  ffmpeg; `make check` runs the content lint test; `make web` builds the wasm
-  bundle into `web/`.
+- `make art` runs Aseprite's CLI export on changed sources
+  (`tools/export-art.sh`); later `make audio` runs ffmpeg; `make check` runs
+  gofmt, `go mod tidy -diff`, vet for desktop and browser and every test,
+  which will include the content lint test; `make web` builds the wasm bundle
+  into `build/web/`.
 - Naming: lower_snake_case, one sheet per character, tags named
   `<anim>_<dir>`.
 - Licences: prefer CC0; CC-BY needs an entry in `CREDITS.md`; avoid NC and ND
@@ -744,6 +759,8 @@ is a legitimate shortcut.
 | 2026-11-27 | Real-time action fights on the paw button, telegraphed enemies, petals and nap, age presets, Peaceful mode | Boop-only grumpies; turn-based critter battles; both | The Zelda and Kitaria feel the game is modelled on, kept to one stick and one button, never a game over. Turn-based would be a second game mode and more reading. |
 | 2026-11-27 | localStorage and file saves, no accounts | Backend with logins | Pillar 6 |
 | 2026-11-27 | sv and en from day one | English only | Needed at home; retrofitting is painful |
+| 2026-11-27 | View: the largest whole-number scale that shows at least 240 by 180 world px; the world fills the screen at that scale, up to 480 by 240 | A fixed 180 px height with adaptive width | A 2048 by 1536 iPad fills the screen at scale 8 instead of getting a border, and very wide or very tall screens cannot see too much of a map |
+| 2026-11-27 | Input reports Pointing, a finger or mouse button held at a point, instead of a one-off TapAt | TapAt events | One rule covers tap-to-walk and leading the critter with a held finger; a tap is a short hold |
 
 ## Appendix A: data format sketches
 
@@ -831,18 +848,21 @@ A string table (`strings/sv.json`):
 
 ```bash
 # project
-go mod init github.com/<you>/critterkingdom
+go mod init github.com/Elpulgo/critterkingdom
 go get github.com/hajimehoshi/ebiten/v2@latest          # needs Go 1.25 or later
 
 # run on desktop
 go run ./cmd/game
 
 # run in the browser (rebuilds on every reload)
-go run github.com/hajimehoshi/wasmserve@latest ./cmd/game   # then open http://localhost:8080
+go get -tool github.com/hajimehoshi/wasmserve@latest        # once; pins it in go.mod
+go tool wasmserve ./cmd/game                                # then open http://localhost:8080/web/
 
 # build the web bundle
-GOOS=js GOARCH=wasm go build -trimpath -ldflags="-s -w" -o web/game.wasm ./cmd/game
-cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/            # Go 1.23 and older: misc/wasm/wasm_exec.js
+make web    # or by hand:
+GOOS=js GOARCH=wasm go build -trimpath -ldflags="-s -w" -o build/web/main.wasm ./cmd/game
+cp web/index.html web/loader.js build/web/
+cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" build/web/      # Go 1.23 and older: misc/wasm/wasm_exec.js
 
 # assets
 aseprite -b assets-src/fox.aseprite --sheet assets/sprites/critters/fox.png \
