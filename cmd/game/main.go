@@ -25,11 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	m, err := assets.LoadMap("meadow")
-	if err != nil {
-		log.Fatal(err)
-	}
-	scene, err := world.NewScene(font, m)
+	scene, err := world.NewScene(font, assets.LoadMap, "meadow")
 	if err != nil {
 		log.Fatal(err)
 	}

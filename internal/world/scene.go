@@ -50,9 +50,11 @@ const (
 )
 
 // Scene is the world scene: a Tiled map where the critter walks around,
-// collides with solid scenery, and hops and says hello when the paw button is
-// pressed.
+// collides with solid scenery, hops and says hello when the paw button is
+// pressed, and moves to another map when it walks into a warp.
 type Scene struct {
+	load     MapLoader
+	mapName  string // the name m was loaded under
 	m        *Map
 	bounds   geom.Rect // the whole map, in world pixels
 	walkable geom.Rect // where the critter's feet may go so its box stays inside bounds
@@ -63,6 +65,10 @@ type Scene struct {
 	bob      float64 // how far the walk bob lifts the critter, in world pixels
 	elapsed  float64 // total elapsed seconds, for tile animations
 
+	// awaitRelease ignores pointer walking after a warp until the pointer has
+	// been let go, so a held tap does not walk the critter straight back.
+	awaitRelease bool
+
 	walked     float64 // seconds the critter has spent walking
 	greet      float64 // seconds left of the greeting
 	titleAlpha float64
@@ -71,62 +77,87 @@ type Scene struct {
 	bubbleFace *text.GoTextFace
 }
 
-// NewScene returns a world scene for m with the critter placed at the first
-// player_spawn object in the objects layer. It returns an error when m has no
-// player_spawn object.
-func NewScene(font *text.GoTextFaceSource, m *Map) (*Scene, error) {
+// NewScene returns a world scene on the map startMap, loaded with load, with
+// the critter placed at the map's first player_spawn. Warps load their target
+// maps with load too. It returns an error when startMap cannot be loaded or
+// has no player_spawn object.
+func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Scene, error) {
+	if load == nil {
+		return nil, fmt.Errorf("map loader is nil")
+	}
+	m, err := load(startMap)
+	if err != nil {
+		return nil, fmt.Errorf("start map %q: %w", startMap, err)
+	}
 	if m == nil {
-		return nil, fmt.Errorf("map is nil")
+		return nil, fmt.Errorf("start map %q: loader returned no map", startMap)
 	}
-	spawn, ok := findPlayerSpawn(m)
+	spawn, ok := m.DefaultSpawn()
 	if !ok {
-		return nil, fmt.Errorf("map has no player_spawn object in objects layer")
+		return nil, fmt.Errorf("start map %q has no player_spawn object in %s layer", startMap, objectsLayer)
 	}
-	size := m.Size()
-	bounds := geom.Rect{Max: size}
-	walkable := geom.Rect{
-		Min: geom.Vec{X: feetMarginX, Y: feetMarginTop},
-		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
-	}
-	player := entity.NewPlayer(spawn)
-	player.Walls = m.Collision
-	return &Scene{
-		m:          m,
-		bounds:     bounds,
-		walkable:   walkable,
-		player:     player,
+	s := &Scene{
+		load:       load,
+		player:     entity.NewPlayer(spawn),
 		titleAlpha: 1,
 		titleFace:  engine.NewFace(font, titleTextSize, titleWeight),
 		bubbleFace: engine.NewFace(font, bubbleTextSize, bubbleWeight),
-	}, nil
+	}
+	s.setMap(startMap, m)
+	return s, nil
 }
 
-// findPlayerSpawn returns the position of the first object of type
-// player_spawn in the objects layer of m, and false when there is none.
-func findPlayerSpawn(m *Map) (geom.Vec, bool) {
-	objs := m.ObjectLayer("objects")
-	if objs == nil {
-		return geom.Vec{}, false
+// setMap makes m, loaded as name, the scene's map: its size bounds the
+// critter and the camera, and its collision grid stops the critter.
+func (s *Scene) setMap(name string, m *Map) {
+	size := m.Size()
+	s.mapName = name
+	s.m = m
+	s.bounds = geom.Rect{Max: size}
+	s.walkable = geom.Rect{
+		Min: geom.Vec{X: feetMarginX, Y: feetMarginTop},
+		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
 	}
-	for _, o := range objs.Objects {
-		if o.Type == "player_spawn" {
-			return geom.Vec{X: o.X, Y: o.Y}, true
-		}
-	}
-	return geom.Vec{}, false
+	s.player.Walls = m.Collision
 }
 
-// Update moves the critter and the camera by one tick.
+// followWarp moves the critter to the target spawn of the warp its feet are
+// in, if any, on the warp's target map. It returns the error from ResolveWarp
+// when the target map or spawn does not exist.
+func (s *Scene) followWarp() error {
+	w, ok := s.m.WarpAt(s.player.Pos)
+	if !ok {
+		return nil
+	}
+	m, pos, err := ResolveWarp(s.load, w)
+	if err != nil {
+		return err
+	}
+	s.setMap(w.TargetMap, m)
+	s.player.Place(pos)
+	s.awaitRelease = true
+	return nil
+}
+
+// Update moves the critter and the camera by one tick, and moves the critter
+// to another map when its feet end the tick inside a warp. It returns an error
+// when that warp's target map or spawn does not exist.
 func (s *Scene) Update(f engine.Frame) error {
 	s.elapsed += f.DT
 	in := f.Input
-	if in.Move.IsZero() && in.Pointing {
+	if !in.Pointing {
+		s.awaitRelease = false
+	}
+	if in.Move.IsZero() && in.Pointing && !s.awaitRelease {
 		s.player.WalkTo(s.camera.Add(in.Point))
 	}
 	if in.Paw && s.player.Hop() {
 		s.greet = greetTime
 	}
 	s.player.Update(f.DT, in.Move, s.walkable)
+	if err := s.followWarp(); err != nil {
+		return err
+	}
 	if s.player.Moved() {
 		s.walked += f.DT
 	}
@@ -212,11 +243,12 @@ func (s *Scene) feetInView() geom.Vec {
 	return s.player.Pos.Sub(s.camera)
 }
 
-// DebugLines adds the critter's position, the camera and the walk target to
-// the debug overlay.
+// DebugLines adds the map's name, the critter's position, the camera and the
+// walk target to the debug overlay.
 func (s *Scene) DebugLines() []string {
 	p := s.player
 	lines := []string{
+		"map " + s.mapName,
 		fmt.Sprintf("critter %.1f,%.1f facing %s", p.Pos.X, p.Pos.Y, p.Facing),
 		fmt.Sprintf("camera %.0f,%.0f", s.camera.X, s.camera.Y),
 	}
