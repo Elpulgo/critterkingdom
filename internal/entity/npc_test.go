@@ -98,3 +98,82 @@ func solidUnder(g *world.Grid, box geom.Rect) (col, row int, ok bool) {
 	}
 	return 0, 0, false
 }
+
+// openArea is a 4.5 by 4.5 tile wander area with no walls around it, centred
+// on openCentre, where a villager starts.
+var (
+	openArea   = geom.Rect{Min: geom.Vec{X: 64, Y: 64}, Max: geom.Vec{X: 136, Y: 136}}
+	openCentre = geom.Vec{X: 100, Y: 100}
+)
+
+func TestNPC_StopsAndFacesANearbyCritterOnEachSide(t *testing.T) {
+	tests := []struct {
+		name    string
+		critter geom.Vec
+		want    entity.Facing
+	}{
+		{"critter above", geom.Vec{X: 100, Y: 70}, entity.FacingUp},
+		{"critter below", geom.Vec{X: 100, Y: 130}, entity.FacingDown},
+		{"critter to the left", geom.Vec{X: 70, Y: 100}, entity.FacingLeft},
+		{"critter to the right", geom.Vec{X: 130, Y: 100}, entity.FacingRight},
+		{"critter diagonally left and up, more up", geom.Vec{X: 90, Y: 70}, entity.FacingUp},
+		{"critter exactly diagonal faces sideways", geom.Vec{X: 120, Y: 80}, entity.FacingRight},
+		{"critter at the edge of the range", geom.Vec{X: 100, Y: 60}, entity.FacingUp},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			n := entity.NewNPC("grandma_hedgehog", openCentre, openArea, rand.New(rand.NewPCG(1, 2)))
+			// Left alone a villager walks off within its 1 to 3 s rest; ten
+			// seconds near the critter must not move it at all.
+			for range 10 * 60 {
+				n.Update(tick, tc.critter)
+			}
+			if n.Pos != openCentre {
+				t.Errorf("villager moved to %v with the critter at %v; want it to stand at %v", n.Pos, tc.critter, openCentre)
+			}
+			if n.Facing != tc.want {
+				t.Errorf("Facing = %v with the critter at %v; want %v", n.Facing, tc.critter, tc.want)
+			}
+		})
+	}
+}
+
+func TestNPC_IgnoresAFarCritterAndWandersAgainOnceTheCritterLeaves(t *testing.T) {
+	n := entity.NewNPC("baker_badger", openCentre, openArea, rand.New(rand.NewPCG(1, 2)))
+
+	// 41 px below is just out of range: the villager sets off as if alone.
+	// Stop at its first step, so the critter below arrives mid-walk.
+	far := geom.Vec{X: 100, Y: 141}
+	walking := false
+	for range 5 * 60 {
+		before := n.Pos
+		n.Update(tick, far)
+		if n.Pos != before {
+			walking = true
+			break
+		}
+	}
+	if !walking {
+		t.Fatalf("villager stood at %v for 5 s with the critter 41 px away; want it to wander", n.Pos)
+	}
+
+	// The critter comes up beside the walking villager, which stops at once.
+	if movesWithin(n, 5, n.Pos.Add(geom.Vec{X: 20})) {
+		t.Fatalf("villager moved to %v with the critter next to it; want it to stand still", n.Pos)
+	}
+
+	// The critter walks away: after a rest the villager wanders on.
+	if !movesWithin(n, 5, geom.Vec{X: 1000, Y: 1000}) {
+		t.Errorf("villager stood at %v for 5 s after the critter left; want it to wander again", n.Pos)
+	}
+}
+
+// movesWithin updates n for the given seconds with the critter at critter and
+// reports whether the villager's feet moved.
+func movesWithin(n *entity.NPC, seconds int, critter geom.Vec) bool {
+	start := n.Pos
+	for range seconds * 60 {
+		n.Update(tick, critter)
+	}
+	return n.Pos != start
+}

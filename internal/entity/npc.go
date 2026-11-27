@@ -15,10 +15,16 @@ const (
 	// walks, in seconds.
 	npcIdleMin = 1.0
 	npcIdleMax = 3.0
+
+	// NPCNoticeRange is how close, feet to feet in world pixels, the critter
+	// must come for a villager to stop and face it: 2.5 tiles, more than the
+	// interaction reach, so a villager has turned before it can be picked.
+	NPCNoticeRange = 40.0
 )
 
 // NPC is a villager. It idles for a while, then walks to a random spot inside
-// its wander area, then idles again.
+// its wander area, then idles again. While the critter is close it stands
+// still and faces it.
 type NPC struct {
 	// ID names the villager, as in the map's npc object.
 	ID string
@@ -33,6 +39,7 @@ type NPC struct {
 	idle    float64  // seconds left standing still
 	target  geom.Vec // spot the villager walks to
 	walking bool
+	noticed bool // the critter is within NPCNoticeRange
 }
 
 // NewNPC returns the villager id standing at pos, facing the player, that
@@ -51,9 +58,21 @@ func (n *NPC) Box() geom.Rect {
 }
 
 // Update moves the villager for dt seconds. playerPos is where the critter's
-// feet are.
+// feet are: within NPCNoticeRange the villager stops and faces the critter,
+// and once the critter leaves it rests and then wanders on.
 func (n *NPC) Update(dt float64, playerPos geom.Vec) {
-	_ = playerPos // facing the critter comes with the next change
+	toPlayer := playerPos.Sub(n.Pos)
+	if toPlayer.Len() <= NPCNoticeRange {
+		n.noticed = true
+		if !toPlayer.IsZero() {
+			n.Facing = facingAlong(toPlayer)
+		}
+		return
+	}
+	if n.noticed {
+		n.noticed = false
+		n.rest()
+	}
 
 	if !n.walking {
 		n.idle -= dt

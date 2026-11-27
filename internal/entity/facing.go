@@ -32,6 +32,12 @@ func (f Facing) Toward(v geom.Vec) Facing {
 	if v.IsZero() || f.allows(v) {
 		return f
 	}
+	return facingAlong(v)
+}
+
+// facingAlong returns the facing towards the larger part of a non-zero v,
+// sideways when both parts are equal.
+func facingAlong(v geom.Vec) Facing {
 	if math.Abs(v.X) >= math.Abs(v.Y) {
 		if v.X > 0 {
 			return FacingRight
