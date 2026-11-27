@@ -1,0 +1,258 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="2560" height="1440" viewBox="0 0 2560 1440">
+  <style>
+    @font-face {
+      font-family: "Fredoka";
+      src: url("../../assets/fonts/Fredoka.ttf") format("truetype");
+    }
+  </style>
+
+  <defs>
+    <!-- Seamless 128 by 128 px (16 by 16 world px) meadow grass tile.
+         No outlines on the ground; tufts stay inside the edges so the tile wraps cleanly. -->
+    <pattern id="grass_pattern" x="0" y="0" width="128" height="128" patternUnits="userSpaceOnUse">
+      <g id="grass_tile">
+        <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+        <!-- Upper-left grass tuft in leaf green #3e8948 -->
+        <path d="M 24 44 C 22 32 18 26 16 24 C 21 26 26 32 28 44 Z" fill="#3e8948" stroke="none"/>
+        <path d="M 28 44 C 28 29 30 20 32 18 C 34 20 36 29 36 44 Z" fill="#3e8948" stroke="none"/>
+        <path d="M 36 44 C 38 33 43 27 47 25 C 45 29 42 36 40 44 Z" fill="#3e8948" stroke="none"/>
+        <!-- Lower-right smaller grass tuft -->
+        <path d="M 88 102 C 86 92 83 87 80 85 C 85 87 89 92 92 102 Z" fill="#3e8948" stroke="none"/>
+        <path d="M 92 102 C 93 90 95 83 97 81 C 99 83 100 90 100 102 Z" fill="#3e8948" stroke="none"/>
+      </g>
+    </pattern>
+  </defs>
+
+  <!-- Ground: 320 by 180 world pixel mock screen filled with the 128 by 128 px grass tile -->
+  <rect id="ground" x="0" y="0" width="2560" height="1440" fill="url(#grass_pattern)" stroke="none"/>
+
+  <!-- Tree: 32 by 48 world px = 256 by 384 px bounding box, placed at (440, 220).
+       Trunk in wood brown #b86f50 outlined in bark brown #733e39;
+       canopy in leaf green #3e8948 outlined in pine green #265c42,
+       with top-left highlight in meadow green #63c74d and bottom-right shade in #265c42. -->
+  <g id="tree" transform="translate(440, 220)">
+    <!-- Soft ground shadow at trunk base -->
+    <ellipse cx="128" cy="364" rx="88" ry="20" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+    <!-- Trunk (base at bottom centre of the 256 by 384 box) -->
+    <rect x="92" y="236" width="72" height="128" rx="24" fill="#b86f50" stroke="none"/>
+    <!-- Trunk top-left highlight and right/top shade -->
+    <rect x="98" y="256" width="16" height="92" rx="8" fill="#e4a672" stroke="none"/>
+    <path d="M 140 240 L 164 240 L 164 344 C 164 356 154 364 140 364 Z" fill="#733e39" stroke="none"/>
+    <!-- Under-canopy cast shadow across the top of the trunk -->
+    <rect x="92" y="236" width="72" height="28" rx="10" fill="#733e39" stroke="none"/>
+    <!-- Trunk 8 px darker outline (#733e39) -->
+    <rect x="92" y="236" width="72" height="128" rx="24" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- Canopy base silhouette (within x: 8..248, y: 12..268) -->
+    <circle cx="72" cy="184" r="64" fill="#3e8948" stroke="none"/>
+    <circle cx="184" cy="184" r="64" fill="#3e8948" stroke="none"/>
+    <circle cx="128" cy="116" r="88" fill="#3e8948" stroke="none"/>
+    <ellipse cx="128" cy="204" rx="104" ry="60" fill="#3e8948" stroke="none"/>
+
+    <!-- Canopy bottom-right shade (#265c42) -->
+    <path d="M 44 224 C 76 256 184 256 224 216 C 240 200 244 176 236 156 C 244 196 220 248 168 258 C 112 268 64 252 44 224 Z" fill="#265c42" stroke="none"/>
+    <ellipse cx="192" cy="204" rx="44" ry="30" fill="#265c42" stroke="none"/>
+
+    <!-- Canopy top-left highlight (#63c74d) and warm sun dab (#fee761) -->
+    <ellipse cx="104" cy="76" rx="52" ry="32" transform="rotate(-15 104 76)" fill="#63c74d" stroke="none"/>
+    <ellipse cx="56" cy="156" rx="26" ry="18" transform="rotate(-20 56 156)" fill="#63c74d" stroke="none"/>
+    <circle cx="88" cy="68" r="14" fill="#fee761" stroke="none"/>
+
+    <!-- Canopy 8 px darker outline (#265c42) around the outer puffs -->
+    <path d="M 52 124
+             A 88 88 0 0 1 204 124
+             A 64 64 0 0 1 216 240
+             A 104 60 0 0 1 40 240
+             A 64 64 0 0 1 52 124 Z"
+          fill="none" stroke="#265c42" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+
+  <!-- Fox player critter: 32 by 32 world px = 256 by 256 px bounding box, placed at (1152, 420).
+       Feet sit at the bottom centre (128, 240); head is about half the total height (136 px wide).
+       Primary fur #f77622 with shade #d77643, highlight #e4a672, cream belly/muzzle #ead4aa,
+       and an 8 px outline in rust red #be4a2f. -->
+  <g id="critter" transform="translate(1152, 420)">
+    <!-- Soft ground shadow under the feet -->
+    <ellipse cx="128" cy="240" rx="60" ry="16" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+    <!-- Bushy tail curling out to the right behind the body -->
+    <g id="down_tail">
+      <ellipse cx="186" cy="200" rx="40" ry="22" transform="rotate(-18 186 200)" fill="#f77622" stroke="none"/>
+      <ellipse cx="176" cy="210" rx="28" ry="12" transform="rotate(-18 176 210)" fill="#d77643" stroke="none"/>
+      <circle cx="212" cy="190" r="16" fill="#ead4aa" stroke="none"/>
+      <ellipse cx="186" cy="200" rx="40" ry="22" transform="rotate(-18 186 200)" fill="none" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+
+    <!-- Compact round body (about 10 world px = 88 px across) with cream belly -->
+    <g id="down_body">
+      <ellipse cx="128" cy="196" rx="44" ry="38" fill="#f77622" stroke="none"/>
+      <!-- Lower-right body shade -->
+      <path d="M 96 220 C 116 234 152 232 166 208 C 172 198 172 184 168 176 C 174 202 158 232 128 234 C 110 234 98 228 96 220 Z" fill="#d77643" stroke="none"/>
+      <!-- Cream belly patch -->
+      <ellipse cx="128" cy="200" rx="26" ry="24" fill="#ead4aa" stroke="none"/>
+      <!-- Body 8 px darker outline -->
+      <ellipse cx="128" cy="196" rx="44" ry="38" fill="none" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+
+    <!-- Feet at bottom centre -->
+    <g id="down_feet">
+      <ellipse cx="104" cy="232" rx="18" ry="11" fill="#d77643" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+      <ellipse cx="152" cy="232" rx="18" ry="11" fill="#d77643" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+
+    <!-- Rounded ears with blossom pink inner ear -->
+    <g id="down_ear_left">
+      <path d="M 60 88 C 52 44 64 24 80 24 C 94 24 108 46 112 76 Z" fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M 70 78 C 66 52 72 38 80 38 C 88 38 96 52 98 72 Z" fill="#f6757a" stroke="none"/>
+    </g>
+    <g id="down_ear_right">
+      <path d="M 196 88 C 204 44 192 24 176 24 C 162 24 148 46 144 76 Z" fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M 186 78 C 190 52 184 38 176 38 C 168 38 160 52 158 72 Z" fill="#f6757a" stroke="none"/>
+    </g>
+
+    <!-- Big round head (about half the character height: 136 by 112 px) -->
+    <g id="down_head">
+      <ellipse cx="128" cy="112" rx="68" ry="56" fill="#f77622" stroke="none"/>
+      <!-- Top-left forehead highlight (#e4a672) -->
+      <ellipse cx="102" cy="76" rx="30" ry="14" transform="rotate(-14 102 76)" fill="#e4a672" stroke="none"/>
+      <!-- Lower-right cheek shade (#d77643) -->
+      <path d="M 78 148 C 104 170 162 170 186 138 C 194 126 196 112 194 100 C 198 134 172 168 128 168 C 104 168 88 160 78 148 Z" fill="#d77643" stroke="none"/>
+      <!-- Cream cheek and muzzle mask (#ead4aa) -->
+      <ellipse cx="96" cy="132" rx="34" ry="24" fill="#ead4aa" stroke="none"/>
+      <ellipse cx="160" cy="132" rx="34" ry="24" fill="#ead4aa" stroke="none"/>
+      <ellipse cx="128" cy="136" rx="38" ry="26" fill="#ead4aa" stroke="none"/>
+      <!-- Rosy cheek dabs (#f6757a) -->
+      <ellipse cx="78" cy="132" rx="10" ry="6" fill="#f6757a" stroke="none"/>
+      <ellipse cx="178" cy="132" rx="10" ry="6" fill="#f6757a" stroke="none"/>
+      <!-- Head 8 px darker outline (#be4a2f) -->
+      <ellipse cx="128" cy="112" rx="68" ry="56" fill="none" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+      <!-- Big dark eyes (#181425) with crisp white (#ffffff) top-left highlight dots -->
+      <ellipse cx="98" cy="112" rx="11" ry="14" fill="#181425" stroke="none"/>
+      <circle cx="94" cy="105" r="4.5" fill="#ffffff" stroke="none"/>
+      <ellipse cx="158" cy="112" rx="11" ry="14" fill="#181425" stroke="none"/>
+      <circle cx="154" cy="105" r="4.5" fill="#ffffff" stroke="none"/>
+
+      <!-- Rounded cocoa nose and gentle friendly smile (#3e2731) -->
+      <ellipse cx="128" cy="126" rx="9" ry="6" fill="#3e2731" stroke="none"/>
+      <path d="M 116 138 Q 128 147 140 138" fill="none" stroke="#3e2731" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Grumpy enemy (Sulky Slime): 24 by 24 world px = 192 by 192 px bounding box, placed at (1720, 484).
+       Orchid purple #b55088 body, blossom pink #f6757a top-left highlight, plum purple #68386c shade
+       and 8 px outline. Grumpy furrowed eyebrows and a little pout — never scary, no fangs. -->
+  <g id="enemy" transform="translate(1720, 484)">
+    <!-- Soft ground shadow -->
+    <ellipse cx="96" cy="168" rx="68" ry="16" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+    <!-- Squishy rounded slime body -->
+    <path d="M 28 136
+             C 28 72 54 36 96 36
+             C 138 36 164 72 164 136
+             C 164 158 142 168 96 168
+             C 50 168 28 158 28 136 Z"
+          fill="#b55088" stroke="none"/>
+
+    <!-- Bottom-right plum shade (#68386c) -->
+    <path d="M 44 152
+             C 68 164 132 162 150 136
+             C 158 124 160 104 156 88
+             C 164 116 164 148 146 160
+             C 128 170 68 170 44 152 Z"
+          fill="#68386c" stroke="none"/>
+
+    <!-- Top-left blossom pink highlight (#f6757a) -->
+    <ellipse cx="68" cy="68" rx="24" ry="13" transform="rotate(-24 68 68)" fill="#f6757a" stroke="none"/>
+    <circle cx="48" cy="92" r="7" fill="#f6757a" stroke="none"/>
+
+    <!-- Slime 8 px darker outline (#68386c) -->
+    <path d="M 28 136
+             C 28 72 54 36 96 36
+             C 138 36 164 72 164 136
+             C 164 158 142 168 96 168
+             C 50 168 28 158 28 136 Z"
+          fill="none" stroke="#68386c" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- Big dark eyes (#181425) with white (#ffffff) top-left highlight dots -->
+    <ellipse cx="70" cy="112" rx="10" ry="12" fill="#181425" stroke="none"/>
+    <circle cx="66" cy="106" r="4" fill="#ffffff" stroke="none"/>
+    <ellipse cx="122" cy="112" rx="10" ry="12" fill="#181425" stroke="none"/>
+    <circle cx="118" cy="106" r="4" fill="#ffffff" stroke="none"/>
+
+    <!-- Furrowed eyebrows tilted inward (8 px thick in plum #68386c) -->
+    <path d="M 52 92 L 84 102" fill="none" stroke="#68386c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 140 92 L 108 102" fill="none" stroke="#68386c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Little grumpy pout (6 px thick in plum #68386c, no fangs) -->
+    <path d="M 82 138 Q 96 128 110 138" fill="none" stroke="#68386c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Dialogue UI panel across the bottom of the mock screen (2 px per CSS px).
+       Cream card #ead4aa outlined in warm taupe #c28569 with a soft offset shadow in #181425. -->
+  <g id="ui_panel">
+    <!-- Soft offset drop shadow -->
+    <rect x="320" y="968" width="1920" height="400" rx="48" fill="#181425" fill-opacity="0.22" stroke="none"/>
+    <!-- Dialogue card body -->
+    <rect x="320" y="952" width="1920" height="400" rx="48" fill="#ead4aa" stroke="none"/>
+    <!-- Top-left inner highlight strip (#ffffff) and bottom shade strip (#e8b796) -->
+    <rect x="352" y="968" width="1856" height="16" rx="8" fill="#ffffff" stroke="none"/>
+    <rect x="352" y="1320" width="1856" height="16" rx="8" fill="#e8b796" stroke="none"/>
+    <!-- Panel 8 px darker outline (#c28569) -->
+    <rect x="320" y="952" width="1920" height="400" rx="48" fill="none" stroke="#c28569" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- Speaker name tag badge -->
+    <rect x="760" y="916" width="260" height="72" rx="28" fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    <text x="890" y="966" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="44" font-weight="600" fill="#ffffff">Räv</text>
+
+    <!-- Two short lines of dialogue text in cocoa #3e2731 -->
+    <text x="760" y="1110" font-family="Fredoka, sans-serif" font-size="64" font-weight="600" fill="#3e2731">Hej! Vill du leka i gläntan?</text>
+    <text x="760" y="1206" font-family="Fredoka, sans-serif" font-size="64" font-weight="600" fill="#3e2731">Vi kan leta efter blåbär!</text>
+
+    <!-- Next-line prompt arrow at bottom right of the panel -->
+    <path d="M 2136 1276 L 2184 1276 L 2160 1308 Z" fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+
+  <!-- Character portrait: 160 by 160 CSS px = 320 by 320 px at 2 px per CSS px,
+       framed on the left side of the dialogue panel at (368, 992). -->
+  <g id="portrait" transform="translate(368, 992)">
+    <!-- Portrait background card (320 by 320 px) in peach #e8b796 -->
+    <rect x="0" y="0" width="320" height="320" rx="36" fill="#e8b796" stroke="none"/>
+    <!-- Soft inner card highlight -->
+    <rect x="16" y="16" width="288" height="288" rx="24" fill="#ead4aa" stroke="none"/>
+
+    <!-- Fox shoulders/chest inside the portrait frame -->
+    <path d="M 72 308 C 76 252 112 232 160 232 C 208 232 244 252 248 308 Z" fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="160" cy="284" rx="44" ry="26" fill="#ead4aa" stroke="none"/>
+
+    <!-- Fox ears in portrait -->
+    <path d="M 64 132 C 52 72 68 40 92 40 C 112 40 130 68 136 112 Z" fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M 78 118 C 72 82 80 60 92 60 C 104 60 114 82 118 108 Z" fill="#f6757a" stroke="none"/>
+    <path d="M 256 132 C 268 72 252 40 228 40 C 208 40 190 68 184 112 Z" fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M 242 118 C 248 82 240 60 228 60 C 216 60 206 82 202 108 Z" fill="#f6757a" stroke="none"/>
+
+    <!-- Fox head in portrait -->
+    <ellipse cx="160" cy="168" rx="92" ry="76" fill="#f77622" stroke="none"/>
+    <ellipse cx="124" cy="118" rx="40" ry="18" transform="rotate(-14 124 118)" fill="#e4a672" stroke="none"/>
+    <ellipse cx="116" cy="194" rx="46" ry="32" fill="#ead4aa" stroke="none"/>
+    <ellipse cx="204" cy="194" rx="46" ry="32" fill="#ead4aa" stroke="none"/>
+    <ellipse cx="160" cy="200" rx="52" ry="36" fill="#ead4aa" stroke="none"/>
+    <ellipse cx="92" cy="194" rx="14" ry="8" fill="#f6757a" stroke="none"/>
+    <ellipse cx="228" cy="194" rx="14" ry="8" fill="#f6757a" stroke="none"/>
+    <ellipse cx="160" cy="168" rx="92" ry="76" fill="none" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- Happy portrait eyes with big white highlights -->
+    <ellipse cx="118" cy="166" rx="15" ry="19" fill="#181425" stroke="none"/>
+    <circle cx="112" cy="157" r="6" fill="#ffffff" stroke="none"/>
+    <ellipse cx="202" cy="166" rx="15" ry="19" fill="#181425" stroke="none"/>
+    <circle cx="196" cy="157" r="6" fill="#ffffff" stroke="none"/>
+
+    <!-- Nose and cheerful open smile -->
+    <ellipse cx="160" cy="186" rx="12" ry="8" fill="#3e2731" stroke="none"/>
+    <path d="M 142 204 Q 160 220 178 204" fill="none" stroke="#3e2731" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Outer 320 by 320 portrait frame outline (#c28569) -->
+    <rect x="0" y="0" width="320" height="320" rx="36" fill="none" stroke="#c28569" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>
