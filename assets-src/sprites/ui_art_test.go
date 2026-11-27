@@ -35,6 +35,8 @@ var uiArt = []struct {
 	{"ui/joystick_ring.svg", 256, 256},
 	{"ui/joystick_knob.svg", 112, 112},
 	{"ui/paw_button.svg", 192, 192},
+	// Title-screen logo emblem, 128 CSS px; the title text is set by the engine.
+	{"ui/logo.svg", 256, 256},
 	// HUD icons, 32 CSS px: simplified redraws of the menu icons.
 	{"ui/icons/speech_32.svg", 64, 64},
 	{"ui/icons/footsteps_32.svg", 64, 64},
