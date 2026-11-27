@@ -18,5 +18,12 @@ modules it depends on keep their own licences.
 
 ## Art and audio
 
+**Endesga 32** by ENDESGA is the colour palette for the game's art, stored as
+an Inkscape swatch palette at
+[assets-src/palettes/endesga_32.gpl](../assets-src/palettes/endesga_32.gpl).
+
+- Source: https://lospec.com/palette-list/endesga-32.
+- Licence: free to use (Lospec palette list; credit appreciated).
+
 Everything on screen in M0 is drawn in code. Art or audio made by others gets
 an entry here with its author, source and licence before it is added.
