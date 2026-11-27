@@ -9,7 +9,14 @@
        0 for terrain a and 1 for terrain b (grass_path_0111 is path but for a grass
        top-left corner). Each pair's 14 mixed tiles follow the base tiles in
        ascending code order, starting at row 1, column 1. They are all drawn out,
-       so no Tiled flip or rotate flags are needed. -->
+       so no Tiled flip or rotate flags are needed.
+       The nine cliff tiles follow at row 6, column 3 to row 7, column 3, in the
+       order cliff_nw, cliff_n, cliff_ne, cliff_w, cliff_e, cliff_sw, cliff_s,
+       cliff_se, cliff_face. They are a nine-slice of a rock cliff wall standing
+       on meadow grass, with the grass plateau overhanging its top edge:
+       cliff_nw cliff_n cliff_ne / cliff_w cliff_face cliff_e /
+       cliff_sw cliff_s cliff_se. The middle row and column repeat, so a cliff
+       can be any width and height from two tiles up. -->
   <defs>
     <clipPath id="tile_cell">
       <rect x="0" y="0" width="128" height="128"/>
@@ -48,6 +55,80 @@
     <g id="detail_sand_ripple" stroke="none">
       <rect x="-16" y="-3" width="32" height="6" rx="3" fill="#e4a672"/>
       <circle cx="12" cy="-14" r="3" fill="#ead4aa"/>
+    </g>
+    <!-- Cliff pieces, in tile coordinates. cliff_rock_<part> is the rock wall's
+         outline in each tile: 24 px in from the grass on an open west or east
+         side, starting at y 40 under the plateau lip on top and ending at y 92 at
+         the base, with 16 px rounded corners. Where the wall goes on into the next
+         tile the outline runs 24 px past the tile edge, so the drop shadow (the
+         outline moved 12 px right and down) also runs on without a gap. -->
+    <path id="cliff_rock_nw" d="M 24 152 V 56 A 16 16 0 0 1 40 40 H 152 V 152 Z"/>
+    <path id="cliff_rock_n" d="M -24 40 H 152 V 152 H -24 Z"/>
+    <path id="cliff_rock_ne" d="M -24 40 H 88 A 16 16 0 0 1 104 56 V 152 H -24 Z"/>
+    <path id="cliff_rock_w" d="M 24 -24 H 152 V 152 H 24 Z"/>
+    <path id="cliff_rock_e" d="M -24 -24 H 104 V 152 H -24 Z"/>
+    <path id="cliff_rock_sw" d="M 24 -24 H 152 V 92 H 40 A 16 16 0 0 1 24 76 Z"/>
+    <path id="cliff_rock_s" d="M -24 -24 H 152 V 92 H -24 Z"/>
+    <path id="cliff_rock_se" d="M -24 -24 H 104 V 76 A 16 16 0 0 1 88 92 H -24 Z"/>
+    <clipPath id="cliff_clip_nw"><use xlink:href="#cliff_rock_nw"/></clipPath>
+    <clipPath id="cliff_clip_n"><use xlink:href="#cliff_rock_n"/></clipPath>
+    <clipPath id="cliff_clip_ne"><use xlink:href="#cliff_rock_ne"/></clipPath>
+    <clipPath id="cliff_clip_w"><use xlink:href="#cliff_rock_w"/></clipPath>
+    <clipPath id="cliff_clip_e"><use xlink:href="#cliff_rock_e"/></clipPath>
+    <clipPath id="cliff_clip_sw"><use xlink:href="#cliff_rock_sw"/></clipPath>
+    <clipPath id="cliff_clip_s"><use xlink:href="#cliff_rock_s"/></clipPath>
+    <clipPath id="cliff_clip_se"><use xlink:href="#cliff_rock_se"/></clipPath>
+
+    <!-- The rock face, a seamless 128 px pattern: cool grey #8b9bb4 stone in two
+         staggered courses split by slate blue #5a6988 grooves at y 36..44 and
+         100..108 and joints, with a pale slate #c0cbdc highlight on the upper-left
+         of each stone. The course between y 108 and the next tile's y 36 runs
+         across the tile edge, so its joints are drawn on both sides of it, and the
+         stone crossing the right edge has its highlight repeated 128 px left.
+         Nothing else crosses an edge. -->
+    <g id="cliff_rock" stroke="none">
+      <rect x="-24" y="-24" width="176" height="176" fill="#8b9bb4"/>
+      <g fill="#5a6988">
+        <rect x="-24" y="36" width="176" height="8"/>
+        <rect x="-24" y="100" width="176" height="8"/>
+        <rect x="12" y="-24" width="8" height="64" rx="4"/>
+        <rect x="76" y="-24" width="8" height="64" rx="4"/>
+        <rect x="44" y="40" width="8" height="64" rx="4"/>
+        <rect x="108" y="40" width="8" height="64" rx="4"/>
+        <rect x="12" y="104" width="8" height="48" rx="4"/>
+        <rect x="76" y="104" width="8" height="48" rx="4"/>
+      </g>
+      <g fill="#c0cbdc">
+        <rect x="56" y="50" width="22" height="6" rx="3"/>
+        <rect x="120" y="50" width="20" height="6" rx="3"/>
+        <rect x="-8" y="50" width="20" height="6" rx="3"/>
+        <rect x="24" y="114" width="22" height="6" rx="3"/>
+        <rect x="88" y="114" width="22" height="6" rx="3"/>
+      </g>
+    </g>
+    <!-- Wall edges, drawn inside a tile's cliff_clip_<part>: the lit west side,
+         the shaded east side and the shaded base, each 8 or 12 px wide. -->
+    <rect id="cliff_side_light" x="24" y="-24" width="8" height="176" fill="#c0cbdc" stroke="none"/>
+    <rect id="cliff_side_shade" x="96" y="-24" width="8" height="176" fill="#5a6988" stroke="none"/>
+    <rect id="cliff_base_shade" x="-24" y="80" width="176" height="12" fill="#5a6988" stroke="none"/>
+    <!-- The plateau lip: meadow green #63c74d scallops hanging over the top of the
+         rock at y 40, with a slate blue #5a6988 shade 8 px below each. The
+         scallops sit every 32 px from x 0 to 128, so the lip repeats seamlessly. -->
+    <g id="cliff_lip" stroke="none">
+      <g fill="#5a6988">
+        <circle cx="0" cy="48" r="18"/>
+        <circle cx="32" cy="48" r="18"/>
+        <circle cx="64" cy="48" r="18"/>
+        <circle cx="96" cy="48" r="18"/>
+        <circle cx="128" cy="48" r="18"/>
+      </g>
+      <g fill="#63c74d">
+        <circle cx="0" cy="40" r="18"/>
+        <circle cx="32" cy="40" r="18"/>
+        <circle cx="64" cy="40" r="18"/>
+        <circle cx="96" cy="40" r="18"/>
+        <circle cx="128" cy="40" r="18"/>
+      </g>
     </g>
   </defs>
 
@@ -481,5 +562,89 @@
     <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
     <use xlink:href="#sand_water_corner" transform="rotate(180 64 64)" fill="#e8b796"/>
     <use xlink:href="#detail_ripple" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 6, column 3: cliff_nw, the top-left corner: plateau grass above, the wall's rounded top-left corner below, lit on its west side. -->
+  <g id="cliff_nw" transform="translate(384,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#detail_tuft" transform="translate(88,30)"/>
+    <use xlink:href="#cliff_rock_nw" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_nw)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_light"/>
+      <use xlink:href="#cliff_lip"/>
+    </g>
+  </g>
+  <!-- Row 6, column 4: cliff_n, the top edge: plateau grass above the lip, rock face below. -->
+  <g id="cliff_n" transform="translate(512,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#detail_tuft" transform="translate(40,30)"/>
+    <use xlink:href="#cliff_rock_n" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_n)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_lip"/>
+    </g>
+  </g>
+  <!-- Row 6, column 5: cliff_ne, the top-right corner: plateau grass above, the wall's rounded top-right corner below, shaded on its east side. -->
+  <g id="cliff_ne" transform="translate(640,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#detail_tuft" transform="translate(40,30)"/>
+    <use xlink:href="#cliff_rock_ne" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_ne)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_shade"/>
+      <use xlink:href="#cliff_lip"/>
+    </g>
+  </g>
+  <!-- Row 6, column 6: cliff_w, the west side: grass on the left, rock face lit along its west side. -->
+  <g id="cliff_w" transform="translate(768,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_w" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_w)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_light"/>
+    </g>
+  </g>
+  <!-- Row 6, column 7: cliff_e, the east side: rock face shaded along its east side, grass on the right with the wall's shadow. -->
+  <g id="cliff_e" transform="translate(896,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_e" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_e)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 0: cliff_sw, the bottom-left corner: rock face with a rounded bottom-left corner and a shaded base on grass. -->
+  <g id="cliff_sw" transform="translate(0,896)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_sw" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_sw)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_light"/>
+      <use xlink:href="#cliff_base_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 1: cliff_s, the base: rock face with a shaded base, grass below with the wall's shadow. -->
+  <g id="cliff_s" transform="translate(128,896)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_s" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_s)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_base_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 2: cliff_se, the bottom-right corner: rock face with a rounded bottom-right corner, shaded base and east side, shadow on the grass. -->
+  <g id="cliff_se" transform="translate(256,896)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_se" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_se)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_shade"/>
+      <use xlink:href="#cliff_base_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 3: cliff_face, the middle of the wall: rock face only. It
+       wraps on all four edges, so it repeats for wider and taller cliffs. -->
+  <g id="cliff_face" transform="translate(384,896)" clip-path="url(#tile_cell)">
+    <use xlink:href="#cliff_rock"/>
   </g>
 </svg>
