@@ -1,0 +1,5 @@
+[
+  {"id": "berry",        "name": {"en": "Berry",         "sv": "Bär"},          "icon": "berry"},
+  {"id": "cookie",       "name": {"en": "Cookie",        "sv": "Kaka"},         "icon": "cookie"},
+  {"id": "grandmas_hat", "name": {"en": "Grandma's Hat", "sv": "Mormors hatt"}, "icon": "hat", "key": true}
+]
