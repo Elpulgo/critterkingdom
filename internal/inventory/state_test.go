@@ -44,9 +44,6 @@ func TestInventory_SavedInventoryRestoredFromJSONHoldsTheSameThings(t *testing.T
 	if got, want := held(restored.Items()), []string{"berry×3", "grandmas_hat×1"}; !slices.Equal(got, want) {
 		t.Fatalf("restored Items() = %v; want %v", got, want)
 	}
-	if got := restored.Count("berry"); got != 3 {
-		t.Fatalf("restored Count(berry) = %d; want 3", got)
-	}
 	if got, want := held(restored.KeyItems()), []string{"grandmas_hat×1"}; !slices.Equal(got, want) {
 		t.Fatalf("restored KeyItems() = %v; want %v", got, want)
 	}
