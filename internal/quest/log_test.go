@@ -172,12 +172,14 @@ func TestLog_CountedSteps_CountUpCapAtTheirCountAndTheNextStepStartsAtZero(t *te
 				event quest.Event
 				want  quest.Change
 			}{
-				{n(2), quest.Change{Quest: "q", Kind: quest.Progressed, Step: 0, Count: 4, Of: 5}},
-				// One left but three handed in: the step finishes and the
-				// extra two do not carry over.
-				{n(3), quest.Change{Quest: "q", Kind: quest.StepAdvanced, Step: 1, Count: 0, Of: 3}},
-				// Ten on a step of three finishes only that step.
-				{n(10), quest.Change{Quest: "q", Kind: quest.StepAdvanced, Step: 2, Count: 0, Of: 2}},
+				{n(1), quest.Change{Quest: "q", Kind: quest.Progressed, Step: 0, Count: 3, Of: 5}},
+				{n(1), quest.Change{Quest: "q", Kind: quest.Progressed, Step: 0, Count: 4, Of: 5}},
+				// The fifth finishes the step.
+				{n(1), quest.Change{Quest: "q", Kind: quest.StepAdvanced, Step: 1, Count: 0, Of: 3}},
+				{n(2), quest.Change{Quest: "q", Kind: quest.Progressed, Step: 1, Count: 2, Of: 3}},
+				// One left but five handed in: the step finishes and the
+				// extra four do not carry over into the next step.
+				{n(5), quest.Change{Quest: "q", Kind: quest.StepAdvanced, Step: 2, Count: 0, Of: 2}},
 			}
 			for _, p := range plays {
 				got := l.Handle(p.event)
