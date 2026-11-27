@@ -5,8 +5,9 @@ A cosy top-down adventure for children aged 5 to 9, written in Go with
 a desktop game. The plan, the roadmap and the reasons behind them are in
 [docs/PLAN.md](docs/PLAN.md).
 
-Status: milestone M0, "Hello Critter". A placeholder critter walks around a
-meadow, hops and says hello.
+Status: milestone M1, "A place to walk", in progress. A placeholder critter
+starts in a small village, walks into a house and out to the meadow, hops and
+says hello.
 
 ## Getting started
 
@@ -17,6 +18,7 @@ The one exception is `make art`, which also needs Inkscape (see [Art](#art)).
 make run              # play on the desktop
 make run TAGS=debug   # with the debug overlay, F3 hides it
 make run ARGS=-pad    # with the touch pad instead of tap-to-walk
+make run ARGS='-map meadow'  # start on another map from assets/maps
 make serve            # play in a browser at http://localhost:8080/web/
 make test             # run the tests
 make check            # what CI runs: gofmt, go mod tidy, vet and tests
