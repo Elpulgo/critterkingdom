@@ -13,6 +13,7 @@ import (
 	"github.com/Elpulgo/critterkingdom/internal/engine"
 	"github.com/Elpulgo/critterkingdom/internal/entity"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
+	"github.com/Elpulgo/critterkingdom/internal/i18n"
 )
 
 const (
@@ -33,8 +34,6 @@ const (
 )
 
 const (
-	title          = "Critter Kingdom"
-	greeting       = "Hej!"
 	titleTextSize  = 34 // CSS pixels
 	titleWeight    = 600
 	bubbleTextSize = 26 // CSS pixels
@@ -169,7 +168,8 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
 }
 
-// DrawUI draws the title and the greeting bubble at full screen resolution.
+// DrawUI draws the title and the greeting bubble at full screen resolution,
+// in the current language of i18n.
 func (s *Scene) DrawUI(screen *ebiten.Image, ui engine.UI) {
 	if s.titleAlpha > 0 {
 		s.drawTitle(screen, ui)
@@ -181,6 +181,7 @@ func (s *Scene) DrawUI(screen *ebiten.Image, ui engine.UI) {
 
 func (s *Scene) drawTitle(screen *ebiten.Image, ui engine.UI) {
 	u := ui.Unit
+	title := i18n.T("ui.title")
 	s.titleFace.Size = titleTextSize * u
 	x, y := float64(screen.Bounds().Dx())/2, 24*u
 	engine.DrawText(screen, title, s.titleFace, x+3*u, y+3*u, text.AlignCenter, fade(cocoa, 0.6*s.titleAlpha))
@@ -191,6 +192,7 @@ func (s *Scene) drawTitle(screen *ebiten.Image, ui engine.UI) {
 // screen when the critter is near an edge.
 func (s *Scene) drawGreeting(screen *ebiten.Image, ui engine.UI) {
 	u := ui.Unit
+	greeting := i18n.T("ui.greeting")
 	s.bubbleFace.Size = bubbleTextSize * u
 	padX, padY, tail, margin := 14*u, 6*u, 10*u, 8*u
 	w := text.Advance(greeting, s.bubbleFace) + 2*padX
