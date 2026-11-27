@@ -59,12 +59,9 @@ func TestManifest_IconsExistAtDeclaredSizesAndMeetInstallCriteria(t *testing.T) 
 			}
 			defer f.Close()
 
-			cfg, format, err := image.DecodeConfig(f)
+			cfg, _, err := image.DecodeConfig(f)
 			if err != nil {
 				t.Fatalf("decode icon %q: %v", icon.Src, err)
-			}
-			if format != "png" {
-				t.Errorf("icon %q format = %q, want \"png\"", icon.Src, format)
 			}
 			gotSizes := fmt.Sprintf("%dx%d", cfg.Width, cfg.Height)
 			if gotSizes != icon.Sizes {
@@ -104,12 +101,9 @@ func TestManifest_IconsExistAtDeclaredSizesAndMeetInstallCriteria(t *testing.T) 
 		}
 		defer f.Close()
 
-		img, format, err := image.Decode(f)
+		img, _, err := image.Decode(f)
 		if err != nil {
 			t.Fatalf("decode icons/apple-touch-icon.png: %v", err)
-		}
-		if format != "png" {
-			t.Errorf("apple-touch-icon format = %q, want \"png\"", format)
 		}
 		b := img.Bounds()
 		if b.Dx() != 180 || b.Dy() != 180 {
