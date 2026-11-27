@@ -31,10 +31,6 @@ type SaveGame struct {
 	Critter Critter `json:"critter"`
 }
 
-// migrations maps a save version v to the step that upgrades the raw JSON
-// object in place from v to v+1.
-var migrations = map[int]func(map[string]json.RawMessage) error{}
-
 // Encode serialises sg as JSON with Version set to CurrentVersion.
 func Encode(sg SaveGame) ([]byte, error) {
 	sg.Version = CurrentVersion
