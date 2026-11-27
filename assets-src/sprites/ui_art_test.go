@@ -75,6 +75,15 @@ var uiArt = []struct {
 	{"ui/icons/stick_64.svg", 128, 128},
 	{"ui/icons/sturdy_stick_64.svg", 128, 128},
 	{"ui/icons/wand_64.svg", 128, 128},
+	// Effects, one drawing each that the engine scales, turns and fades: the
+	// swoosh is the player's 32 world px box, the clouds and flowers the
+	// largest normal enemy (24), the spark and dust one tile (16).
+	{"effects/swoosh_arc.svg", 256, 256},
+	{"effects/poof_cloud.svg", 192, 192},
+	{"effects/flower_burst.svg", 192, 192},
+	{"effects/spore_cloud.svg", 192, 192},
+	{"effects/hit_spark.svg", 128, 128},
+	{"effects/dust_puff.svg", 128, 128},
 }
 
 // uiArtFolders are the folders whose every .svg must be a manifest row.

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Flower burst, 192 by 192 px (24 by 24 world px at 8 px per world px),
+     what a defeated enemy poofs into. A big blossom pink flower in the
+     middle, four small flowers on the diagonals (white daisies and sunny
+     yellow ones) and four pink pop dots between them, centred on the page so
+     the engine can scale, turn and fade it about the centre. Petals have a
+     6 px outline in a darker colour of their family; flower hearts a 4 px one.
+     No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Small white daisy, top-right -->
+  <g id="flower_burst_daisy_ne">
+    <g fill="#c0cbdc" stroke="none">
+      <circle cx="142.7" cy="38.3" r="15"/>
+      <circle cx="153.2" cy="45.9" r="15"/>
+      <circle cx="149.2" cy="58.2" r="15"/>
+      <circle cx="136.2" cy="58.2" r="15"/>
+      <circle cx="132.2" cy="45.9" r="15"/>
+    </g>
+    <g fill="#ffffff" stroke="none">
+      <circle cx="142.7" cy="38.3" r="9"/>
+      <circle cx="153.2" cy="45.9" r="9"/>
+      <circle cx="149.2" cy="58.2" r="9"/>
+      <circle cx="136.2" cy="58.2" r="9"/>
+      <circle cx="132.2" cy="45.9" r="9"/>
+    </g>
+    <circle cx="142.7" cy="49.3" r="7" fill="#feae34" stroke="#d77643" stroke-width="4"/>
+  </g>
+  <!-- Small sunny yellow flower, bottom-right -->
+  <g id="flower_burst_yellow_se">
+    <g fill="#d77643" stroke="none">
+      <circle cx="142.7" cy="131.7" r="15"/>
+      <circle cx="153.2" cy="139.3" r="15"/>
+      <circle cx="149.2" cy="151.6" r="15"/>
+      <circle cx="136.2" cy="151.6" r="15"/>
+      <circle cx="132.2" cy="139.3" r="15"/>
+    </g>
+    <g fill="#fee761" stroke="none">
+      <circle cx="142.7" cy="131.7" r="9"/>
+      <circle cx="153.2" cy="139.3" r="9"/>
+      <circle cx="149.2" cy="151.6" r="9"/>
+      <circle cx="136.2" cy="151.6" r="9"/>
+      <circle cx="132.2" cy="139.3" r="9"/>
+    </g>
+    <circle cx="142.7" cy="142.7" r="7" fill="#d77643" stroke="#be4a2f" stroke-width="4"/>
+  </g>
+  <!-- Small white daisy, bottom-left -->
+  <g id="flower_burst_daisy_sw">
+    <g fill="#c0cbdc" stroke="none">
+      <circle cx="49.3" cy="131.7" r="15"/>
+      <circle cx="59.8" cy="139.3" r="15"/>
+      <circle cx="55.8" cy="151.6" r="15"/>
+      <circle cx="42.8" cy="151.6" r="15"/>
+      <circle cx="38.8" cy="139.3" r="15"/>
+    </g>
+    <g fill="#ffffff" stroke="none">
+      <circle cx="49.3" cy="131.7" r="9"/>
+      <circle cx="59.8" cy="139.3" r="9"/>
+      <circle cx="55.8" cy="151.6" r="9"/>
+      <circle cx="42.8" cy="151.6" r="9"/>
+      <circle cx="38.8" cy="139.3" r="9"/>
+    </g>
+    <circle cx="49.3" cy="142.7" r="7" fill="#feae34" stroke="#d77643" stroke-width="4"/>
+  </g>
+  <!-- Small sunny yellow flower, top-left -->
+  <g id="flower_burst_yellow_nw">
+    <g fill="#d77643" stroke="none">
+      <circle cx="49.3" cy="38.3" r="15"/>
+      <circle cx="59.8" cy="45.9" r="15"/>
+      <circle cx="55.8" cy="58.2" r="15"/>
+      <circle cx="42.8" cy="58.2" r="15"/>
+      <circle cx="38.8" cy="45.9" r="15"/>
+    </g>
+    <g fill="#fee761" stroke="none">
+      <circle cx="49.3" cy="38.3" r="9"/>
+      <circle cx="59.8" cy="45.9" r="9"/>
+      <circle cx="55.8" cy="58.2" r="9"/>
+      <circle cx="42.8" cy="58.2" r="9"/>
+      <circle cx="38.8" cy="45.9" r="9"/>
+    </g>
+    <circle cx="49.3" cy="49.3" r="7" fill="#d77643" stroke="#be4a2f" stroke-width="4"/>
+  </g>
+  <!-- Big blossom pink flower in the middle with a marigold heart -->
+  <g id="flower_burst_middle">
+    <g fill="#a22633" stroke="none">
+      <circle cx="96" cy="76" r="21"/>
+      <circle cx="115" cy="89.8" r="21"/>
+      <circle cx="107.8" cy="112.2" r="21"/>
+      <circle cx="84.2" cy="112.2" r="21"/>
+      <circle cx="77" cy="89.8" r="21"/>
+    </g>
+    <g fill="#f6757a" stroke="none">
+      <circle cx="96" cy="76" r="15"/>
+      <circle cx="115" cy="89.8" r="15"/>
+      <circle cx="107.8" cy="112.2" r="15"/>
+      <circle cx="84.2" cy="112.2" r="15"/>
+      <circle cx="77" cy="89.8" r="15"/>
+    </g>
+    <circle cx="96" cy="96" r="11" fill="#feae34" stroke="#d77643" stroke-width="4"/>
+  </g>
+  <!-- Sunny yellow highlight dab on the middle heart -->
+  <circle id="flower_burst_highlight" cx="92" cy="92" r="4" fill="#fee761" stroke="none"/>
+  <!-- Pop dots between the flowers: blossom pink with a 4 px berry crimson outline -->
+  <g id="flower_burst_dots" fill="#f6757a" stroke="#a22633" stroke-width="4">
+    <circle cx="96" cy="30" r="6"/>
+    <circle cx="162" cy="96" r="6"/>
+    <circle cx="96" cy="162" r="6"/>
+    <circle cx="30" cy="96" r="6"/>
+  </g>
+</svg>
