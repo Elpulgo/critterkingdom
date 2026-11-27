@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop flower_switch_on: the flower switch pressed down, 16 by 16 world
+       px, on the same page as flower_switch_off. The stone top sits 6 px
+       lower, almost flush with its rim, and the carved flower has bloomed:
+       blossom pink petals outlined in berry crimson round a marigold heart,
+       with sunny yellow sparkles. -->
+  <defs>
+    <clipPath id="top"><ellipse cx="64" cy="72" rx="50" ry="32"/></clipPath>
+  </defs>
+
+  <ellipse cx="68" cy="106" rx="54" ry="10" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <g stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Side, then top -->
+    <ellipse cx="64" cy="80" rx="50" ry="26" fill="#5a6988"/>
+    <ellipse cx="64" cy="72" rx="50" ry="32" fill="#8b9bb4"/>
+  </g>
+  <g clip-path="url(#top)" stroke="none">
+    <ellipse cx="38" cy="56" rx="14" ry="7" transform="rotate(-25 38 56)" fill="#c0cbdc"/>
+  </g>
+
+  <!-- Flower -->
+  <g stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <g fill="#f6757a" stroke="#a22633">
+      <circle cx="64" cy="54" r="11"/>
+      <circle cx="81" cy="66" r="11"/>
+      <circle cx="75" cy="87" r="11"/>
+      <circle cx="53" cy="87" r="11"/>
+      <circle cx="47" cy="66" r="11"/>
+    </g>
+    <circle cx="64" cy="72" r="10" fill="#feae34" stroke="#d77643"/>
+  </g>
+  <circle cx="61" cy="69" r="4" fill="#fee761" stroke="none"/>
+  <!-- Sparkles -->
+  <g fill="#fee761" stroke="#feae34" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <circle cx="20" cy="30" r="4"/>
+    <circle cx="108" cy="26" r="4"/>
+    <circle cx="112" cy="58" r="3"/>
+  </g>
+</svg>
