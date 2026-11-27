@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Swedish flag icon (language picker), 64 by 64 px (32 by 32 CSS px HUD
+     size at 2 px per CSS px). A rounded pond blue flag with a sunny yellow
+     Nordic cross, its upright set toward the pole side, the simplified
+     redraw of flag_sv_64.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the flag 6 px lower -->
+  <g id="flag_sv_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <rect x="6" y="14" width="52" height="34" rx="6" fill="#181425" stroke="#181425" stroke-width="4"/>
+  </g>
+  <!-- Pond blue field -->
+  <rect id="flag_sv_32_field" x="6" y="14" width="52" height="34" rx="6" fill="#0099db" stroke="none"/>
+  <!-- Sunny yellow Nordic cross; the arms end on the straight edges, so no clipping is needed -->
+  <rect id="flag_sv_32_cross_across" x="6" y="27.5" width="52" height="7" fill="#fee761" stroke="none"/>
+  <rect id="flag_sv_32_cross_down" x="22" y="14" width="7" height="34" fill="#fee761" stroke="none"/>
+  <!-- Sky cyan highlight in the upper-left of the field -->
+  <path id="flag_sv_32_highlight" d="M 11 22 Q 11 19 14 19 H 16" fill="none" stroke="#2ce8f5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Deep water blue outline on top -->
+  <rect id="flag_sv_32_outline" x="6" y="14" width="52" height="34" rx="6" fill="none" stroke="#124e89" stroke-width="4"/>
+</svg>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Snacks icon (the snack category), 64 by 64 px (32 by 32 CSS px HUD size
+     at 2 px per CSS px). A wooden bowl of mixed snacks: a green leaf, a red
+     berry and a cream seed peeking over the rim. The simplified redraw of
+     snacks_64.svg, without the leaf vein and the seed stripe. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, snacks and bowl 6 px lower -->
+  <g id="snacks_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <ellipse cx="19" cy="23" rx="6" ry="11" transform="rotate(-35 19 23)" fill="#181425" stroke="#181425" stroke-width="4"/>
+    <ellipse cx="46" cy="23" rx="5.5" ry="8" transform="rotate(30 46 23)" fill="#181425" stroke="#181425" stroke-width="4"/>
+    <circle cx="32" cy="22" r="9" fill="#181425" stroke="#181425" stroke-width="4"/>
+    <path d="M 8 33 H 56 Q 54 53 32 53 Q 10 53 8 33 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="5" y="28" width="54" height="8" rx="4" fill="#181425" stroke="#181425" stroke-width="4"/>
+  </g>
+  <!-- Leaf green leaf with pine green outline -->
+  <ellipse id="snacks_32_leaf" cx="19" cy="23" rx="6" ry="11" transform="rotate(-35 19 23)" fill="#3e8948" stroke="#265c42" stroke-width="4"/>
+  <!-- Cream seed with warm taupe outline -->
+  <ellipse id="snacks_32_seed" cx="46" cy="23" rx="5.5" ry="8" transform="rotate(30 46 23)" fill="#ead4aa" stroke="#c28569" stroke-width="4"/>
+  <!-- Poppy red berry with berry crimson outline and a blossom pink highlight -->
+  <circle id="snacks_32_berry" cx="32" cy="22" r="9" fill="#e43b44" stroke="#a22633" stroke-width="4"/>
+  <ellipse id="snacks_32_berry_highlight" cx="29" cy="19" rx="2" ry="3" transform="rotate(35 29 19)" fill="#f6757a" stroke="none"/>
+  <!-- Wood brown bowl with bark brown outline -->
+  <path id="snacks_32_bowl" d="M 8 33 H 56 Q 54 53 32 53 Q 10 53 8 33 Z" fill="#b86f50" stroke="#733e39" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Light tan highlight on the bowl's upper-left curve -->
+  <path id="snacks_32_bowl_highlight" d="M 15 40 Q 17 45 21 47" fill="none" stroke="#e4a672" stroke-width="4" stroke-linecap="round"/>
+  <!-- Light tan rim -->
+  <rect id="snacks_32_rim" x="5" y="28" width="54" height="8" rx="4" fill="#e4a672" stroke="#733e39" stroke-width="4"/>
+</svg>
