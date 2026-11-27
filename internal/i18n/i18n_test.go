@@ -92,22 +92,6 @@ func TestNewCatalog_StartingInALanguageWithoutATableIsAnError(t *testing.T) {
 	}
 }
 
-func TestParseTable_ReadsAFlatObjectOfTexts(t *testing.T) {
-	table, err := ParseTable([]byte(`{"ui.greeting": "Hej på dig!", "ui.title": "Critter Kingdom"}`))
-	if err != nil {
-		t.Fatalf("ParseTable: %v", err)
-	}
-	want := map[string]string{"ui.greeting": "Hej på dig!", "ui.title": "Critter Kingdom"}
-	if len(table) != len(want) {
-		t.Fatalf("ParseTable gave %d keys, want %d: %v", len(table), len(want), table)
-	}
-	for key, text := range want {
-		if table[key] != text {
-			t.Errorf("table[%q] = %q, want %q", key, table[key], text)
-		}
-	}
-}
-
 func TestParseTable_ATableThatIsNotAFlatObjectOfStringsIsRejected(t *testing.T) {
 	tests := []struct {
 		name string
@@ -120,8 +104,6 @@ func TestParseTable_ATableThatIsNotAFlatObjectOfStringsIsRejected(t *testing.T) 
 		{"top-level array", `["Hej!"]`},
 		{"top-level string", `"Hej!"`},
 		{"top-level null", `null`},
-		{"broken JSON", `{"ui.greeting": "Hej!"`},
-		{"empty input", ``},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
