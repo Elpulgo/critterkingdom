@@ -860,7 +860,7 @@ func TestTerrainCheck_RejectsIncompleteOrMisnamedTransitions(t *testing.T) {
 
 // imageCollections are the image-collection tilesets, by slash path relative to
 // assets-src. Each lists every drawing in its own folder, one tile per drawing.
-var imageCollections = []string{"sprites/decor/decor.tsx"}
+var imageCollections = []string{"sprites/decor/decor.tsx", "sprites/props/props.tsx"}
 
 func TestImageCollections_EveryTileMatchesADrawingAndNoDrawingIsLeftOut(t *testing.T) {
 	for _, path := range imageCollections {
