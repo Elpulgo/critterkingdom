@@ -1,6 +1,7 @@
 package world
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -259,39 +260,46 @@ func TestObject_Rect_PlacesTileObjectAboveItsBottomLeftAnchor(t *testing.T) {
 
 func TestLoadMap_RejectsUnsupportedOrMalformedMaps(t *testing.T) {
 	tests := []struct {
-		name string
-		json string
+		name    string
+		json    string
+		wantErr string
 	}{
 		{
-			name: "invalid JSON",
-			json: `{not valid json`,
+			name:    "invalid JSON",
+			json:    `{not valid json`,
+			wantErr: "parse map json",
 		},
 		{
-			name: "non-orthogonal map",
-			json: `{"orientation":"isometric","infinite":false,"width":2,"height":2,"tilewidth":128,"tileheight":128}`,
+			name:    "non-orthogonal map",
+			json:    `{"orientation":"isometric","infinite":false,"width":2,"height":2,"tilewidth":128,"tileheight":128}`,
+			wantErr: "orthogonal",
 		},
 		{
-			name: "infinite map",
-			json: `{"orientation":"orthogonal","infinite":true,"width":2,"height":2,"tilewidth":128,"tileheight":128}`,
+			name:    "infinite map",
+			json:    `{"orientation":"orthogonal","infinite":true,"width":2,"height":2,"tilewidth":128,"tileheight":128}`,
+			wantErr: "infinite",
 		},
 		{
-			name: "tile size other than 128",
-			json: `{"orientation":"orthogonal","infinite":false,"width":2,"height":2,"tilewidth":16,"tileheight":16}`,
+			name:    "tile size other than 128",
+			json:    `{"orientation":"orthogonal","infinite":false,"width":2,"height":2,"tilewidth":16,"tileheight":16}`,
+			wantErr: "128x128",
 		},
 		{
 			name: "external tileset with source",
 			json: `{
 				"orientation":"orthogonal","infinite":false,"width":1,"height":1,"tilewidth":128,"tileheight":128,
-				"tilesets":[{"firstgid":1,"source":"outdoor.tsj"}]
+				"tilesets":[{"firstgid":1,"source":"outdoor.tsj","tilecount":1}]
 			}`,
+			wantErr: "Embed Tilesets",
 		},
 		{
 			name: "encoded layer data",
 			json: `{
 				"orientation":"orthogonal","infinite":false,"width":1,"height":1,"tilewidth":128,"tileheight":128,
 				"tilesets":[{"firstgid":1,"name":"t","tilecount":1}],
-				"layers":[{"name":"ground","type":"tilelayer","width":1,"height":1,"encoding":"base64","data":[1]}]
+				"layers":[{"name":"ground","type":"tilelayer","width":1,"height":1,"encoding":"base64","data":"AQAAAA=="}]
 			}`,
+			wantErr: "CSV",
 		},
 		{
 			name: "unknown layer name",
@@ -300,6 +308,7 @@ func TestLoadMap_RejectsUnsupportedOrMalformedMaps(t *testing.T) {
 				"tilesets":[{"firstgid":1,"name":"t","tilecount":1}],
 				"layers":[{"name":"sky","type":"tilelayer","width":1,"height":1,"data":[1]}]
 			}`,
+			wantErr: `"sky"`,
 		},
 		{
 			name: "known layer of wrong kind",
@@ -308,6 +317,7 @@ func TestLoadMap_RejectsUnsupportedOrMalformedMaps(t *testing.T) {
 				"tilesets":[{"firstgid":1,"name":"t","tilecount":1}],
 				"layers":[{"name":"ground","type":"objectgroup","objects":[]}]
 			}`,
+			wantErr: `"ground"`,
 		},
 		{
 			name: "duplicate layer name",
@@ -319,6 +329,7 @@ func TestLoadMap_RejectsUnsupportedOrMalformedMaps(t *testing.T) {
 					{"name":"ground","type":"tilelayer","width":1,"height":1,"data":[1]}
 				]
 			}`,
+			wantErr: "duplicate",
 		},
 		{
 			name: "layer data length not width times height",
@@ -327,6 +338,7 @@ func TestLoadMap_RejectsUnsupportedOrMalformedMaps(t *testing.T) {
 				"tilesets":[{"firstgid":1,"name":"t","tilecount":2}],
 				"layers":[{"name":"ground","type":"tilelayer","width":2,"height":2,"data":[1,1,1]}]
 			}`,
+			wantErr: "3 gids for 2x2",
 		},
 		{
 			name: "gid not covered by any tileset",
@@ -335,13 +347,18 @@ func TestLoadMap_RejectsUnsupportedOrMalformedMaps(t *testing.T) {
 				"tilesets":[{"firstgid":1,"name":"t","tilecount":2}],
 				"layers":[{"name":"ground","type":"tilelayer","width":1,"height":1,"data":[5]}]
 			}`,
+			wantErr: "gid 5",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, err := LoadMap([]byte(tt.json)); err == nil {
-				t.Errorf("LoadMap succeeded for %s; want error", tt.name)
+			_, err := LoadMap([]byte(tt.json))
+			if err == nil {
+				t.Fatalf("LoadMap succeeded for %s; want error containing %q", tt.name, tt.wantErr)
+			}
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Errorf("LoadMap error = %q; want it to contain %q", err.Error(), tt.wantErr)
 			}
 		})
 	}

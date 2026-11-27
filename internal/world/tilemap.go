@@ -197,15 +197,15 @@ type tmjMap struct {
 }
 
 type tmjLayer struct {
-	Name        string        `json:"name"`
-	Type        string        `json:"type"`
-	Width       int           `json:"width"`
-	Height      int           `json:"height"`
-	Data        []uint32      `json:"data"`
-	Encoding    string        `json:"encoding"`
-	Compression string        `json:"compression"`
-	Objects     []tmjObject   `json:"objects"`
-	Properties  []tmjProperty `json:"properties"`
+	Name        string          `json:"name"`
+	Type        string          `json:"type"`
+	Width       int             `json:"width"`
+	Height      int             `json:"height"`
+	Data        json.RawMessage `json:"data"`
+	Encoding    string          `json:"encoding"`
+	Compression string          `json:"compression"`
+	Objects     []tmjObject     `json:"objects"`
+	Properties  []tmjProperty   `json:"properties"`
 }
 
 type tmjObject struct {
@@ -330,12 +330,16 @@ func LoadMap(data []byte) (*Map, error) {
 			if rl.Encoding != "" || rl.Compression != "" {
 				return nil, fmt.Errorf("layer %q uses encoding %q / compression %q: use CSV (plain JSON array)", rl.Name, rl.Encoding, rl.Compression)
 			}
-			w, h := rl.Width, rl.Height
-			if w != m.Cols || h != m.Rows || len(rl.Data) != w*h {
-				return nil, fmt.Errorf("layer %q has %d gids for %dx%d (map is %dx%d)", rl.Name, len(rl.Data), w, h, m.Cols, m.Rows)
+			var rawData []uint32
+			if err := json.Unmarshal(rl.Data, &rawData); err != nil {
+				return nil, fmt.Errorf("parse layer %q data: %w", rl.Name, err)
 			}
-			gids := make([]uint32, len(rl.Data))
-			for i, rawGID := range rl.Data {
+			w, h := rl.Width, rl.Height
+			if w != m.Cols || h != m.Rows || len(rawData) != w*h {
+				return nil, fmt.Errorf("layer %q has %d gids for %dx%d (map is %dx%d)", rl.Name, len(rawData), w, h, m.Cols, m.Rows)
+			}
+			gids := make([]uint32, len(rawData))
+			for i, rawGID := range rawData {
 				gid := rawGID &^ gidFlipMask
 				if gid != 0 {
 					if _, _, ok := m.findTileset(gid); !ok {
