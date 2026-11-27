@@ -30,6 +30,11 @@ var uiArt = []struct {
 	// The boss's big health stars, 48 CSS px.
 	{"ui/star_full.svg", 96, 96},
 	{"ui/star_empty.svg", 96, 96},
+	// Touch pad and paw button, sized to padRadius 64, padKnobRadius 28 and
+	// pawButtonRadius 48 CSS px in internal/engine/touch.go.
+	{"ui/joystick_ring.svg", 256, 256},
+	{"ui/joystick_knob.svg", 112, 112},
+	{"ui/paw_button.svg", 192, 192},
 	// HUD icons, 32 CSS px: simplified redraws of the menu icons.
 	{"ui/icons/speech_32.svg", 64, 64},
 	{"ui/icons/footsteps_32.svg", 64, 64},

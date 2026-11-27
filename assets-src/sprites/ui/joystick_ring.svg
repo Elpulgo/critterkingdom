@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Touch pad ring, 256 by 256 px (128 by 128 CSS px at 2 px per CSS px,
+     padRadius 64 CSS px in internal/engine/touch.go). A white ring band with
+     a slate blue outline on both edges and a pale slate shade on its
+     lower-right. Every circle is a stroke with fill="none", so the middle of
+     the page stays transparent and the world shows through. The engine
+     centres the ring on the finger's start; joystick_knob.svg rides on top. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Soft drop shadow: the whole band with its outlines, 6 px lower -->
+  <circle id="joystick_ring_shadow" cx="128" cy="134" r="104" fill="none" stroke="#181425" stroke-opacity="0.22" stroke-width="26"/>
+  <!-- White ring band, from radius 94 to 114 -->
+  <circle id="joystick_ring_band" cx="128" cy="128" r="104" fill="none" stroke="#ffffff" stroke-width="20"/>
+  <!-- Pale slate shade along the outer lower-right of the band -->
+  <path id="joystick_ring_shade" d="M 235 128 A 107 107 0 0 1 128 235" fill="none" stroke="#c0cbdc" stroke-width="8" stroke-linecap="round"/>
+  <!-- Slate blue outlines on the outer and inner edges -->
+  <circle id="joystick_ring_outline_outer" cx="128" cy="128" r="114" fill="none" stroke="#5a6988" stroke-width="6"/>
+  <circle id="joystick_ring_outline_inner" cx="128" cy="128" r="94" fill="none" stroke="#5a6988" stroke-width="6"/>
+</svg>
