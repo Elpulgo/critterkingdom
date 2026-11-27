@@ -671,24 +671,33 @@ only face down). Small critters: 5 to 10. Enemies: about 12. The boss: about
   `text/v2`. Dialogue text about 1 cm tall on a tablet, at most two lines of
   about 40 characters.
 
-**Sound effects** (jsfxr or ChipTone to WAV, then
-`ffmpeg -i x.wav -c:a libvorbis -q:a 4 x.ogg`): step, talk blip, pickup, door,
-chest, quest start (three notes up), quest done (fanfare), befriend success
-(sparkle), wrong snack (a soft "bwomp", never harsh), menu tap, hearts,
-sparkle, zzz, swing whoosh, hit pop, hurt "oof", poof, heart pickup, room lock
-and unlock chime, the Grub's friendly grumble. Keep everything soft and cap the
-master volume.
+**Sound effects** (jsfxr or ChipTone to WAV, then `ffmpeg -i x.wav -ac 1 -ar
+44100 -c:a libvorbis -q:a 4 x.ogg`, mono at 44100 Hz): step, talk blip,
+pickup, door, chest, quest start (three notes up), quest done (fanfare),
+befriend success (sparkle), wrong snack (a soft "bwomp", never harsh), menu
+tap, hearts, sparkle, zzz, swing whoosh, hit pop, hurt "oof", poof, heart
+pickup, room lock and unlock chime, the Grub's friendly grumble. Keep
+everything soft and cap the master volume. *Now:* the 21 files in
+`assets/audio/sfx/` are synthesised placeholders from `tools/audio` (`make
+audio`); a hand-made jsfxr or ChipTone sound can replace any of them under the
+same name (see 6.6).
 
-**Music** (BeepBox or Bosca Ceoil to WAV, then OGG at `-q:a 3`): four loops of
-45 to 60 seconds for village, meadow, cave and boss; 90 to 120 BPM, major or
-pentatonic, soft instruments. The boss track is bouncy, not scary. Music is
-the biggest asset, so keep loops short.
+**Music** (BeepBox or Bosca Ceoil to WAV, then OGG the same way at `-q:a 3`,
+mono at 44100 Hz): four loops of 45 to 60 seconds for village, meadow, cave
+and boss; 90 to 120 BPM, major or pentatonic, soft instruments. The boss track
+is bouncy, not scary. Music is the biggest asset, so keep loops short. *Now:*
+the four loops in `assets/audio/music/` are synthesised placeholders from
+`tools/audio`; a BeepBox or Bosca Ceoil track can replace any of them under
+the same name (see 6.6).
 
 **Critter voices**: record about 20 syllables ("ba", "mi", "ko", ...) in a
 high and a low voice and play one per couple of letters while the text types
 out (the Animal Crossing trick). Cheap and charming. Read-aloud of the actual
 words comes from the browser's speech voices; later, family-recorded lines can
-replace them.
+replace them. *Now:* the 20 syllables (`ba bi bo da di do ka ki ko la li lo ma
+mi mo na ni no pa pi`) in `assets/audio/voices/high/` and `voices/low/` are
+synthesised placeholders from `tools/audio`; recorded syllables can replace
+them under the same names (see 6.6).
 
 **Fonts** must include Latin Extended for å, ä and ö. Fredoka, Baloo 2, Nunito
 and Andika do, all under the SIL Open Font License (keep the licence
@@ -697,12 +706,12 @@ text in `CREDITS.md`).
 ### 6.6 Pipeline and folders
 
 ```
-assets-src/   Inkscape .svg, .tmx/.tsx, BeepBox .json, raw .wav   (sources of truth; consider git LFS for audio)
+assets-src/   Inkscape .svg, .tmx/.tsx, BeepBox .json   (sources of truth; the audio's source of truth is the Go code in tools/audio/synth/)
 assets/       exported and embedded
   sprites/    critters/fox/*.png + fox.json (where parts sit and turn), npcs/, enemies/, props/, effects/, ui/, emotes/
   tiles/      tileset_outdoor.png ...
   maps/       village.tmj, meadow.tmj, ...
-  audio/      music/*.ogg, sfx/*.ogg|wav, voices/
+  audio/      music/*.ogg, sfx/*.ogg, voices/high/*.ogg, voices/low/*.ogg   (written by make audio)
   fonts/      Fredoka-Medium.ttf
   data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
 ```
@@ -724,15 +733,30 @@ assets/       exported and embedded
   inside a part, such as `down_head_shine`, is exported as a part of its own.
   Until the first drawing lands the placeholder art is drawn in code. The
   exporter's tests use a fake Inkscape; `go test -tags inkscape ./tools/art/...`
-  runs the real one on a machine that has it. Later `make audio` runs ffmpeg;
-  `make check` runs gofmt, `go mod tidy -diff`, vet for desktop and browser
+  runs the real one on a machine that has it.
+- `make audio` runs `go run ./tools/audio`, a Go command (logic in
+  `tools/audio/audioexport`) that renders every sound in the catalog of
+  `tools/audio/synth` (sound effects, music loops and critter-voice syllables,
+  all synthesised in code) to a mono 44100 Hz WAV in `build/audio-src/`, which
+  is not committed, and encodes it with ffmpeg (`-map_metadata -1 -bitexact
+  -ac 1 -c:a libvorbis`, `-q:a 4` for sound effects and voices, `-q:a 3` for
+  music) to its OGG under `assets/audio/` (`FFMPEG=/path/to/ffmpeg` when it is
+  not on `PATH`). It always re-encodes everything and deletes OGG files under
+  `assets/audio/` that the catalog no longer lists. The exporter's tests use a
+  fake ffmpeg; `go test -tags ffmpeg ./tools/audio/...` runs the real one, and
+  a lint test checks the committed OGG files against the catalog (mono Ogg
+  Vorbis, length per kind, 3 MB in total). A hand-made file that replaces a
+  synthesised one needs its catalog entry changed too, or the next `make
+  audio` overwrites it.
+- `make check` runs gofmt, `go mod tidy -diff`, vet for desktop and browser
   and every test, which will include the content lint test; `make web` builds
   the wasm bundle into `build/web/`.
 - Naming: lower_snake_case, one drawing per character, parts named
   `<view>_<part>`.
 - Licences: prefer CC0; CC-BY needs an entry in `CREDITS.md`; avoid NC and ND
   material in case the game is ever sold. Decide a licence for your own art
-  too (the repo is MIT, which covers code; art can be the same or CC-BY).
+  too (the repo is MIT, which covers code; art can be the same or CC-BY). The
+  synthesised audio is CC0 (see `CREDITS.md`).
 
 ### 6.7 Asset list for the vertical slice (rough first-timer hours)
 
@@ -934,12 +958,15 @@ cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" build/web/      # Go 1.23 and older:
 
 # assets
 make art    # export changed drawings; ART_ARGS=-force for all, INKSCAPE=/path/to/inkscape if not on PATH
+make audio  # render every sound to assets/audio/*.ogg; FFMPEG=/path/to/ffmpeg if not on PATH
 # what make art runs for each part of a character, by hand:
 inkscape assets-src/sprites/critters/fox.svg --query-all    # id,x,y,width,height of every object
 inkscape assets-src/sprites/critters/fox.svg --export-type=png --export-id=down_head --export-id-only \
   --export-area-snap --export-dpi=96 \
   --export-filename=assets/sprites/critters/fox/down_head.png   # one part, at 8 px per world pixel
-ffmpeg -i in.wav -c:a libvorbis -q:a 4 out.ogg
+# what make audio runs per sound, by hand (-q:a 3 for music); -ac 1 makes it mono, which the lint test
+# requires, and -map_metadata -1 -bitexact keep the output the same from run to run:
+ffmpeg -y -i in.wav -map_metadata -1 -bitexact -ac 1 -c:a libvorbis -q:a 4 out.ogg
 
 # tests
 go test ./...
