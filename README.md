@@ -11,7 +11,8 @@ meadow, hops and says hello.
 ## Getting started
 
 You need Go 1.25 or later and nothing else: no C compiler and no Node.
-The one exception is `make art`, which also needs Inkscape (see [Art](#art)).
+The exceptions are `make art`, which also needs Inkscape (see [Art](#art)),
+and `make audio`, which also needs ffmpeg with libvorbis.
 
 ```sh
 make run              # play on the desktop
@@ -23,6 +24,7 @@ make test             # run the tests
 make check            # what CI runs: gofmt, go mod tidy, vet and tests
 make web              # build the browser bundle into build/web
 make art              # export changed drawings to PNG (needs Inkscape)
+make audio            # render every sound to OGG in assets/audio (needs ffmpeg)
 make                  # list every command
 ```
 
