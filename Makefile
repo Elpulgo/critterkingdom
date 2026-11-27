@@ -11,11 +11,13 @@ PORT ?= 8080
 INKSCAPE ?= inkscape
 # Extra arguments for make art, for example ART_ARGS=-force to export everything.
 ART_ARGS ?=
+# ffmpeg with libvorbis for make audio, a name on PATH or a path.
+FFMPEG ?= ffmpeg
 
 WEB_OUT := build/web
 LDFLAGS := -s -w
 
-.PHONY: help run build serve web art test check clean
+.PHONY: help run build serve web art audio test check clean
 
 help: ## List the commands
 	@grep -E '^[a-z]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN { FS = ":.*## " } { printf "  make %-6s %s\n", $$1, $$2 }'
@@ -41,6 +43,9 @@ web: ## Build the browser bundle into build/web
 
 art: ## Export changed drawings in assets-src/ to PNG and part JSON (needs Inkscape)
 	$(GO) run ./tools/art -inkscape '$(INKSCAPE)' $(ART_ARGS)
+
+audio: ## Render every sound to OGG in assets/audio/ (needs ffmpeg)
+	$(GO) run ./tools/audio -ffmpeg '$(FFMPEG)'
 
 test: ## Run the tests
 	$(GO) test ./...
