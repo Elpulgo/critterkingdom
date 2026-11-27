@@ -738,6 +738,150 @@ func TestTerrainCheck_RejectsIncompleteOrMisnamedTransitions(t *testing.T) {
 	}
 }
 
+// imageCollections are the image-collection tilesets, by slash path relative to
+// assets-src. Each lists every drawing in its own folder, one tile per drawing.
+var imageCollections = []string{"sprites/decor/decor.tsx"}
+
+func TestImageCollections_EveryTileMatchesADrawingAndNoDrawingIsLeftOut(t *testing.T) {
+	for _, path := range imageCollections {
+		t.Run(path, func(t *testing.T) {
+			dir := filepath.ToSlash(filepath.Dir(path))
+			for _, p := range checkImageCollection(dir, loadPages(t, dir), loadTSX(t, path)) {
+				t.Error(p)
+			}
+		})
+	}
+}
+
+func TestImageCollectionCheck_RejectsTilesThatDisagreeWithTheDrawings(t *testing.T) {
+	pages := loadPages(t, "sprites/decor")
+	tests := []struct {
+		name   string
+		change func(ts *tsxTileset)
+		want   string // a substring of a problem expected; "" for none
+	}{
+		{
+			name:   "the decor tileset as committed passes",
+			change: func(*tsxTileset) {},
+		},
+		{
+			name: "a tile naming a drawing that does not exist is rejected",
+			change: func(ts *tsxTileset) {
+				tile := tileOfType(t, ts, "twig")
+				tile.Type = "stick"
+				tile.Image.Source = "../../../assets/sprites/decor/stick.png"
+			},
+			want: `tile 14 type "stick": no drawing sprites/decor/stick.svg`,
+		},
+		{
+			name: "a tile whose image is not its own drawing's exported PNG is rejected",
+			change: func(ts *tsxTileset) {
+				tileOfType(t, ts, "clover").Image.Source = "../../../assets/sprites/decor/twig.png"
+			},
+			want: `tile 13 type "clover": image source "../../../assets/sprites/decor/twig.png", want "../../../assets/sprites/decor/clover.png"`,
+		},
+		{
+			name:   "a tile whose image size is not its drawing's page is rejected",
+			change: func(ts *tsxTileset) { tileOfType(t, ts, "pebble_1").Image.Width = 256 },
+			want:   `tile 7 type "pebble_1": image is 256 by 128 px, want the drawing's page 128 by 128`,
+		},
+		{
+			name: "a drawing in the folder with no tile is rejected",
+			change: func(ts *tsxTileset) {
+				ts.Tiles = slices.DeleteFunc(ts.Tiles, func(x tsxTile) bool { return x.Type == "leaf_2" })
+			},
+			want: `sprites/decor/leaf_2.svg has no tile in the tileset`,
+		},
+		{
+			name:   "a drawing on two tiles is rejected",
+			change: func(ts *tsxTileset) { tileOfType(t, ts, "tuft_2").Type = "tuft_1" },
+			want:   `tile 1 type "tuft_1": type repeats tile 0`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ts := loadTSX(t, "sprites/decor/decor.tsx")
+			tc.change(&ts)
+
+			problems := checkImageCollection("sprites/decor", pages, ts)
+
+			checkProblems(t, problems, tc.want)
+		})
+	}
+}
+
+// pxSize is a drawing's page size in drawing px.
+type pxSize struct{ w, h int }
+
+// loadPages returns the page size of each drawing in dir, keyed by its file
+// name without .svg.
+func loadPages(t *testing.T, dir string) map[string]pxSize {
+	t.Helper()
+	paths, err := filepath.Glob(filepath.Join(filepath.FromSlash(dir), "*.svg"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(paths) == 0 {
+		t.Fatalf("no drawings in %s", dir)
+	}
+	pages := make(map[string]pxSize)
+	for _, p := range paths {
+		f, err := os.Open(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var root struct {
+			Width  string `xml:"width,attr"`
+			Height string `xml:"height,attr"`
+		}
+		err = xml.NewDecoder(f).Decode(&root)
+		f.Close()
+		if err != nil {
+			t.Fatalf("parse %s: %v", p, err)
+		}
+		pages[strings.TrimSuffix(filepath.Base(p), ".svg")] = pxSize{int(pagePx(root.Width)), int(pagePx(root.Height))}
+	}
+	return pages
+}
+
+// checkImageCollection returns the ways the image-collection tileset ts
+// disagrees with the drawings in dir, whose page sizes are pages: each tile's
+// type names a drawing, its image is that drawing's exported PNG at the
+// drawing's page size, and every drawing has exactly one tile.
+func checkImageCollection(dir string, pages map[string]pxSize, ts tsxTileset) []string {
+	var problems []string
+	// The .tsx sits in assets-src/<dir>; the PNG at assets/<dir>/<name>.png.
+	toRoot := strings.Repeat("../", strings.Count(dir, "/")+2)
+	seen := make(map[string]int)
+	for _, tile := range ts.Tiles {
+		at := fmt.Sprintf("tile %d type %q", tile.ID, tile.Type)
+		if first, dup := seen[tile.Type]; dup {
+			problems = append(problems, fmt.Sprintf("%s: type repeats tile %d", at, first))
+			continue
+		}
+		seen[tile.Type] = tile.ID
+		page, drawn := pages[tile.Type]
+		if !drawn {
+			problems = append(problems, fmt.Sprintf("%s: no drawing %s/%s.svg", at, dir, tile.Type))
+			continue
+		}
+		if want := toRoot + "assets/" + dir + "/" + tile.Type + ".png"; tile.Image.Source != want {
+			problems = append(problems, fmt.Sprintf("%s: image source %q, want %q", at, tile.Image.Source, want))
+		}
+		if tile.Image.Width != page.w || tile.Image.Height != page.h {
+			problems = append(problems, fmt.Sprintf("%s: image is %d by %d px, want the drawing's page %d by %d",
+				at, tile.Image.Width, tile.Image.Height, page.w, page.h))
+		}
+	}
+	for name := range pages {
+		if _, ok := seen[name]; !ok {
+			problems = append(problems, fmt.Sprintf("%s/%s.svg has no tile in the tileset", dir, name))
+		}
+	}
+	slices.Sort(problems)
+	return problems
+}
+
 // checkProblems fails unless problems is empty when want is "", or holds a
 // problem containing want.
 func checkProblems(t *testing.T, problems []string, want string) {
@@ -792,22 +936,26 @@ func setWangID(t *testing.T, ts *tsxTileset, typ, wangID string) {
 
 // tsxTileset is the part of a Tiled .tsx tileset the tests read.
 type tsxTileset struct {
-	TileWidth  int `xml:"tilewidth,attr"`
-	TileHeight int `xml:"tileheight,attr"`
-	Columns    int `xml:"columns,attr"`
-	Image      struct {
-		Source string `xml:"source,attr"`
-		Width  int    `xml:"width,attr"`
-		Height int    `xml:"height,attr"`
-	} `xml:"image"`
-	Tiles    []tsxTile    `xml:"tile"`
-	WangSets []tsxWangSet `xml:"wangsets>wangset"`
+	TileWidth  int          `xml:"tilewidth,attr"`
+	TileHeight int          `xml:"tileheight,attr"`
+	Columns    int          `xml:"columns,attr"`
+	Image      tsxImage     `xml:"image"`
+	Tiles      []tsxTile    `xml:"tile"`
+	WangSets   []tsxWangSet `xml:"wangsets>wangset"`
+}
+
+type tsxImage struct {
+	Source string `xml:"source,attr"`
+	Width  int    `xml:"width,attr"`
+	Height int    `xml:"height,attr"`
 }
 
 type tsxTile struct {
 	ID     int        `xml:"id,attr"`
 	Type   string     `xml:"type,attr"`
 	Frames []tsxFrame `xml:"animation>frame"`
+	// Image is the tile's own image in an image-collection tileset.
+	Image tsxImage `xml:"image"`
 }
 
 type tsxFrame struct {
