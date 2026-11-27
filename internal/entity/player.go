@@ -16,13 +16,26 @@ const (
 	HopTime = 0.35
 	// hopHeight is how high a hop goes, in world pixels.
 	hopHeight = 6.0
+
+	// boxHalfWidth and boxHeight size the critter's 12 by 10 feet collision
+	// box, whose bottom centre sits at Pos.
+	boxHalfWidth = 6.0
+	boxHeight    = 10.0
 )
+
+// Walls stops the critter from walking through solid scenery and slides it
+// along walls.
+type Walls interface {
+	Slide(box geom.Rect, delta geom.Vec) geom.Vec
+}
 
 // Player is the critter the child plays.
 type Player struct {
 	// Pos is where the critter's feet touch the ground, in world pixels.
 	Pos    geom.Vec
 	Facing Facing
+	// Walls, when non-nil, constrains movement against solid scenery.
+	Walls Walls
 
 	target  geom.Vec
 	walking bool    // walking to target
@@ -33,6 +46,15 @@ type Player struct {
 // NewPlayer returns a critter standing at pos, facing the player.
 func NewPlayer(pos geom.Vec) *Player {
 	return &Player{Pos: pos}
+}
+
+// Box returns the critter's 12 by 10 collision rectangle in world pixels, with
+// its bottom centre at Pos.
+func (p *Player) Box() geom.Rect {
+	return geom.Rect{
+		Min: geom.Vec{X: p.Pos.X - boxHalfWidth, Y: p.Pos.Y - boxHeight},
+		Max: geom.Vec{X: p.Pos.X + boxHalfWidth, Y: p.Pos.Y},
+	}
 }
 
 // WalkTo makes the critter walk in a straight line to target and stop there.
@@ -100,6 +122,13 @@ func (p *Player) Update(dt float64, dir geom.Vec, area geom.Rect) {
 		p.Facing = p.Facing.Toward(want)
 	}
 	next = area.Clamp(next)
+	intended := next.Sub(p.Pos).Len()
+	if p.Walls != nil {
+		next = p.Pos.Add(p.Walls.Slide(p.Box(), next.Sub(p.Pos)))
+	}
+	if p.walking && next.Sub(p.Pos).Len() < 0.1*intended {
+		p.walking = false
+	}
 	p.moved = next != p.Pos
 	p.Pos = next
 }
