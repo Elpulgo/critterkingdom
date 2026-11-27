@@ -535,3 +535,525 @@ func loadPalette(t *testing.T, path string) map[string]bool {
 	}
 	return colours
 }
+
+// tileSize is the size of one tileset tile in drawing px (16 world px).
+const tileSize = 16 * drawingPxPerWorldPx
+
+// terrainPairs are the transitions the outdoor ground terrain set must paint:
+// each pair's 16 corner combinations need a tile.
+var terrainPairs = [][2]string{{"grass", "path"}, {"grass", "water"}, {"sand", "water"}}
+
+func TestTilesets_EveryTileSitsInItsDrawingsGridCell(t *testing.T) {
+	sheets, err := filepath.Glob("tiles/*.svg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sheets) == 0 {
+		t.Fatal("no tileset drawings in tiles/")
+	}
+	for _, sheet := range sheets {
+		name := strings.TrimSuffix(filepath.Base(sheet), ".svg")
+		t.Run(name, func(t *testing.T) {
+			ts := loadTSX(t, filepath.Join("tiles", name+".tsx"))
+			for _, p := range checkTileset(name, loadSheet(t, sheet), ts) {
+				t.Error(p)
+			}
+		})
+	}
+}
+
+func TestOutdoorTileset_GroundTerrainCoversEveryCornerCombination(t *testing.T) {
+	ts := loadTSX(t, "tiles/tileset_outdoor.tsx")
+	for _, p := range checkTerrain(ts, "ground", terrainPairs) {
+		t.Error(p)
+	}
+}
+
+func TestOutdoorTileset_WaterAnimatesThroughItsThreeFrames(t *testing.T) {
+	ts := loadTSX(t, "tiles/tileset_outdoor.tsx")
+	types := make(map[int]string)
+	var water *tsxTile
+	for i, tile := range ts.Tiles {
+		types[tile.ID] = tile.Type
+		if tile.Type == "water_1" {
+			water = &ts.Tiles[i]
+		}
+	}
+	if water == nil {
+		t.Fatal("no water_1 tile")
+	}
+	var got []string
+	for _, f := range water.Frames {
+		got = append(got, fmt.Sprintf("%s %dms", types[f.TileID], f.Duration))
+	}
+	want := []string{"water_1 300ms", "water_2 300ms", "water_3 300ms"}
+	if !slices.Equal(got, want) {
+		t.Errorf("water_1 animation = %q, want %q", got, want)
+	}
+}
+
+func TestTilesetCheck_RejectsTilesThatDisagreeWithTheDrawing(t *testing.T) {
+	sheet := loadSheet(t, "tiles/tileset_outdoor.svg")
+	tests := []struct {
+		name   string
+		change func(ts *tsxTileset)
+		want   string // a substring of a problem expected; "" for none
+	}{
+		{
+			name:   "the outdoor tileset as committed passes",
+			change: func(*tsxTileset) {},
+		},
+		{
+			name:   "a tile whose id is not its drawing's grid cell is rejected",
+			change: func(ts *tsxTileset) { tileOfType(t, ts, "cliff_face").ID = 63 },
+			want:   `tile 63 type "cliff_face": drawn in cell 59 (row 7, column 3), want id 59`,
+		},
+		{
+			name: "a drawn tile with no tileset entry is rejected",
+			change: func(ts *tsxTileset) {
+				ts.Tiles = slices.DeleteFunc(ts.Tiles, func(x tsxTile) bool { return x.Type == "sand" })
+			},
+			want: `"sand" is drawn in cell 5 but has no tile in the tileset`,
+		},
+		{
+			name:   "a type on two tiles is rejected",
+			change: func(ts *tsxTileset) { tileOfType(t, ts, "grass_2").Type = "grass" },
+			want:   `tile 1 type "grass": type repeats tile 0`,
+		},
+		{
+			name:   "a tile with no type is rejected",
+			change: func(ts *tsxTileset) { tileOfType(t, ts, "path").Type = "" },
+			want:   `tile 4 has no type`,
+		},
+		{
+			name:   "a type with no drawing is rejected",
+			change: func(ts *tsxTileset) { tileOfType(t, ts, "cliff_face").Type = "cliff_cave" },
+			want:   `tile 59 type "cliff_cave": no <g id="cliff_cave"> tile in the drawing`,
+		},
+		{
+			name:   "an image that is not the drawing's exported PNG is rejected",
+			change: func(ts *tsxTileset) { ts.Image.Source = "../../assets/tiles/tileset_placeholder.png" },
+			want:   `image source "../../assets/tiles/tileset_placeholder.png", want "../../assets/tiles/tileset_outdoor.png"`,
+		},
+		{
+			name:   "an image size other than the drawing's page is rejected",
+			change: func(ts *tsxTileset) { ts.Image.Height = 1152 },
+			want:   `image is 1024 by 1152 px, want the drawing's page 1024 by 1024`,
+		},
+		{
+			name:   "a column count other than the drawing's is rejected",
+			change: func(ts *tsxTileset) { ts.Columns = 4 },
+			want:   `columns="4", want 8`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ts := loadTSX(t, "tiles/tileset_outdoor.tsx")
+			tc.change(&ts)
+
+			problems := checkTileset("tileset_outdoor", sheet, ts)
+
+			checkProblems(t, problems, tc.want)
+		})
+	}
+}
+
+func TestTerrainCheck_RejectsIncompleteOrMisnamedTransitions(t *testing.T) {
+	tests := []struct {
+		name   string
+		change func(ts *tsxTileset)
+		want   string // a substring of a problem expected; "" for none
+	}{
+		{
+			name:   "the outdoor ground terrain as committed passes",
+			change: func(*tsxTileset) {},
+		},
+		{
+			name:   "a missing mixed corner combination is rejected",
+			change: func(ts *tsxTileset) { dropWangTile(t, ts, "grass_water_0110") },
+			want:   `grass/water: no tile has corners 0110 (nw ne sw se, 0 grass, 1 water)`,
+		},
+		{
+			name:   "a missing plain corner combination is rejected",
+			change: func(ts *tsxTileset) { dropWangTile(t, ts, "sand") },
+			want:   `sand/water: no tile has corners 0000 (nw ne sw se, 0 sand, 1 water)`,
+		},
+		{
+			name: "a mixed corner combination on two tiles is rejected",
+			change: func(ts *tsxTileset) {
+				w := tileOfType(t, ts, "cliff_face").ID
+				ts.WangSets[0].Tiles = append(ts.WangSets[0].Tiles, tsxWangTile{TileID: w, WangID: "0,1,0,2,0,1,0,1"})
+			},
+			want: `grass/path: corners 0001 are on 2 tiles`,
+		},
+		{
+			name: "a transition tile whose corners differ from its name is rejected",
+			change: func(ts *tsxTileset) {
+				setWangID(t, ts, "sand_water_0001", "0,4,0,4,0,3,0,4")
+			},
+			want: `tile 37 "sand_water_0001": corners nw sand, ne sand, sw water, se sand, want nw sand, ne sand, sw sand, se water`,
+		},
+		{
+			name:   "a transition tile left out of the terrain set is rejected",
+			change: func(ts *tsxTileset) { dropWangTile(t, ts, "grass_path_1110") },
+			want:   `tile 22 "grass_path_1110": not in wangset "ground"`,
+		},
+		{
+			name:   "a plain tile painted as another terrain is rejected",
+			change: func(ts *tsxTileset) { setWangID(t, ts, "grass_3", "0,2,0,2,0,2,0,2") },
+			want:   `tile 2 "grass_3": corners are all path, want a path tile`,
+		},
+		{
+			name:   "an edge-type terrain set is rejected",
+			change: func(ts *tsxTileset) { ts.WangSets[0].Type = "edge" },
+			want:   `wangset "ground" is type "edge", want "corner"`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ts := loadTSX(t, "tiles/tileset_outdoor.tsx")
+			tc.change(&ts)
+
+			problems := checkTerrain(ts, "ground", terrainPairs)
+
+			checkProblems(t, problems, tc.want)
+		})
+	}
+}
+
+// checkProblems fails unless problems is empty when want is "", or holds a
+// problem containing want.
+func checkProblems(t *testing.T, problems []string, want string) {
+	t.Helper()
+	if want == "" {
+		if len(problems) != 0 {
+			t.Fatalf("problems = %q, want none", problems)
+		}
+		return
+	}
+	for _, p := range problems {
+		if strings.Contains(p, want) {
+			return
+		}
+	}
+	t.Fatalf("problems = %q, want one containing %q", problems, want)
+}
+
+func tileOfType(t *testing.T, ts *tsxTileset, typ string) *tsxTile {
+	t.Helper()
+	for i := range ts.Tiles {
+		if ts.Tiles[i].Type == typ {
+			return &ts.Tiles[i]
+		}
+	}
+	t.Fatalf("no tile of type %q", typ)
+	return nil
+}
+
+func dropWangTile(t *testing.T, ts *tsxTileset, typ string) {
+	t.Helper()
+	id := tileOfType(t, ts, typ).ID
+	ws := &ts.WangSets[0]
+	n := len(ws.Tiles)
+	ws.Tiles = slices.DeleteFunc(ws.Tiles, func(w tsxWangTile) bool { return w.TileID == id })
+	if len(ws.Tiles) == n {
+		t.Fatalf("%q has no wangtile to drop", typ)
+	}
+}
+
+func setWangID(t *testing.T, ts *tsxTileset, typ, wangID string) {
+	t.Helper()
+	id := tileOfType(t, ts, typ).ID
+	for i := range ts.WangSets[0].Tiles {
+		if ts.WangSets[0].Tiles[i].TileID == id {
+			ts.WangSets[0].Tiles[i].WangID = wangID
+			return
+		}
+	}
+	t.Fatalf("%q has no wangtile", typ)
+}
+
+// tsxTileset is the part of a Tiled .tsx tileset the tests read.
+type tsxTileset struct {
+	TileWidth  int `xml:"tilewidth,attr"`
+	TileHeight int `xml:"tileheight,attr"`
+	Columns    int `xml:"columns,attr"`
+	Image      struct {
+		Source string `xml:"source,attr"`
+		Width  int    `xml:"width,attr"`
+		Height int    `xml:"height,attr"`
+	} `xml:"image"`
+	Tiles    []tsxTile    `xml:"tile"`
+	WangSets []tsxWangSet `xml:"wangsets>wangset"`
+}
+
+type tsxTile struct {
+	ID     int        `xml:"id,attr"`
+	Type   string     `xml:"type,attr"`
+	Frames []tsxFrame `xml:"animation>frame"`
+}
+
+type tsxFrame struct {
+	TileID   int `xml:"tileid,attr"`
+	Duration int `xml:"duration,attr"`
+}
+
+type tsxWangSet struct {
+	Name   string `xml:"name,attr"`
+	Type   string `xml:"type,attr"`
+	Colors []struct {
+		Name string `xml:"name,attr"`
+	} `xml:"wangcolor"`
+	Tiles []tsxWangTile `xml:"wangtile"`
+}
+
+type tsxWangTile struct {
+	TileID int    `xml:"tileid,attr"`
+	WangID string `xml:"wangid,attr"`
+}
+
+func loadTSX(t *testing.T, path string) tsxTileset {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read tileset: %v", err)
+	}
+	var ts tsxTileset
+	if err := xml.Unmarshal(data, &ts); err != nil {
+		t.Fatalf("parse %s: %v", path, err)
+	}
+	return ts
+}
+
+// sheet is a tileset drawing: its page size in px and the grid cell
+// (row*columns + column) of each tile, keyed by the tile group's id.
+type sheet struct {
+	width, height int
+	cells         map[string]int
+}
+
+// loadSheet reads a tileset drawing. Its tiles are the <g id="..."> children
+// of the root <svg>, each moved to its cell by transform="translate(x,y)".
+func loadSheet(t *testing.T, path string) sheet {
+	t.Helper()
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("open sheet: %v", err)
+	}
+	defer f.Close()
+
+	s := sheet{cells: make(map[string]int)}
+	dec := xml.NewDecoder(f)
+	depth := 0
+	for {
+		tok, err := dec.Token()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			t.Fatalf("parse %s: %v", path, err)
+		}
+		switch tok := tok.(type) {
+		case xml.EndElement:
+			depth--
+		case xml.StartElement:
+			depth++
+			attrs := make(map[string]string)
+			for _, a := range tok.Attr {
+				if a.Name.Space == "" {
+					attrs[a.Name.Local] = a.Value
+				}
+			}
+			if depth == 1 {
+				s.width, s.height = int(pagePx(attrs["width"])), int(pagePx(attrs["height"]))
+				if s.width <= 0 || s.width%tileSize != 0 || s.height <= 0 || s.height%tileSize != 0 {
+					t.Fatalf("%s: page %q by %q is not a whole number of %d px tiles", path, attrs["width"], attrs["height"], tileSize)
+				}
+			}
+			if depth != 2 || tok.Name.Local != "g" || attrs["id"] == "" {
+				continue
+			}
+			id := attrs["id"]
+			var xy []float64
+			if inner, ok := strings.CutPrefix(attrs["transform"], "translate("); ok {
+				xy = numbers(strings.TrimSuffix(inner, ")"))
+			}
+			if len(xy) != 2 || int(xy[0])%tileSize != 0 || int(xy[1])%tileSize != 0 ||
+				xy[0] < 0 || xy[1] < 0 || int(xy[0]) >= s.width || int(xy[1]) >= s.height {
+				t.Fatalf("%s: tile %q has transform %q, want translate(column*%d,row*%d) inside the page", path, id, attrs["transform"], tileSize, tileSize)
+			}
+			if _, dup := s.cells[id]; dup {
+				t.Fatalf("%s: tile %q is drawn twice", path, id)
+			}
+			s.cells[id] = int(xy[1])/tileSize*(s.width/tileSize) + int(xy[0])/tileSize
+		}
+	}
+	return s
+}
+
+// checkTileset returns the ways the Tiled tileset ts disagrees with its
+// drawing s, the tiles/<name>.svg it is exported from.
+func checkTileset(name string, s sheet, ts tsxTileset) []string {
+	var problems []string
+	columns := s.width / tileSize
+	if ts.TileWidth != tileSize || ts.TileHeight != tileSize {
+		problems = append(problems, fmt.Sprintf("tiles are %d by %d px, want %d by %d", ts.TileWidth, ts.TileHeight, tileSize, tileSize))
+	}
+	if ts.Columns != columns {
+		problems = append(problems, fmt.Sprintf("columns=\"%d\", want %d", ts.Columns, columns))
+	}
+	if want := "../../assets/tiles/" + name + ".png"; ts.Image.Source != want {
+		problems = append(problems, fmt.Sprintf("image source %q, want %q", ts.Image.Source, want))
+	}
+	if ts.Image.Width != s.width || ts.Image.Height != s.height {
+		problems = append(problems, fmt.Sprintf("image is %d by %d px, want the drawing's page %d by %d",
+			ts.Image.Width, ts.Image.Height, s.width, s.height))
+	}
+	seen := make(map[string]int)
+	for _, tile := range ts.Tiles {
+		if tile.Type == "" {
+			problems = append(problems, fmt.Sprintf("tile %d has no type", tile.ID))
+			continue
+		}
+		at := fmt.Sprintf("tile %d type %q", tile.ID, tile.Type)
+		if first, dup := seen[tile.Type]; dup {
+			problems = append(problems, fmt.Sprintf("%s: type repeats tile %d", at, first))
+			continue
+		}
+		seen[tile.Type] = tile.ID
+		cell, drawn := s.cells[tile.Type]
+		switch {
+		case !drawn:
+			problems = append(problems, fmt.Sprintf("%s: no <g id=%q> tile in the drawing", at, tile.Type))
+		case cell != tile.ID:
+			problems = append(problems, fmt.Sprintf("%s: drawn in cell %d (row %d, column %d), want id %d",
+				at, cell, cell/columns, cell%columns, cell))
+		}
+	}
+	for typ, cell := range s.cells {
+		if _, ok := seen[typ]; !ok {
+			problems = append(problems, fmt.Sprintf("%q is drawn in cell %d but has no tile in the tileset", typ, cell))
+		}
+	}
+	slices.Sort(problems)
+	return problems
+}
+
+// transitionName matches a transition tile type, <a>_<b>_<nw><ne><sw><se>,
+// with 0 for terrain a and 1 for terrain b at each corner.
+var transitionName = regexp.MustCompile(`^([a-z]+)_([a-z]+)_([01]{4})$`)
+
+// plainName matches a single-terrain tile type and its variants: grass, grass_2.
+var plainName = regexp.MustCompile(`^([a-z]+)(?:_[0-9]+)?$`)
+
+// checkTerrain returns the problems with ts's corner terrain set setName: each
+// pair needs all 16 corner combinations, its mixed ones on exactly one tile,
+// and every tile's corners must be the ones its name states.
+func checkTerrain(ts tsxTileset, setName string, pairs [][2]string) []string {
+	var ws *tsxWangSet
+	for i := range ts.WangSets {
+		if ts.WangSets[i].Name == setName {
+			ws = &ts.WangSets[i]
+		}
+	}
+	if ws == nil {
+		return []string{fmt.Sprintf("no wangset %q", setName)}
+	}
+	var problems []string
+	if ws.Type != "corner" {
+		problems = append(problems, fmt.Sprintf("wangset %q is type %q, want \"corner\"", setName, ws.Type))
+	}
+	types := make(map[int]string)
+	for _, tile := range ts.Tiles {
+		types[tile.ID] = tile.Type
+	}
+	colour := func(i int) string {
+		if i < 1 || i > len(ws.Colors) {
+			return fmt.Sprintf("colour %d", i)
+		}
+		return ws.Colors[i-1].Name
+	}
+
+	// corners maps each tile in the set to its terrain at nw, ne, sw, se.
+	corners := make(map[int][4]string)
+	for _, wt := range ws.Tiles {
+		at := fmt.Sprintf("tile %d %q", wt.TileID, types[wt.TileID])
+		ids := numbers(wt.WangID)
+		if len(ids) != 8 {
+			problems = append(problems, fmt.Sprintf("%s: wangid %q, want 8 numbers", at, wt.WangID))
+			continue
+		}
+		if ids[0] != 0 || ids[2] != 0 || ids[4] != 0 || ids[6] != 0 {
+			problems = append(problems, fmt.Sprintf("%s: wangid %q sets an edge in a corner set", at, wt.WangID))
+		}
+		if _, dup := corners[wt.TileID]; dup {
+			problems = append(problems, at+": in the terrain set twice")
+		}
+		// Tiled lists a wangid clockwise from the top edge: top, ne, right,
+		// se, bottom, sw, left, nw.
+		c := [4]string{colour(int(ids[7])), colour(int(ids[1])), colour(int(ids[5])), colour(int(ids[3]))}
+		corners[wt.TileID] = c
+
+		typ := types[wt.TileID]
+		if m := transitionName.FindStringSubmatch(typ); m != nil {
+			var want [4]string
+			for i, d := range m[3] {
+				want[i] = m[1+int(d-'0')]
+			}
+			if c != want {
+				problems = append(problems, fmt.Sprintf("%s: corners %s, want %s", at, describeCorners(c), describeCorners(want)))
+			}
+			continue
+		}
+		if c[0] != c[1] || c[1] != c[2] || c[2] != c[3] {
+			problems = append(problems, fmt.Sprintf("%s: corners %s, but the name states no corners", at, describeCorners(c)))
+			continue
+		}
+		if m := plainName.FindStringSubmatch(typ); m == nil || m[1] != c[0] {
+			problems = append(problems, fmt.Sprintf("%s: corners are all %s, want a %s tile", at, c[0], c[0]))
+		}
+	}
+
+	for _, tile := range ts.Tiles {
+		if m := transitionName.FindStringSubmatch(tile.Type); m != nil {
+			if _, ok := corners[tile.ID]; !ok {
+				problems = append(problems, fmt.Sprintf("tile %d %q: not in wangset %q", tile.ID, tile.Type, setName))
+			}
+		}
+	}
+
+	for _, pair := range pairs {
+		count := make(map[string]int)
+		for _, c := range corners {
+			code := ""
+			for _, terrain := range c {
+				switch terrain {
+				case pair[0]:
+					code += "0"
+				case pair[1]:
+					code += "1"
+				}
+			}
+			if len(code) == 4 {
+				count[code]++
+			}
+		}
+		for n := range 16 {
+			code := fmt.Sprintf("%04b", n)
+			switch {
+			case count[code] == 0:
+				problems = append(problems, fmt.Sprintf("%s/%s: no tile has corners %s (nw ne sw se, 0 %s, 1 %s)",
+					pair[0], pair[1], code, pair[0], pair[1]))
+			case count[code] > 1 && n != 0 && n != 15:
+				problems = append(problems, fmt.Sprintf("%s/%s: corners %s are on %d tiles, want one",
+					pair[0], pair[1], code, count[code]))
+			}
+		}
+	}
+	slices.Sort(problems)
+	return problems
+}
+
+func describeCorners(c [4]string) string {
+	return fmt.Sprintf("nw %s, ne %s, sw %s, se %s", c[0], c[1], c[2], c[3])
+}
