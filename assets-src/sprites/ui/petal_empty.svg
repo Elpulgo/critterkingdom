@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Empty petal, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A lost petal of the player's health: the same outline path as
+     petal_full.svg, filled in muted pale slate with a slate blue outline and
+     no highlight, so a row of full and empty petals lines up. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the petal 6 px lower -->
+  <path id="petal_empty_shadow" d="M 32 52 C 18 44 12 30 14 20 C 16 10 24 6 32 13 C 40 6 48 10 50 20 C 52 30 46 44 32 52 Z" transform="translate(0 6)" opacity="0.22" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Pale slate fill with slate blue outline -->
+  <path id="petal_empty_body" d="M 32 52 C 18 44 12 30 14 20 C 16 10 24 6 32 13 C 40 6 48 10 50 20 C 52 30 46 44 32 52 Z" fill="#c0cbdc" stroke="#5a6988" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -25,6 +25,11 @@ var uiArt = []struct {
 	// HUD size, 32 CSS px.
 	{"ui/arrow_next.svg", 64, 64},
 	{"ui/checkmark.svg", 64, 64},
+	{"ui/petal_full.svg", 64, 64},
+	{"ui/petal_empty.svg", 64, 64},
+	// The boss's big health stars, 48 CSS px.
+	{"ui/star_full.svg", 96, 96},
+	{"ui/star_empty.svg", 96, 96},
 	// HUD icons, 32 CSS px: simplified redraws of the menu icons.
 	{"ui/icons/speech_32.svg", 64, 64},
 	{"ui/icons/footsteps_32.svg", 64, 64},

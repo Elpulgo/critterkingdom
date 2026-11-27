@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Full petal, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     One petal of the player's health: a round blossom pink petal with a soft
+     notch at the top, narrowing to its base at the bottom. petal_empty.svg
+     uses the same outline path so a row of petals lines up. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the petal 6 px lower -->
+  <path id="petal_full_shadow" d="M 32 52 C 18 44 12 30 14 20 C 16 10 24 6 32 13 C 40 6 48 10 50 20 C 52 30 46 44 32 52 Z" transform="translate(0 6)" opacity="0.22" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Blossom pink petal fill -->
+  <path id="petal_full_body" d="M 32 52 C 18 44 12 30 14 20 C 16 10 24 6 32 13 C 40 6 48 10 50 20 C 52 30 46 44 32 52 Z" fill="#f6757a" stroke="none"/>
+  <!-- White highlight dab on the upper-left lobe -->
+  <ellipse id="petal_full_highlight" cx="22" cy="19" rx="3" ry="5" transform="rotate(25 22 19)" fill="#ffffff" stroke="none"/>
+  <!-- Berry crimson outline on top -->
+  <path id="petal_full_outline" d="M 32 52 C 18 44 12 30 14 20 C 16 10 24 6 32 13 C 40 6 48 10 50 20 C 52 30 46 44 32 52 Z" fill="none" stroke="#a22633" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
