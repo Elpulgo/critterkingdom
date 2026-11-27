@@ -670,23 +670,24 @@ only face down). Small critters: 5 to 10. Enemies: about 12. The boss: about
   `text/v2`. Dialogue text about 1 cm tall on a tablet, at most two lines of
   about 40 characters.
 
-**Sound effects** (jsfxr or ChipTone to WAV, then
-`ffmpeg -i x.wav -c:a libvorbis -q:a 4 x.ogg`): step, talk blip, pickup, door,
-chest, quest start (three notes up), quest done (fanfare), befriend success
-(sparkle), wrong snack (a soft "bwomp", never harsh), menu tap, hearts,
-sparkle, zzz, swing whoosh, hit pop, hurt "oof", poof, heart pickup, room lock
-and unlock chime, the Grub's friendly grumble. Keep everything soft and cap the
-master volume. *Now:* the 21 files in `assets/audio/sfx/` are synthesised
-placeholders from `tools/audio` (`make audio`); a hand-made jsfxr or ChipTone
-sound can replace any of them under the same name (see 6.6).
+**Sound effects** (jsfxr or ChipTone to WAV, then `ffmpeg -i x.wav -ac 1 -ar
+44100 -c:a libvorbis -q:a 4 x.ogg`, mono at 44100 Hz): step, talk blip,
+pickup, door, chest, quest start (three notes up), quest done (fanfare),
+befriend success (sparkle), wrong snack (a soft "bwomp", never harsh), menu
+tap, hearts, sparkle, zzz, swing whoosh, hit pop, hurt "oof", poof, heart
+pickup, room lock and unlock chime, the Grub's friendly grumble. Keep
+everything soft and cap the master volume. *Now:* the 21 files in
+`assets/audio/sfx/` are synthesised placeholders from `tools/audio` (`make
+audio`); a hand-made jsfxr or ChipTone sound can replace any of them under the
+same name (see 6.6).
 
-**Music** (BeepBox or Bosca Ceoil to WAV, then OGG at `-q:a 3`): four loops of
-45 to 60 seconds for village, meadow, cave and boss; 90 to 120 BPM, major or
-pentatonic, soft instruments. The boss track is bouncy, not scary. Music is
-the biggest asset, so keep loops short. *Now:* the four loops in
-`assets/audio/music/` are synthesised placeholders from `tools/audio`; a
-BeepBox or Bosca Ceoil track can replace any of them under the same name (see
-6.6).
+**Music** (BeepBox or Bosca Ceoil to WAV, then OGG the same way at `-q:a 3`,
+mono at 44100 Hz): four loops of 45 to 60 seconds for village, meadow, cave
+and boss; 90 to 120 BPM, major or pentatonic, soft instruments. The boss track
+is bouncy, not scary. Music is the biggest asset, so keep loops short. *Now:*
+the four loops in `assets/audio/music/` are synthesised placeholders from
+`tools/audio`; a BeepBox or Bosca Ceoil track can replace any of them under
+the same name (see 6.6).
 
 **Critter voices**: record about 20 syllables ("ba", "mi", "ko", ...) in a
 high and a low voice and play one per couple of letters while the text types
@@ -734,18 +735,18 @@ assets/       exported and embedded
   runs the real one on a machine that has it.
 - `make audio` runs `go run ./tools/audio`, a Go command (logic in
   `tools/audio/audioexport`) that renders every sound in the catalog of
-  `tools/audio/synth` (sound effects, music loops and critter-voice
-  syllables, all synthesised in code) to a mono 44100 Hz WAV in
-  `build/audio-src/`, which is not committed, and encodes it with ffmpeg
-  (`-c:a libvorbis`, `-q:a 4` for sound effects and voices, `-q:a 3` for
+  `tools/audio/synth` (sound effects, music loops and critter-voice syllables,
+  all synthesised in code) to a mono 44100 Hz WAV in `build/audio-src/`, which
+  is not committed, and encodes it with ffmpeg (`-map_metadata -1 -bitexact
+  -ac 1 -c:a libvorbis`, `-q:a 4` for sound effects and voices, `-q:a 3` for
   music) to its OGG under `assets/audio/` (`FFMPEG=/path/to/ffmpeg` when it is
   not on `PATH`). It always re-encodes everything and deletes OGG files under
-  `assets/audio/` that the catalog no longer lists. The exporter's tests use
-  a fake ffmpeg; `go test -tags ffmpeg ./tools/audio/...` runs the real one,
-  and a lint test checks the committed OGG files against the catalog (mono
-  Ogg Vorbis, length per kind, 3 MB in total). A hand-made file that
-  replaces a synthesised one needs its catalog entry changed too, or the next
-  `make audio` overwrites it.
+  `assets/audio/` that the catalog no longer lists. The exporter's tests use a
+  fake ffmpeg; `go test -tags ffmpeg ./tools/audio/...` runs the real one, and
+  a lint test checks the committed OGG files against the catalog (mono Ogg
+  Vorbis, length per kind, 3 MB in total). A hand-made file that replaces a
+  synthesised one needs its catalog entry changed too, or the next `make
+  audio` overwrites it.
 - `make check` runs gofmt, `go mod tidy -diff`, vet for desktop and browser
   and every test, which will include the content lint test; `make web` builds
   the wasm bundle into `build/web/`.
@@ -962,7 +963,9 @@ inkscape assets-src/sprites/critters/fox.svg --query-all    # id,x,y,width,heigh
 inkscape assets-src/sprites/critters/fox.svg --export-type=png --export-id=down_head --export-id-only \
   --export-area-snap --export-dpi=96 \
   --export-filename=assets/sprites/critters/fox/down_head.png   # one part, at 8 px per world pixel
-ffmpeg -i in.wav -c:a libvorbis -q:a 4 out.ogg              # what make audio runs per sound (-q:a 3 for music)
+# what make audio runs per sound, by hand (-q:a 3 for music); -ac 1 makes it mono, which the lint test
+# requires, and -map_metadata -1 -bitexact keep the output the same from run to run:
+ffmpeg -y -i in.wav -map_metadata -1 -bitexact -ac 1 -c:a libvorbis -q:a 4 out.ogg
 
 # tests
 go test ./...
