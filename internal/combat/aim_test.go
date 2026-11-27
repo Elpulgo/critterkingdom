@@ -16,6 +16,7 @@ func TestAim_TurnsTowardAnEnemyInsideTheConeAndKeepsFacingOtherwise(t *testing.T
 	rad46 := 46 * math.Pi / 180
 	cos44, sin44 := math.Cos(rad44), math.Sin(rad44)
 	cos46, sin46 := math.Cos(rad46), math.Sin(rad46)
+	invSqrt2 := math.Sqrt(0.5)
 
 	tests := []struct {
 		name    string
@@ -64,6 +65,20 @@ func TestAim_TurnsTowardAnEnemyInsideTheConeAndKeepsFacingOtherwise(t *testing.T
 			facingRight,
 			[]geom.Vec{{X: 100 + 20*cos44, Y: 100 - 20*sin44}},
 			geom.Vec{X: cos44, Y: -sin44},
+			1,
+		},
+		{
+			"enemy exactly 45 degrees to one side of facing on the diagonal is aimed at",
+			facingRight,
+			[]geom.Vec{{X: 110, Y: 110}},
+			geom.Vec{X: invSqrt2, Y: invSqrt2},
+			1,
+		},
+		{
+			"enemy exactly 45 degrees to the other side of facing on the diagonal is aimed at",
+			facingRight,
+			[]geom.Vec{{X: 110, Y: 90}},
+			geom.Vec{X: invSqrt2, Y: -invSqrt2},
 			1,
 		},
 		{

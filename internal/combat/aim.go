@@ -22,6 +22,7 @@ func Aim(origin, facing geom.Vec, enemies []geom.Vec) geom.Vec {
 		return geom.Vec{}
 	}
 
+	minDot := math.Cos(AimHalfAngle) - 1e-9
 	best := f
 	bestDist := math.Inf(1)
 	for _, enemy := range enemies {
@@ -32,8 +33,7 @@ func Aim(origin, facing geom.Vec, enemies []geom.Vec) geom.Vec {
 		}
 		dir := to.Normalized()
 		dot := dir.X*f.X + dir.Y*f.Y
-		dot = math.Max(-1, math.Min(1, dot))
-		if math.Acos(dot) > AimHalfAngle {
+		if dot < minDot {
 			continue
 		}
 		if dist < bestDist {
