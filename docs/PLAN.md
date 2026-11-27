@@ -302,7 +302,7 @@ critterkingdom/
     content/           content lint: validates all data cross-references    [test]
   assets/              exported, embedded game data (see 6.6)
   assets-src/          Inkscape, Tiled and BeepBox sources (not embedded)
-  web/                 index.html and loader.js (loading bar, tap-to-start); later manifest.webmanifest, sw.js
+  web/                 index.html and loader.js (loading bar, tap-to-start), manifest.webmanifest, sw.js, icons/
   tools/               asset export helpers
   docs/                PLAN.md (this), later ART-BIBLE.md, CREDITS.md, PLAYTEST-LOG.md
 ```
@@ -343,10 +343,17 @@ Systems emit events (`ItemCollected`, `TalkedTo`, `EnteredArea`,
   page, where `make web` writes it, or from `Content-Length` under wasmserve.
   The game starts on the tap. Ebitengine adds its own viewport tag at start,
   so the loader keeps ours in force.
-- PWA: `manifest.webmanifest` plus a service worker, so the game can be added
-  to the tablet home screen and works offline.
+- PWA: `manifest.webmanifest`, app icons in `web/icons/` and a service worker
+  (`web/sw.js`), so the game can be added to the tablet home screen and works
+  offline. The worker stores the whole bundle when it installs, then answers
+  network-first with a cache fallback: an online visit always gets the newest
+  build, and the stored copy is used only when the network fails. `loader.js`
+  registers it only where service workers exist (not on plain http over the
+  LAN), and a failed registration never stops the game.
 - Portrait on a phone: show a "turn your device" picture (iOS cannot lock
-  orientation from a web page).
+  orientation from a web page). The hint is CSS-only: a media query shows it
+  on coarse-pointer screens up to 600 CSS px wide held in portrait, with no
+  JavaScript, so it also covers the loading screen.
 - Serve `.wasm` as `application/wasm` with Brotli or gzip. Cloudflare Pages,
   Netlify and GitHub Pages all work as free static hosts; verify compression.
 - Build with `-trimpath -ldflags="-s -w"`; optionally try `wasm-opt -Oz` for a
@@ -407,7 +414,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 ### M1 A place to walk: "Acorn Hollow" (2 to 3 weeks)
 
-- [ ] Tiled JSON loading, layers, collision grid, animated tiles (water)
+- [x] Tiled JSON loading, layers, collision grid, animated tiles (water)
 - [ ] Camera follow and clamp; y-sorted props; "above" layer
 - [ ] Warps: village to meadow, village to house interior
 - [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
@@ -921,7 +928,7 @@ go tool wasmserve ./cmd/game                                # then open http://l
 # build the web bundle
 make web    # or by hand:
 GOOS=js GOARCH=wasm go build -trimpath -ldflags="-s -w" -o build/web/main.wasm ./cmd/game
-cp web/index.html web/loader.js build/web/
+cp -R web/. build/web/ && rm -f build/web/*_test.go         # page, loader, manifest, icons, worker
 cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" build/web/      # Go 1.23 and older: misc/wasm/wasm_exec.js
 
 # assets

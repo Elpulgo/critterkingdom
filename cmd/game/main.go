@@ -25,7 +25,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	game := engine.NewGame(world.NewScene(font), engine.Options{
+	m, err := assets.LoadMap("meadow")
+	if err != nil {
+		log.Fatal(err)
+	}
+	scene, err := world.NewScene(font, m)
+	if err != nil {
+		log.Fatal(err)
+	}
+	game := engine.NewGame(scene, engine.Options{
 		Font:     font,
 		TouchPad: opts.touchPad,
 	})

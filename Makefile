@@ -34,6 +34,7 @@ web: ## Build the browser bundle into build/web
 	@mkdir -p $(WEB_OUT)
 	GOOS=js GOARCH=wasm $(GO) build -tags '$(TAGS)' -trimpath -ldflags '$(LDFLAGS)' -o $(WEB_OUT)/main.wasm ./cmd/game
 	cp -R web/. $(WEB_OUT)/
+	rm -f $(WEB_OUT)/*_test.go
 	cp "$$($(GO) env GOROOT)/lib/wasm/wasm_exec.js" $(WEB_OUT)/
 	sed "s/__WASM_SIZE__/$$(wc -c < $(WEB_OUT)/main.wasm | tr -d ' ')/" web/index.html > $(WEB_OUT)/index.html
 	@echo "$(WEB_OUT)/main.wasm is $$(wc -c < $(WEB_OUT)/main.wasm | tr -d ' ') bytes"
