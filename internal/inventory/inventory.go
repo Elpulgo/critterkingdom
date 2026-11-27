@@ -25,6 +25,12 @@ type Stack struct {
 type Inventory struct {
 	catalog *Catalog
 	counts  map[string]int
+	// stickers holds unlocked sticker ids in unlock order.
+	stickers []string
+	// companion is the chosen companion's id; "" means none.
+	companion string
+	// weapons holds owned weapon ids, oldest first; the last is in use.
+	weapons []string
 }
 
 // New returns an empty inventory for the items in catalog.
