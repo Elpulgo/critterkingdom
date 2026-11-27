@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 9-slice button, normal state, 96 by 96 px (48 by 48 CSS px at 2 px per CSS px).
+     Insets: 32 px (16 CSS px) on every side. Corners, outline, highlight
+     strip, shade strip and drop shadow all stay inside the insets, so the
+     middle 32 by 32 px is plain marigold and stretches cleanly.
+     button_pressed.svg is this shape moved 4 px down onto its shadow. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="96" height="96" viewBox="0 0 96 96">
+  <!-- Soft drop shadow: the outer edge of the pressed button, 4 px lower -->
+  <rect id="button_shadow" x="1" y="5" width="94" height="86" rx="23" fill="#181425" fill-opacity="0.22" stroke="none"/>
+  <!-- Marigold body -->
+  <rect id="button_body" x="4" y="4" width="88" height="80" rx="20" fill="#feae34" stroke="none"/>
+  <!-- Top highlight strip (sunny yellow) and bottom shade strip (warm ochre) -->
+  <rect id="button_highlight" x="16" y="10" width="64" height="6" rx="3" fill="#fee761" stroke="none"/>
+  <rect id="button_shade" x="16" y="72" width="64" height="6" rx="3" fill="#d77643" stroke="none"/>
+  <!-- Rust red outline -->
+  <rect id="button_outline" x="4" y="4" width="88" height="80" rx="20" fill="none" stroke="#be4a2f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

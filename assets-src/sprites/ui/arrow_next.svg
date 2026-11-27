@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- "Next" arrow, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A rounded triangle pointing right, for moving on in a dialogue. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, 4 px lower -->
+  <path id="arrow_next_shadow" d="M 16 22 Q 16 16 21.1 19.2 L 42.9 32.8 Q 48 36 42.9 39.2 L 21.1 52.8 Q 16 56 16 50 Z" opacity="0.22" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Marigold body with rust red outline -->
+  <path id="arrow_next_body" d="M 16 18 Q 16 12 21.1 15.2 L 42.9 28.8 Q 48 32 42.9 35.2 L 21.1 48.8 Q 16 52 16 46 Z" fill="#feae34" stroke="#be4a2f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Highlight dab near the top-left -->
+  <circle id="arrow_next_highlight" cx="23" cy="24" r="3" fill="#fee761" stroke="none"/>
+</svg>
