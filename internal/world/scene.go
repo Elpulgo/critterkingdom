@@ -2,8 +2,11 @@
 package world
 
 import (
+	"cmp"
 	"fmt"
 	"math"
+	"math/rand/v2"
+	"slices"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -58,8 +61,9 @@ type Scene struct {
 	bounds   geom.Rect // the whole map, in world pixels
 	walkable geom.Rect // where the critter's feet may go so its box stays inside bounds
 	player   *entity.Player
-	camera   geom.Vec // top-left corner of the view, in world pixels
-	viewSize geom.Vec // size of the view, in world pixels
+	npcs     []*entity.NPC // the villagers of m, in the order of m.NPCs
+	camera   geom.Vec      // top-left corner of the view, in world pixels
+	viewSize geom.Vec      // size of the view, in world pixels
 	pen      pen
 	bob      float64 // how far the walk bob lifts the critter, in world pixels
 	elapsed  float64 // total elapsed seconds, for tile animations
@@ -107,7 +111,8 @@ func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Sc
 }
 
 // setMap makes m, loaded as name, the scene's map: its size bounds the
-// critter and the camera, and its collision grid stops the critter.
+// critter and the camera, its collision grid stops the critter and the
+// villagers, and its npc objects replace the villagers of the map before.
 func (s *Scene) setMap(name string, m *Map) {
 	size := m.Size()
 	s.mapName = name
@@ -118,6 +123,16 @@ func (s *Scene) setMap(name string, m *Map) {
 		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
 	}
 	s.player.Walls = m.Collision
+	spawns := m.NPCs()
+	s.npcs = make([]*entity.NPC, 0, len(spawns))
+	for _, sp := range spawns {
+		// Seeding from the object id gives each villager its own wander that
+		// is the same every time the map is entered.
+		rng := rand.New(rand.NewPCG(uint64(sp.ObjectID), 0))
+		n := entity.NewNPC(sp.ID, sp.Pos, sp.Area, rng)
+		n.Walls = m.Collision
+		s.npcs = append(s.npcs, n)
+	}
 }
 
 // followWarp moves the critter to the target spawn of the warp its feet are
@@ -138,9 +153,9 @@ func (s *Scene) followWarp() error {
 	return nil
 }
 
-// Update moves the critter and the camera by one tick, and moves the critter
-// to another map when its feet end the tick inside a warp. It returns an error
-// when that warp's target map or spawn does not exist.
+// Update moves the critter, the villagers and the camera by one tick, and
+// moves the critter to another map when its feet end the tick inside a warp.
+// It returns an error when that warp's target map or spawn does not exist.
 func (s *Scene) Update(f engine.Frame) error {
 	s.elapsed += f.DT
 	in := f.Input
@@ -156,6 +171,9 @@ func (s *Scene) Update(f engine.Frame) error {
 	s.player.Update(f.DT, in.Move, s.walkable)
 	if err := s.followWarp(); err != nil {
 		return err
+	}
+	for _, n := range s.npcs {
+		n.Update(f.DT, s.player.Pos)
 	}
 	if s.player.Moved() {
 		s.walked += f.DT
@@ -183,7 +201,7 @@ func (s *Scene) updateBob(dt float64) {
 	s.bob += math.Max(-bobPace*dt, math.Min(bobPace*dt, target-s.bob))
 }
 
-// DrawWorld draws the map layers and the critter.
+// DrawWorld draws the map layers, the villagers and the critter.
 func (s *Scene) DrawWorld(c engine.Canvas) {
 	c.Image.Fill(ink)
 	s.pen.begin(c, s.camera)
@@ -194,9 +212,35 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("ground"), c0, r0, c1, r1, elapsed)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("decor"), c0, r0, c1, r1, elapsed)
 	drawProps(&s.pen, s.m, s.m.ObjectLayer("props"), view, elapsed)
-	feet := s.player.Pos
-	drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	s.drawCharacters()
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
+}
+
+// drawCharacters draws the villagers and the critter from the back of the
+// view to the front, by the Y of their feet, so whoever stands lower in the
+// view overlaps whoever stands behind. The critter is drawn last of those
+// with the same Y.
+func (s *Scene) drawCharacters() {
+	order := make([]int, len(s.npcs))
+	for i := range order {
+		order[i] = i
+	}
+	slices.SortStableFunc(order, func(a, b int) int {
+		return cmp.Compare(s.npcs[a].Pos.Y, s.npcs[b].Pos.Y)
+	})
+	feet := s.player.Pos
+	critterDrawn := false
+	for _, i := range order {
+		n := s.npcs[i]
+		if !critterDrawn && n.Pos.Y > feet.Y {
+			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+			critterDrawn = true
+		}
+		drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, i)
+	}
+	if !critterDrawn {
+		drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	}
 }
 
 // DrawUI draws the title and the greeting bubble at full screen resolution,
@@ -245,14 +289,15 @@ func (s *Scene) feetInView() geom.Vec {
 	return s.player.Pos.Sub(s.camera)
 }
 
-// DebugLines adds the map's name, the critter's position, the camera and the
-// walk target to the debug overlay.
+// DebugLines adds the map's name, the critter's position, the camera, the
+// number of villagers and the walk target to the debug overlay.
 func (s *Scene) DebugLines() []string {
 	p := s.player
 	lines := []string{
 		"map " + s.mapName,
 		fmt.Sprintf("critter %.1f,%.1f facing %s", p.Pos.X, p.Pos.Y, p.Facing),
 		fmt.Sprintf("camera %.0f,%.0f", s.camera.X, s.camera.Y),
+		fmt.Sprintf("villagers %d", len(s.npcs)),
 	}
 	if t, ok := p.Target(); ok {
 		lines = append(lines, fmt.Sprintf("walk to %.0f,%.0f", t.X, t.Y))
