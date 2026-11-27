@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Key icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A marigold key lying diagonally, round bow at the upper left. Drawn level
+     and turned 45 degrees by the group transform. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, the key 6 px lower -->
+  <g id="key_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <g transform="translate(0 -4) rotate(45 64 64)">
+      <path d="M 52 56 H 106 Q 112 56 112 62 V 82 Q 112 86 108 86 H 106 Q 102 86 102 82 V 72 H 92 V 86 Q 92 90 88 90 H 86 Q 82 90 82 86 V 72 H 52 Z" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M 10 64 A 24 24 0 1 0 58 64 A 24 24 0 1 0 10 64 Z M 25 64 A 9 9 0 1 0 43 64 A 9 9 0 1 0 25 64 Z" fill="#181425" fill-rule="evenodd" stroke="#181425" stroke-width="6"/>
+    </g>
+  </g>
+  <g id="key_64_key" transform="translate(0 -4) rotate(45 64 64)">
+    <!-- Shaft and teeth: marigold with warm ochre outline -->
+    <path id="key_64_shaft" d="M 52 56 H 106 Q 112 56 112 62 V 82 Q 112 86 108 86 H 106 Q 102 86 102 82 V 72 H 92 V 86 Q 92 90 88 90 H 86 Q 82 90 82 86 V 72 H 52 Z" fill="#feae34" stroke="#d77643" stroke-width="6" stroke-linejoin="round"/>
+    <!-- Round bow with a hole -->
+    <path id="key_64_bow" d="M 10 64 A 24 24 0 1 0 58 64 A 24 24 0 1 0 10 64 Z M 25 64 A 9 9 0 1 0 43 64 A 9 9 0 1 0 25 64 Z" fill="#feae34" fill-rule="evenodd" stroke="#d77643" stroke-width="6"/>
+    <!-- Joins the bow to the shaft by covering the bow outline where they meet -->
+    <rect id="key_64_join" x="50" y="59" width="14" height="10" fill="#feae34" stroke="none"/>
+    <!-- Sunny yellow highlight on the bow, toward the light -->
+    <path id="key_64_highlight" d="M 18 56 Q 22 46 32 44" fill="none" stroke="#fee761" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

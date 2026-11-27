@@ -25,6 +25,23 @@ var uiArt = []struct {
 	// HUD size, 32 CSS px.
 	{"ui/arrow_next.svg", 64, 64},
 	{"ui/checkmark.svg", 64, 64},
+	// Menu icons, 64 CSS px.
+	{"ui/icons/speech_64.svg", 128, 128},
+	{"ui/icons/footsteps_64.svg", 128, 128},
+	{"ui/icons/berry_64.svg", 128, 128},
+	{"ui/icons/hat_64.svg", 128, 128},
+	{"ui/icons/heart_64.svg", 128, 128},
+	{"ui/icons/star_64.svg", 128, 128},
+	{"ui/icons/sticker_64.svg", 128, 128},
+	{"ui/icons/backpack_64.svg", 128, 128},
+	{"ui/icons/gear_64.svg", 128, 128},
+	{"ui/icons/speaker_64.svg", 128, 128},
+	{"ui/icons/key_64.svg", 128, 128},
+	{"ui/icons/lantern_64.svg", 128, 128},
+	{"ui/icons/zzz_64.svg", 128, 128},
+	{"ui/icons/stick_64.svg", 128, 128},
+	{"ui/icons/sturdy_stick_64.svg", 128, 128},
+	{"ui/icons/wand_64.svg", 128, 128},
 }
 
 // uiArtFolders are the folders whose every .svg must be a manifest row.

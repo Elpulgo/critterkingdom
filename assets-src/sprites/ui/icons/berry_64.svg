@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Berry icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A round poppy red berry with a two-leaf green cap. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, the berry 6 px lower -->
+  <g id="berry_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <circle cx="64" cy="72" r="38" fill="#181425" stroke="#181425" stroke-width="6"/>
+  </g>
+  <!-- Poppy red berry with berry crimson outline -->
+  <circle id="berry_64_body" cx="64" cy="72" r="38" fill="#e43b44" stroke="#a22633" stroke-width="6"/>
+  <!-- Shade crescent on the lower-right curve -->
+  <path id="berry_64_shade" d="M 92 70 Q 92 98 64 100" fill="none" stroke="#a22633" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Highlight on the upper-left curve -->
+  <ellipse id="berry_64_highlight" cx="46" cy="60" rx="9" ry="12" transform="rotate(35 46 60)" fill="#f6757a" stroke="none"/>
+  <!-- Seeds -->
+  <circle id="berry_64_seed_1" cx="72" cy="66" r="3" fill="#a22633" stroke="none"/>
+  <circle id="berry_64_seed_2" cx="56" cy="84" r="3" fill="#a22633" stroke="none"/>
+  <circle id="berry_64_seed_3" cx="78" cy="88" r="3" fill="#a22633" stroke="none"/>
+  <!-- Leaf green cap and stem with pine green outline -->
+  <path id="berry_64_leaf_left" d="M 64 36 Q 50 20 34 30 Q 46 44 64 36 Z" fill="#3e8948" stroke="#265c42" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path id="berry_64_leaf_right" d="M 64 36 Q 78 20 94 30 Q 82 44 64 36 Z" fill="#3e8948" stroke="#265c42" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path id="berry_64_stem" d="M 64 36 Q 64 22 72 14" fill="none" stroke="#265c42" stroke-width="6" stroke-linecap="round"/>
+</svg>
