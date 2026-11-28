@@ -2,6 +2,8 @@ package world
 
 import (
 	"fmt"
+	"math"
+	"time"
 
 	"github.com/Elpulgo/critterkingdom/internal/geom"
 )
@@ -15,7 +17,32 @@ const (
 	// warpType is the Tiled object type of an area that moves the critter to
 	// another map.
 	warpType = "warp"
+	// spawnZoneType is the Tiled object type of an area where wild critters
+	// of one habitat appear.
+	spawnZoneType = "spawn_zone"
+
+	// defaultZoneMax is how many critters a spawn_zone holds when it has no
+	// max property.
+	defaultZoneMax = 3
+	// defaultZoneRespawn is how long a freed slot of a spawn_zone waits when
+	// the zone has no respawn_s property.
+	defaultZoneRespawn = 60 * time.Second
 )
+
+// SpawnZone is an area of a map where wild critters of one habitat appear.
+type SpawnZone struct {
+	// ID names the zone: the object's name, or "zone-<object id>" when the
+	// object has none. It is unique within the map.
+	ID string
+	// Rect is the area critters appear and move in, in world pixels.
+	Rect geom.Rect
+	// Habitat is the habitat of the species that appear here.
+	Habitat string
+	// Max is how many critters the zone holds at once.
+	Max int
+	// RespawnAfter is how long a freed slot waits before it is filled again.
+	RespawnAfter time.Duration
+}
 
 // Warp is an area of a map that moves the critter to the spawn TargetSpawn of
 // the map TargetMap when it walks into it.
@@ -66,6 +93,12 @@ func (m *Map) Warps() []Warp {
 	return append([]Warp(nil), m.warps...)
 }
 
+// SpawnZones returns every spawn_zone object of the objects layer, in layer
+// order. The slice is a copy; changing it does not change the map.
+func (m *Map) SpawnZones() []SpawnZone {
+	return append([]SpawnZone(nil), m.zones...)
+}
+
 // WarpAt returns the first warp whose area contains pos, and false when pos
 // is in no warp.
 func (m *Map) WarpAt(pos geom.Vec) (Warp, bool) {
@@ -77,16 +110,18 @@ func (m *Map) WarpAt(pos geom.Vec) (Warp, bool) {
 	return Warp{}, false
 }
 
-// loadMarkers reads the player_spawn, warp and npc objects of the objects
-// layer into m. It returns an error naming the object id for a spawn without a
-// name or with a name already used, for a warp without an area or without a
-// target map or spawn, and for an npc without an id or with an id already used.
+// loadMarkers reads the player_spawn, warp and spawn_zone objects of the
+// objects layer into m. It returns an error naming the object id for a spawn
+// without a name or with a name already used, for a warp without an area or
+// without a target map or spawn, and for a spawn_zone that parseSpawnZone
+// rejects or whose ID another zone already uses.
 func (m *Map) loadMarkers() error {
 	layer := m.ObjectLayer(objectsLayer)
 	if layer == nil {
 		return nil
 	}
 	seen := make(map[string]int)
+	seenZones := make(map[string]int)
 	seenNPC := make(map[string]int)
 	for _, o := range layer.Objects {
 		switch o.Type {
@@ -117,6 +152,17 @@ func (m *Map) loadMarkers() error {
 			}
 			m.warps = append(m.warps, w)
 
+		case spawnZoneType:
+			z, err := parseSpawnZone(o)
+			if err != nil {
+				return err
+			}
+			if first, dup := seenZones[z.ID]; dup {
+				return fmt.Errorf("%s object %d: spawn_zone id %q is already used by object %d", objectsLayer, o.ID, z.ID, first)
+			}
+			seenZones[z.ID] = o.ID
+			m.zones = append(m.zones, z)
+      
 		case npcType:
 			if err := m.loadNPC(o, seenNPC); err != nil {
 				return err
@@ -124,6 +170,44 @@ func (m *Map) loadMarkers() error {
 		}
 	}
 	return nil
+}
+
+// parseSpawnZone turns the spawn_zone object o into a SpawnZone. It returns an
+// error naming the object id when o has no area, no string property habitat,
+// a max that is not a whole number of at least 1, or a respawn_s that is not
+// a number of at least 0. An absent max or respawn_s takes its default.
+func parseSpawnZone(o Object) (SpawnZone, error) {
+	if o.W <= 0 || o.H <= 0 {
+		return SpawnZone{}, fmt.Errorf("%s object %d: spawn_zone has size %vx%v; want a rectangle with positive width and height", objectsLayer, o.ID, o.W, o.H)
+	}
+	z := SpawnZone{
+		ID:           o.Name,
+		Rect:         o.Rect(),
+		Habitat:      o.Properties.String("habitat"),
+		Max:          defaultZoneMax,
+		RespawnAfter: defaultZoneRespawn,
+	}
+	if z.ID == "" {
+		z.ID = fmt.Sprintf("zone-%d", o.ID)
+	}
+	if z.Habitat == "" {
+		return SpawnZone{}, fmt.Errorf("%s object %d: spawn_zone has no string property habitat", objectsLayer, o.ID)
+	}
+	if raw, ok := o.Properties["max"]; ok {
+		v, isNum := raw.(float64)
+		if !isNum || v < 1 || v != math.Trunc(v) {
+			return SpawnZone{}, fmt.Errorf("%s object %d: spawn_zone property max is %v; want a whole number of at least 1", objectsLayer, o.ID, raw)
+		}
+		z.Max = int(v)
+	}
+	if raw, ok := o.Properties["respawn_s"]; ok {
+		v, isNum := raw.(float64)
+		if !isNum || v < 0 {
+			return SpawnZone{}, fmt.Errorf("%s object %d: spawn_zone property respawn_s is %v; want a number of seconds of at least 0", objectsLayer, o.ID, raw)
+		}
+		z.RespawnAfter = time.Duration(v * float64(time.Second))
+	}
+	return z, nil
 }
 
 // MapLoader loads the map called name, for example "meadow". The game passes

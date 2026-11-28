@@ -9,5 +9,45 @@
     "sprite": "critters/firefly",
     "ability": "light",
     "fact": {"en": "Fireflies glow to say hello.", "sv": "Eldflugor lyser för att säga hej."}
+  },
+  {
+    "id": "frog",
+    "name": {"en": "Frog", "sv": "Groda"},
+    "habitat": "pond",
+    "likes": "cookie",
+    "rarity": "common",
+    "sprite": "critters/frog",
+    "ability": "fetch",
+    "fact": {"en": "Frogs can jump many times their own length.", "sv": "Grodor kan hoppa många gånger sin egen längd."}
+  },
+  {
+    "id": "snail",
+    "name": {"en": "Snail", "sv": "Snigel"},
+    "habitat": "meadow",
+    "likes": "berry",
+    "rarity": "common",
+    "sprite": "critters/snail",
+    "ability": "",
+    "fact": {"en": "Snails carry their house on their back.", "sv": "Sniglar bär sitt hus på ryggen."}
+  },
+  {
+    "id": "bird",
+    "name": {"en": "Bird", "sv": "Fågel"},
+    "habitat": "meadow",
+    "likes": "berry",
+    "rarity": "uncommon",
+    "sprite": "critters/bird",
+    "ability": "point",
+    "fact": {"en": "Birds sing to talk to each other.", "sv": "Fåglar sjunger för att prata med varandra."}
+  },
+  {
+    "id": "squirrel",
+    "name": {"en": "Squirrel", "sv": "Ekorre"},
+    "habitat": "meadow",
+    "likes": "cookie",
+    "rarity": "rare",
+    "sprite": "critters/squirrel",
+    "ability": "",
+    "fact": {"en": "Squirrels hide nuts to eat in winter.", "sv": "Ekorrar gömmer nötter att äta på vintern."}
   }
 ]

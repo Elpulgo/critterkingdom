@@ -10,7 +10,7 @@
   "tilewidth": 128,
   "tileheight": 128,
   "nextlayerid": 7,
-  "nextobjectid": 155,
+  "nextobjectid": 153,
   "properties": [
     {
       "name": "biome",
@@ -6683,21 +6683,21 @@
         },
         {
           "id": 152,
-          "name": "grandma_hedgehog",
-          "type": "npc",
-          "x": 512,
-          "y": 1664,
-          "width": 384,
-          "height": 384,
+          "name": "pond_shore",
+          "type": "spawn_zone",
+          "x": 3200,
+          "y": 2432,
+          "width": 1024,
+          "height": 896,
           "visible": true,
           "properties": [
             {
-              "name": "id",
+              "name": "habitat",
               "type": "string",
-              "value": "grandma_hedgehog"
+              "value": "pond"
             }
           ]
-        },
+         },
         {
           "id": 153,
           "name": "baker_badger",
@@ -6731,7 +6731,24 @@
               "value": "mayor_owl"
             }
           ]
-        }
+        },
+        {
+          "id": 155,
+          "name": "grandma_hedgehog",
+          "type": "npc",
+          "x": 512,
+          "y": 1664,
+          "width": 384,
+          "height": 384,
+          "visible": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "string",
+              "value": "grandma_hedgehog"
+            }
+          ]
+        },
       ]
     }
   ]

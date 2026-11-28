@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/critter"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
 	"github.com/Elpulgo/critterkingdom/internal/world"
 )
@@ -97,6 +98,56 @@ func TestEmbeddedMaps_EveryWarpCanBeWalkedToFromEverySpawn(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestEmbeddedMaps_SpawnZonesLieInsideTheMapClearOfWarpsAndSpawnsOnReachableGround(t *testing.T) {
+	for name, m := range loadEmbeddedMaps(t) {
+		bounds := geom.Rect{Max: m.Size()}
+		spawns := spawnsOf(m)
+		for _, z := range m.SpawnZones() {
+			if z.Rect.Min.X < bounds.Min.X || z.Rect.Min.Y < bounds.Min.Y || z.Rect.Max.X > bounds.Max.X || z.Rect.Max.Y > bounds.Max.Y {
+				t.Errorf("map %s: spawn zone %s at %v reaches outside the map %v", name, z.ID, z.Rect, bounds)
+			}
+			for _, w := range m.Warps() {
+				if overlaps(z.Rect, w.Rect) {
+					t.Errorf("map %s: spawn zone %s at %v overlaps the warp to %s/%s at %v", name, z.ID, z.Rect, w.TargetMap, w.TargetSpawn, w.Rect)
+				}
+			}
+			for _, s := range spawns {
+				if z.Rect.Contains(s.pos) {
+					t.Errorf("map %s: spawn zone %s at %v covers spawn %q at %v", name, z.ID, z.Rect, s.name, s.pos)
+				}
+				reached := openCellsReachableFrom(m, int(s.pos.X/m.TileSize), int(s.pos.Y/m.TileSize))
+				if !anyCellReached(m, reached, z.Rect) {
+					t.Errorf("map %s: spawn zone %s at %v has no open cell that can be walked to from spawn %q", name, z.ID, z.Rect, s.name)
+				}
+			}
+		}
+	}
+}
+
+func TestEmbeddedMaps_EverySpawnZoneHasASpeciesThatComesOutByDay(t *testing.T) {
+	species, err := assets.LoadCritters()
+	if err != nil {
+		t.Fatalf("LoadCritters: %v", err)
+	}
+	// The world the game hands the spawner until night (#50), quest flags,
+	// companions and the daily visitor exist.
+	day := critter.World{TimeOfDay: critter.Day}
+	for name, m := range loadEmbeddedMaps(t) {
+		for _, z := range m.SpawnZones() {
+			found := false
+			for i := range species {
+				if species[i].Habitat == z.Habitat && species[i].Active(day) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("map %s: spawn zone %s has habitat %q, which no species of critters.json lives in by day", name, z.ID, z.Habitat)
+			}
+		}
+  }
 }
 
 func TestEmbeddedMaps_VillagersStartOnOpenGroundAndWanderInsideTheMapClearOfWarps(t *testing.T) {

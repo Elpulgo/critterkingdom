@@ -4,6 +4,7 @@ package world
 import (
 	"cmp"
 	"fmt"
+	"image/color"
 	"math"
 	"math/rand/v2"
 	"slices"
@@ -13,6 +14,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
+	"github.com/Elpulgo/critterkingdom/internal/critter"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
 	"github.com/Elpulgo/critterkingdom/internal/entity"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
@@ -116,6 +118,19 @@ type Scene struct {
 	titleFace  *text.GoTextFace
 	bubbleFace *text.GoTextFace
 
+	// species and rng are set by AddWildCritters; with rng nil the scene has
+	// no wild critters.
+	species []critter.Species
+	rng     *rand.Rand
+	// spawner decides which critters are present in the current map's
+	// zones, and wild holds the entity of each, in zone order.
+	spawner *critter.Spawner
+	wild    []*wildCritter
+	// inView is reused by DrawWorld for the wild critters it draws.
+	inView []*wildCritter
+	// timeOfDay decides which species are about; it stays critter.Day until
+	// day and night exist.
+	timeOfDay critter.TimeOfDay
 	mask lightMask // darkness drawn over dark maps
 }
 
@@ -142,6 +157,7 @@ func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Sc
 		load:       load,
 		player:     entity.NewPlayer(spawn),
 		titleAlpha: 1,
+		timeOfDay:  critter.Day,
 		titleFace:  engine.NewFace(font, titleTextSize, titleWeight),
 		bubbleFace: engine.NewFace(font, bubbleTextSize, bubbleWeight),
 	}
@@ -162,6 +178,7 @@ func (s *Scene) setMap(name string, m *Map) {
 		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
 	}
 	s.player.Walls = m.Collision
+	s.resetWildCritters()
 	// A tapped villager belongs to the map before.
 	s.tapTarget = nil
 	spawns := m.NPCs()
@@ -222,6 +239,7 @@ func (s *Scene) Update(f engine.Frame) error {
 	if err := s.followWarp(); err != nil {
 		return err
 	}
+	s.updateWildCritters(f.DT)
 	if s.tapTarget != nil && !s.reachTapTarget() {
 		if _, walking := s.player.Target(); !walking {
 			// The walk ended before getting there: a wall stopped it, or the
@@ -411,6 +429,7 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("ground"), c0, r0, c1, r1, elapsed)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("decor"), c0, r0, c1, r1, elapsed)
 	drawProps(&s.pen, s.m, s.m.ObjectLayer("props"), view, elapsed)
+	s.drawCritters(view)
 	s.drawCharacters()
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
 	if s.m.Dark {
@@ -445,9 +464,53 @@ func (s *Scene) drawCharacters() {
 	}
 }
 
-// DrawUI draws the title, the "…" bubble over the villager the paw would
-// pick and the greeting bubble at full screen resolution, in the current
-// language of i18n.
+// drawCritters draws the player and the wild critters in view, the ones
+// whose feet are higher up the map first, so a critter in front of another
+// is drawn over it. The player is drawn over a wild critter with its feet at
+// the same height.
+func (s *Scene) drawCritters(view geom.Rect) {
+	near := view.Inset(-wildReach)
+	s.inView = s.inView[:0]
+	for _, w := range s.wild {
+		if near.Contains(w.Pos) {
+			s.inView = append(s.inView, w)
+		}
+	}
+	slices.SortStableFunc(s.inView, func(a, b *wildCritter) int {
+		return cmp.Compare(a.Pos.Y, b.Pos.Y)
+	})
+
+	feet := s.player.Pos
+	playerDrawn := false
+	for _, w := range s.inView {
+		if !playerDrawn && w.Pos.Y > feet.Y {
+			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+			playerDrawn = true
+		}
+		s.drawWild(w)
+	}
+	if !playerDrawn {
+		drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	}
+}
+
+// drawWild draws one wild critter, with twinkling stars around it if it is
+// rare and a "!" above it while it is noticing the player.
+func (s *Scene) drawWild(w *wildCritter) {
+	lift := w.HopHeight()
+	drawWildCritter(&s.pen, w.Pos.X, w.Pos.Y, lift, w.Facing, speciesColor(w.species.ID))
+	if w.Rare {
+		// The spawn id shifts each critter's twinkle so rare critters side
+		// by side do not twinkle in step.
+		drawSparkle(&s.pen, w.Pos.X, w.Pos.Y-wildRadius-lift, s.elapsed, float64(w.id))
+	}
+	if w.Noticing() {
+		drawNotice(&s.pen, w.Pos.X, w.Pos.Y-noticeTop)
+	}
+}
+
+// DrawUI draws the title and the greeting bubble at full screen resolution,
+// in the current language of i18n.
 func (s *Scene) DrawUI(screen *ebiten.Image, ui engine.UI) {
 	if s.titleAlpha > 0 {
 		s.drawTitle(screen, ui)
@@ -517,6 +580,7 @@ func (s *Scene) feetInView() geom.Vec {
 }
 
 // DebugLines adds the map's name, the critter's position, the camera, the
+// walk target and the number of wild critters to the debug overlay.
 // number of villagers, the villager last interacted with and the walk target
 // to the debug overlay.
 func (s *Scene) DebugLines() []string {
@@ -533,16 +597,19 @@ func (s *Scene) DebugLines() []string {
 	if t, ok := p.Target(); ok {
 		lines = append(lines, fmt.Sprintf("walk to %.0f,%.0f", t.X, t.Y))
 	}
+	lines = append(lines, fmt.Sprintf("wild critters %d", len(s.wild)))
 	return lines
 }
 
-// DrawDebug outlines where the critter may walk and marks its feet and its
-// walk target. Sizes are in world pixels, so the marks grow with the view.
+// DrawDebug outlines where the critter may walk and the map's spawn zones,
+// and marks the critter's feet and its walk target. Sizes are in world
+// pixels, so the marks grow with the view.
 func (s *Scene) DrawDebug(c engine.Canvas) {
 	k := float32(c.Scale)
-	left, top := c.At(s.walkable.Min.Sub(s.camera))
-	size := s.walkable.Max.Sub(s.walkable.Min)
-	vector.StrokeRect(c.Image, left, top, float32(size.X)*k, float32(size.Y)*k, k, debugColor, true)
+	s.strokeWorldRect(c, s.walkable, debugColor)
+	for _, z := range s.m.SpawnZones() {
+		s.strokeWorldRect(c, z.Rect, zoneDebug)
+	}
 
 	fx, fy := c.At(s.feetInView())
 	vector.FillRect(c.Image, fx-k, fy-k, 2*k, 2*k, debugColor, true)
@@ -552,4 +619,13 @@ func (s *Scene) DrawDebug(c engine.Canvas) {
 		vector.StrokeLine(c.Image, x-3*k, y-3*k, x+3*k, y+3*k, k, debugColor, true)
 		vector.StrokeLine(c.Image, x-3*k, y+3*k, x+3*k, y-3*k, k, debugColor, true)
 	}
+}
+
+// strokeWorldRect outlines r, given in world pixels, with a line one world
+// pixel wide.
+func (s *Scene) strokeWorldRect(c engine.Canvas, r geom.Rect, clr color.Color) {
+	k := float32(c.Scale)
+	left, top := c.At(r.Min.Sub(s.camera))
+	size := r.Max.Sub(r.Min)
+	vector.StrokeRect(c.Image, left, top, float32(size.X)*k, float32(size.Y)*k, k, clr, true)
 }

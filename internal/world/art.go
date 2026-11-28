@@ -1,6 +1,7 @@
 package world
 
 import (
+	"hash/fnv"
 	"image/color"
 	"math"
 
@@ -32,8 +33,23 @@ var (
 	white       = color.NRGBA{0xff, 0xff, 0xff, 0xff}
 	debugColor  = color.NRGBA{0xfe, 0xe7, 0x61, 0xff}
 	missingTile = color.NRGBA{0xff, 0x00, 0xff, 0xff}
+	zoneDebug   = color.NRGBA{0xff, 0x00, 0x44, 0xff}
+	sparkle     = color.NRGBA{0xfe, 0xe7, 0x61, 0xff}
 )
 
+// wildBodies are the body colours of placeholder wild critters, one picked
+// per species. Greens and light blues are left out, so a critter stands out
+// on grass and by water.
+var wildBodies = []color.NRGBA{
+	{0xbe, 0x4a, 0x2f, 0xff},
+	{0xfe, 0xae, 0x34, 0xff},
+	{0xb5, 0x50, 0x88, 0xff},
+	{0x12, 0x4e, 0x89, 0xff},
+	{0xe8, 0xb7, 0x96, 0xff},
+	{0x68, 0x38, 0x6c, 0xff},
+	{0xc0, 0xcb, 0xdc, 0xff},
+	{0xe4, 0x3b, 0x44, 0xff},
+}
 // villagerCoats are the coat colours of placeholder villagers, picked by the
 // villager's place among the map's villagers so neighbours look different.
 var villagerCoats = []color.NRGBA{
@@ -55,6 +71,19 @@ const (
 	// reach is how far a prop shape can extend beyond its object rectangle, in
 	// world pixels. Props further than this outside the view are not drawn.
 	reach = 6
+	// wildRadius is the radius of a placeholder wild critter's body, about
+	// half the size of the player's.
+	wildRadius = 4
+	// wildReach is how far a wild critter's drawing, hop, sparkles and
+	// notice mark included, can extend from its feet, in world pixels.
+	wildReach = 23
+	// noticeTop is how far above a wild critter's feet the top of its notice
+	// mark is, in world pixels; it sits clear of the top sparkle.
+	noticeTop = 21.5
+	// sparkleCount is how many stars twinkle around a rare critter.
+	sparkleCount = 3
+	// sparklePace is how fast a star twinkles, in radians per second.
+	sparklePace = 2 * math.Pi / 1.2
 )
 
 // drawTileArt draws the art for a tile or prop of the given type filling the
@@ -244,6 +273,89 @@ func drawCritter(p *pen, x, y, lift float64, facing entity.Facing) {
 		p.ellipse(x+2.5, by-1, 0.6, 1.05, ink)
 		p.ellipse(x, by+0.5, 1.1, 0.6, cocoa)
 	}
+}
+
+// speciesColor returns the body colour of a placeholder critter of the
+// species with the given id. The same id always gets the same colour.
+func speciesColor(id string) color.NRGBA {
+	h := fnv.New32a()
+	h.Write([]byte(id))
+	return wildBodies[h.Sum32()%uint32(len(wildBodies))]
+}
+
+// drawWildCritter draws a placeholder wild critter, a round blob in the body
+// colour, with its feet at the world point x, y and its body lifted lift world
+// pixels off the ground. Its eyes show which way it faces.
+func drawWildCritter(p *pen, x, y, lift float64, facing entity.Facing, body color.NRGBA) {
+	// The shadow stays on the ground while the critter hops.
+	p.ellipse(x, y, 3.5, 1.4, shadow)
+
+	by := y - wildRadius - lift // centre of the body
+	p.ellipse(x, by, wildRadius+0.5, wildRadius, body)
+	p.ellipse(x-1.2, by-1.8, 1.4, 0.8, fade(white, 0.4))
+
+	switch facing {
+	case entity.FacingUp:
+		// Seen from behind: no face, just a little tail.
+		p.circle(x, by+2.5, 1, fade(white, 0.6))
+	case entity.FacingLeft:
+		p.ellipse(x-2.6, by-0.3, 0.5, 0.9, ink)
+	case entity.FacingRight:
+		p.ellipse(x+2.6, by-0.3, 0.5, 0.9, ink)
+	default:
+		p.ellipse(x-1.5, by-0.3, 0.5, 0.9, ink)
+		p.ellipse(x+1.5, by-0.3, 0.5, 0.9, ink)
+	}
+}
+
+// drawSparkle draws sparkleCount four-point stars around a rare critter whose
+// body is centred on x, y. Each star grows and shrinks in turn as t, in
+// seconds, goes on; phase shifts the twinkle so neighbouring critters do not
+// twinkle in step.
+func drawSparkle(p *pen, x, y, t, phase float64) {
+	for i := range sparkleCount {
+		a := 2 * math.Pi * float64(i) / sparkleCount
+		sx := x + 7*math.Cos(a-math.Pi/2)
+		sy := y + 6*math.Sin(a-math.Pi/2)
+		size := math.Sin(sparklePace*t + phase + a)
+		if size <= 0 {
+			continue // this star is between twinkles
+		}
+		drawStar(p, sx, sy, 2.2*size, sparkle)
+	}
+}
+
+// drawNotice draws the "!" over a wild critter that has noticed the player,
+// with the top of the mark at the world point x, top. It is a placeholder for
+// the shared exclamation emote of the art bible.
+func drawNotice(p *pen, x, top float64) {
+	// An ink outline first, then the white mark on it, so the "!" reads on
+	// grass, water and sand alike.
+	drawExclaim(p, x, top, 0.5, ink)
+	drawExclaim(p, x, top, 0, white)
+}
+
+// drawExclaim draws a "!" 7 world pixels tall with its top at x, top, every
+// edge pushed out by grow.
+func drawExclaim(p *pen, x, top, grow float64, clr color.NRGBA) {
+	// A bar that narrows towards its foot, then a dot below it.
+	p.polygon(clr,
+		x-0.9-grow, top-grow, x+0.9+grow, top-grow,
+		x+0.5+grow, top+4.6+grow, x-0.5-grow, top+4.6+grow,
+	)
+	p.circle(x, top+6.1, 0.85+grow, clr)
+}
+
+// drawStar draws a four-point star centred on x, y whose points are r from
+// its centre.
+func drawStar(p *pen, x, y, r float64, clr color.NRGBA) {
+	in := r * 0.3
+	p.polygon(clr,
+		x, y-r, x+in, y-in,
+		x+r, y, x+in, y+in,
+		x, y+r, x-in, y+in,
+		x-r, y, x-in, y-in,
+	)
 }
 
 // drawVillager draws a placeholder villager, a round animal in a coat, with

@@ -4,6 +4,7 @@ package main
 
 import (
 	"log"
+	"math/rand/v2"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -44,10 +45,17 @@ func main() {
 			log.Printf("lang %q: %v; starting in %s", opts.lang, err, i18n.Language())
 		}
 	}
+	species, err := assets.LoadCritters()
+	if err != nil {
+		log.Fatal(err)
+	}
 	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// One generator, seeded once from the runtime's random source, drives
+	// every wild critter for the whole run.
+	scene.AddWildCritters(species, rand.New(rand.NewPCG(rand.Uint64(), rand.Uint64())))
 	game := engine.NewGame(scene, engine.Options{
 		Font:     font,
 		TouchPad: opts.touchPad,
