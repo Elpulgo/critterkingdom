@@ -10,7 +10,7 @@
   "tilewidth": 128,
   "tileheight": 128,
   "nextlayerid": 7,
-  "nextobjectid": 153,
+  "nextobjectid": 156,
   "properties": [
     {
       "name": "biome",
@@ -6697,7 +6697,7 @@
               "value": "pond"
             }
           ]
-         },
+        },
         {
           "id": 153,
           "name": "baker_badger",
@@ -6748,7 +6748,7 @@
               "value": "grandma_hedgehog"
             }
           ]
-        },
+        }
       ]
     }
   ]

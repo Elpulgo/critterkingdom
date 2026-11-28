@@ -147,7 +147,7 @@ func TestEmbeddedMaps_EverySpawnZoneHasASpeciesThatComesOutByDay(t *testing.T) {
 				t.Errorf("map %s: spawn zone %s has habitat %q, which no species of critters.json lives in by day", name, z.ID, z.Habitat)
 			}
 		}
-  }
+	}
 }
 
 func TestEmbeddedMaps_VillagersStartOnOpenGroundAndWanderInsideTheMapClearOfWarps(t *testing.T) {

@@ -110,11 +110,12 @@ func (m *Map) WarpAt(pos geom.Vec) (Warp, bool) {
 	return Warp{}, false
 }
 
-// loadMarkers reads the player_spawn, warp and spawn_zone objects of the
+// loadMarkers reads the player_spawn, warp, spawn_zone and npc objects of the
 // objects layer into m. It returns an error naming the object id for a spawn
 // without a name or with a name already used, for a warp without an area or
-// without a target map or spawn, and for a spawn_zone that parseSpawnZone
-// rejects or whose ID another zone already uses.
+// without a target map or spawn, for a spawn_zone that parseSpawnZone rejects
+// or whose ID another zone already uses, and for an npc without an id or with
+// an id already used.
 func (m *Map) loadMarkers() error {
 	layer := m.ObjectLayer(objectsLayer)
 	if layer == nil {
@@ -162,7 +163,7 @@ func (m *Map) loadMarkers() error {
 			}
 			seenZones[z.ID] = o.ID
 			m.zones = append(m.zones, z)
-      
+
 		case npcType:
 			if err := m.loadNPC(o, seenNPC); err != nil {
 				return err

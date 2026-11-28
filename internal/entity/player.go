@@ -1,5 +1,5 @@
 // Package entity holds the things that live in the world: the player's
-// critter and wild critters; villagers, enemies and items join later.
+// critter, the villagers and wild critters; enemies and items join later.
 package entity
 
 import (

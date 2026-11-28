@@ -24,7 +24,7 @@ const drawingPxPerWorldPx = 8
 type worldSize struct{ w, h int }
 
 // manifest lists every drawing under assets-src/tiles and assets-src/sprites,
-// keyed by its slash path relative to assets-src, with its page size in world
+// except those in skipFolders, keyed by its slash path relative to assets-src, with its page size in world
 // pixels. A drawing missing from the folders, or a drawing in the folders but
 // not listed here, fails TestArt_EveryDrawingFollowsTheArtBible.
 var manifest = map[string]worldSize{
@@ -80,6 +80,10 @@ var manifest = map[string]worldSize{
 
 // artFolders are the folders under assets-src whose drawings `make art` exports.
 var artFolders = []string{"tiles", "sprites"}
+
+// skipFolders are the folders under assets-src whose drawings
+// sprites/ui_art_test.go lists and lints instead, at their own page sizes.
+var skipFolders = map[string]bool{"sprites/ui": true, "sprites/effects": true, "sprites/emotes": true}
 
 // minStrokeWidth is half a world pixel in drawing px: nothing may be thinner.
 const minStrokeWidth = 4
@@ -364,14 +368,17 @@ func lintArt(t *testing.T, root string, manifest map[string]worldSize, palette m
 				}
 				return err
 			}
-			if d.IsDir() || !strings.EqualFold(filepath.Ext(p), ".svg") {
-				return nil
-			}
 			rel, err := filepath.Rel(root, p)
 			if err != nil {
 				return err
 			}
 			rel = filepath.ToSlash(rel)
+			if d.IsDir() && skipFolders[rel] {
+				return filepath.SkipDir
+			}
+			if d.IsDir() || !strings.EqualFold(filepath.Ext(p), ".svg") {
+				return nil
+			}
 			found[rel] = true
 			size, ok := manifest[rel]
 			if !ok {

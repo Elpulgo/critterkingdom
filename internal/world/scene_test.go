@@ -390,6 +390,7 @@ func TestScene_HoldingThePointerWhereTheCritterDoesNotFitStopsItAgainstTheWall(t
 		})
 	}
 }
+
 // lights returns the lights of s, failing the test unless there are want of
 // them.
 func lights(t *testing.T, s *Scene, want int) []Light {

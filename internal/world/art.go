@@ -50,6 +50,7 @@ var wildBodies = []color.NRGBA{
 	{0xc0, 0xcb, 0xdc, 0xff},
 	{0xe4, 0x3b, 0x44, 0xff},
 }
+
 // villagerCoats are the coat colours of placeholder villagers, picked by the
 // villager's place among the map's villagers so neighbours look different.
 var villagerCoats = []color.NRGBA{

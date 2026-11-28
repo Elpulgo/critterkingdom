@@ -131,7 +131,7 @@ type Scene struct {
 	// timeOfDay decides which species are about; it stays critter.Day until
 	// day and night exist.
 	timeOfDay critter.TimeOfDay
-	mask lightMask // darkness drawn over dark maps
+	mask      lightMask // darkness drawn over dark maps
 }
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
@@ -225,12 +225,6 @@ func (s *Scene) Update(f engine.Frame) error {
 	if !in.Pointing {
 		s.awaitRelease = false
 	}
-	if in.Move.IsZero() && in.Pointing && !s.awaitRelease {
-		s.walkToPointer(s.camera.Add(in.Point))
-	}
-	if in.Paw && s.player.Hop() {
-		s.greet = greetTime
-  }
 	s.steer(in, pressed)
 	if in.Paw {
 		s.paw()
@@ -292,6 +286,7 @@ func (s *Scene) walkToPointer(p geom.Vec) {
 	s.player.WalkAlong(route)
 	s.planned, s.plannedFor, s.toTap = true, cell, toTap
 }
+
 // steer turns this tick's movement input into where the critter goes. The
 // stick or keys win and drop a tapped villager. A press on a villager makes
 // it the tap target, which the critter walks to until it is in reach; a
@@ -317,7 +312,7 @@ func (s *Scene) steer(in engine.Input, pressed bool) {
 		return
 	}
 	if in.Pointing && !s.awaitRelease {
-		s.player.WalkTo(s.camera.Add(in.Point))
+		s.walkToPointer(s.camera.Add(in.Point))
 	}
 }
 
@@ -509,8 +504,9 @@ func (s *Scene) drawWild(w *wildCritter) {
 	}
 }
 
-// DrawUI draws the title and the greeting bubble at full screen resolution,
-// in the current language of i18n.
+// DrawUI draws the title, the "…" bubble over the villager the paw would
+// pick and the greeting bubble at full screen resolution, in the current
+// language of i18n.
 func (s *Scene) DrawUI(screen *ebiten.Image, ui engine.UI) {
 	if s.titleAlpha > 0 {
 		s.drawTitle(screen, ui)

@@ -100,7 +100,7 @@ func (s *Scene) openPointIn(r geom.Rect) (geom.Vec, bool) {
 			X: r.Min.X + s.rng.Float64()*size.X,
 			Y: r.Min.Y + s.rng.Float64()*size.Y,
 		}
-		if s.walkable.Contains(p) && s.m.Collision.open(critterFeet(p)) {
+		if s.walkable.Contains(p) && s.m.Collision.boxOpen(critterFeet(p)) {
 			return p, true
 		}
 	}
@@ -115,9 +115,9 @@ func critterFeet(p geom.Vec) geom.Rect {
 	}
 }
 
-// open reports whether box overlaps no solid cell with positive area. A nil
+// boxOpen reports whether box overlaps no solid cell with positive area. A nil
 // grid is open everywhere.
-func (g *Grid) open(box geom.Rect) bool {
+func (g *Grid) boxOpen(box geom.Rect) bool {
 	if g == nil || g.TileSize <= 0 {
 		return true
 	}
