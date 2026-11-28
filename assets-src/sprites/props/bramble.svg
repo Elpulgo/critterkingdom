@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop bramble: a thorny tangle that blocks the way until it is cut with
+       the Snippers, 16 by 16 world px. Three arching leaf green vines with an
+       8 px pine green edge (a 28 px pine green stroke under a 12 px leaf
+       green one), solid pine green thorns rounded by their round-joined
+       stroke, two meadow green leaves outlined in pine green and a soft ink
+       shadow below. -->
+  <ellipse cx="66" cy="106" rx="54" ry="9" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- Middle vine, at the back -->
+    <polygon points="61,34 75,34 68,18" fill="#265c42" stroke="#265c42" stroke-width="8"/>
+    <path d="M 40 100 C 40 24 96 24 96 100" fill="none" stroke="#265c42" stroke-width="28"/>
+    <path d="M 40 100 C 40 24 96 24 96 100" fill="none" stroke="#3e8948" stroke-width="12"/>
+
+    <!-- Left vine -->
+    <g fill="#265c42" stroke="#265c42" stroke-width="8">
+      <polygon points="34,45 46,45 40,32"/>
+      <polygon points="19,55 28,48 15,42"/>
+    </g>
+    <path d="M 16 100 C 16 40 64 40 64 100" fill="none" stroke="#265c42" stroke-width="28"/>
+    <path d="M 16 100 C 16 40 64 40 64 100" fill="none" stroke="#3e8948" stroke-width="12"/>
+
+    <!-- Right vine -->
+    <g fill="#265c42" stroke="#265c42" stroke-width="8">
+      <polygon points="86,51 98,51 92,38"/>
+      <polygon points="103,53 112,61 115,48"/>
+    </g>
+    <path d="M 72 100 C 72 48 112 48 112 100" fill="none" stroke="#265c42" stroke-width="28"/>
+    <path d="M 72 100 C 72 48 112 48 112 100" fill="none" stroke="#3e8948" stroke-width="12"/>
+
+    <!-- Leaves -->
+    <g fill="#63c74d" stroke="#265c42" stroke-width="8">
+      <ellipse cx="52" cy="80" rx="14" ry="9" transform="rotate(30 52 80)"/>
+      <ellipse cx="88" cy="78" rx="14" ry="9" transform="rotate(-30 88 78)"/>
+    </g>
+  </g>
+</svg>

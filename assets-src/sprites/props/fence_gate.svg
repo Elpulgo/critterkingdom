@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop fence_gate: a closed gate in a fence running left to right, 16 by
+       16 world px. Two tall gate posts stand at the cell's edges; short rail
+       ends run from behind them past the page edges, at the same height as
+       fence_h's rails, so the gate joins the fence on either side. Between the
+       posts the gate is two rails held by a diagonal brace, drawn twice along
+       one line: a 28 px bark brown stroke under a 12 px wood brown one, which
+       leaves the 8 px outline on each side. Same wood colours as the fence
+       and a soft ink shadow below. -->
+  <defs>
+    <clipPath id="left"><rect x="4" y="14" width="24" height="90" rx="10"/></clipPath>
+    <clipPath id="right"><rect x="100" y="14" width="24" height="90" rx="10"/></clipPath>
+  </defs>
+
+  <g fill="#181425" opacity="0.22" stroke="none">
+    <rect x="0" y="92" width="128" height="10"/>
+    <ellipse cx="18" cy="106" rx="16" ry="7"/>
+    <ellipse cx="114" cy="106" rx="16" ry="7"/>
+  </g>
+  <g fill="#b86f50" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="-16" y="34" width="36" height="20" rx="8"/>
+    <rect x="-16" y="70" width="36" height="20" rx="8"/>
+  </g>
+  <g fill="#e4a672" stroke="none">
+    <rect x="-16" y="39" width="36" height="5"/>
+    <rect x="-16" y="75" width="36" height="5"/>
+  </g>
+  <g fill="#b86f50" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="108" y="34" width="36" height="20" rx="8"/>
+    <rect x="108" y="70" width="36" height="20" rx="8"/>
+  </g>
+  <g fill="#e4a672" stroke="none">
+    <rect x="108" y="39" width="36" height="5"/>
+    <rect x="108" y="75" width="36" height="5"/>
+  </g>
+  <g fill="#b86f50" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="22" y="34" width="84" height="20" rx="8"/>
+    <rect x="22" y="70" width="84" height="20" rx="8"/>
+  </g>
+  <g fill="#e4a672" stroke="none">
+    <rect x="22" y="39" width="84" height="5"/>
+    <rect x="22" y="75" width="84" height="5"/>
+  </g>
+  <g fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 40 80 L 88 44" stroke="#733e39" stroke-width="28"/>
+    <path d="M 40 80 L 88 44" stroke="#b86f50" stroke-width="12"/>
+  </g>
+  <rect x="4" y="14" width="24" height="90" rx="10" fill="#b86f50" stroke="none"/>
+  <g clip-path="url(#left)" stroke="none">
+    <rect x="18" y="14" width="10" height="90" fill="#733e39"/>
+    <rect x="8" y="18" width="16" height="10" rx="5" fill="#e4a672"/>
+  </g>
+  <rect x="4" y="14" width="24" height="90" rx="10" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="100" y="14" width="24" height="90" rx="10" fill="#b86f50" stroke="none"/>
+  <g clip-path="url(#right)" stroke="none">
+    <rect x="114" y="14" width="10" height="90" fill="#733e39"/>
+    <rect x="104" y="18" width="16" height="10" rx="5" fill="#e4a672"/>
+  </g>
+  <rect x="100" y="14" width="24" height="90" rx="10" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

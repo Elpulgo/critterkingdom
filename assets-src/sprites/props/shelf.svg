@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="256" viewBox="0 0 128 256">
+  <!-- Prop shelf: a tall wooden bookshelf seen from the front, 16 by 32 world
+       px. A wood brown case outlined in bark brown, with a light tan highlight
+       along its top and a bark brown shade down its right side, and three bark
+       brown openings shaded cocoa under each board. The top and bottom shelves
+       hold books, each outlined in the darker pair of its colour with a cream
+       band on the spine; the middle shelf holds a warm ochre flower pot with
+       leaf green leaves and a marigold honey jar with a cream lid. A soft ink
+       shadow underneath. -->
+  <defs>
+    <clipPath id="case"><rect x="12" y="10" width="104" height="232" rx="12"/></clipPath>
+    <clipPath id="openings">
+      <rect x="24" y="28" width="74" height="58" rx="4"/>
+      <rect x="24" y="98" width="74" height="58" rx="4"/>
+      <rect x="24" y="168" width="74" height="58" rx="4"/>
+    </clipPath>
+  </defs>
+
+  <ellipse cx="66" cy="246" rx="56" ry="7" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <!-- Case -->
+  <g clip-path="url(#case)" stroke="none">
+    <rect x="0" y="0" width="128" height="256" fill="#b86f50"/>
+    <rect x="12" y="10" width="104" height="12" fill="#e4a672"/>
+    <rect x="104" y="10" width="12" height="232" fill="#733e39"/>
+  </g>
+  <rect x="12" y="10" width="104" height="232" rx="12" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Openings, shaded under each board -->
+  <g clip-path="url(#openings)" stroke="none">
+    <rect x="0" y="0" width="128" height="256" fill="#733e39"/>
+    <rect x="24" y="28" width="74" height="8" fill="#3e2731"/>
+    <rect x="24" y="98" width="74" height="8" fill="#3e2731"/>
+    <rect x="24" y="168" width="74" height="8" fill="#3e2731"/>
+  </g>
+
+  <!-- Top shelf: three books -->
+  <g stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="31" y="42" width="16" height="41" rx="3" fill="#e43b44" stroke="#a22633"/>
+    <rect x="53" y="50" width="16" height="33" rx="3" fill="#0099db" stroke="#124e89"/>
+    <rect x="75" y="46" width="16" height="37" rx="3" fill="#3e8948" stroke="#265c42"/>
+  </g>
+  <g fill="#ead4aa" stroke="none">
+    <rect x="34" y="52" width="10" height="4"/>
+    <rect x="56" y="60" width="10" height="4"/>
+    <rect x="78" y="56" width="10" height="4"/>
+  </g>
+
+  <!-- Middle shelf: a flower pot and a honey jar -->
+  <g fill="#3e8948" stroke="#265c42" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="38" cy="120" rx="7" ry="12" transform="rotate(-30 38 120)"/>
+    <ellipse cx="56" cy="120" rx="7" ry="12" transform="rotate(30 56 120)"/>
+    <ellipse cx="47" cy="114" rx="7" ry="13"/>
+  </g>
+  <path d="M 32 130 L 62 130 L 58 153 L 36 153 Z" fill="#d77643" stroke="#be4a2f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="70" y="124" width="22" height="29" rx="8" fill="#feae34" stroke="#d77643" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="70" y="116" width="22" height="10" rx="4" fill="#ead4aa" stroke="#c28569" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Bottom shelf: three books -->
+  <g stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="31" y="184" width="16" height="39" rx="3" fill="#b55088" stroke="#68386c"/>
+    <rect x="53" y="176" width="16" height="47" rx="3" fill="#feae34" stroke="#d77643"/>
+    <rect x="75" y="190" width="16" height="33" rx="3" fill="#f6757a" stroke="#a22633"/>
+  </g>
+  <g fill="#ead4aa" stroke="none">
+    <rect x="34" y="194" width="10" height="4"/>
+    <rect x="56" y="186" width="10" height="4"/>
+    <rect x="78" y="200" width="10" height="4"/>
+  </g>
+</svg>

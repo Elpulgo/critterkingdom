@@ -1,10 +1,12 @@
 package assets_test
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/geom"
 	"github.com/Elpulgo/critterkingdom/internal/world"
 )
 
@@ -144,5 +146,55 @@ func TestLoadMap_MeadowWaterTilesAreAnimatedAndSolid(t *testing.T) {
 	}
 	if waterCount == 0 {
 		t.Fatal("meadow ground layer has no water tiles; want a pond of animated water")
+	}
+}
+
+func TestDarkTestMap_StartsInTheDarkLitOnlyByTheLanternAtTheSpawn(t *testing.T) {
+	m, err := assets.LoadMap("dark_test")
+	if err != nil {
+		t.Fatalf("LoadMap(dark_test): %v", err)
+	}
+	if !m.Dark || m.Biome != "cave" {
+		t.Errorf("dark_test Dark = %v, Biome = %q; want true, \"cave\"", m.Dark, m.Biome)
+	}
+	if size := m.Size(); size != (geom.Vec{X: 320, Y: 240}) {
+		t.Errorf("dark_test size = %v; want 320x240 world px", size)
+	}
+	spawn, ok := m.DefaultSpawn()
+	if !ok {
+		t.Fatal("dark_test has no player_spawn")
+	}
+
+	// Ground under every cell, and solid props to find in the dark that are
+	// not next to the spawn.
+	ground := m.TileLayer("ground")
+	for row := 0; row < m.Rows; row++ {
+		for col := 0; col < m.Cols; col++ {
+			if ground.At(col, row) == 0 {
+				t.Errorf("dark_test ground cell (%d, %d) is empty", col, row)
+			}
+		}
+	}
+	spawnCol, spawnRow := int(spawn.X/m.TileSize), int(spawn.Y/m.TileSize)
+	farSolidProps := 0
+	for _, p := range m.ObjectLayer("props").Objects {
+		r := p.Rect()
+		col, row := int(r.Min.X/m.TileSize), int(r.Min.Y/m.TileSize)
+		near := col >= spawnCol-1 && col <= spawnCol+1 && row >= spawnRow-1 && row <= spawnRow+1
+		if m.Collision.Solid(col, row) && !near {
+			farSolidProps++
+		}
+	}
+	if farSolidProps < 3 {
+		t.Errorf("dark_test has %d solid props away from the spawn; want at least 3", farSolidProps)
+	}
+
+	s, err := world.NewScene(nil, assets.LoadMap, "dark_test")
+	if err != nil {
+		t.Fatalf("NewScene(dark_test): %v", err)
+	}
+	want := []world.Light{{Pos: geom.Vec{X: 160, Y: 112}, Radius: 56}}
+	if got := s.Lights(); !reflect.DeepEqual(got, want) {
+		t.Errorf("Lights() at the start of dark_test = %v; want the lantern %v", got, want)
 	}
 }

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop push_block: a heavy stone block to push onto a flower switch, 16
+       by 16 world px, seen from above and a little from the front. Cool grey
+       top face, slate blue front face as its shade, a pale slate highlight on
+       the top face's upper left, a carved flower ring on top, all outlined in
+       slate blue, and a soft ink shadow below. -->
+  <defs>
+    <clipPath id="block"><rect x="16" y="14" width="96" height="92" rx="14"/></clipPath>
+  </defs>
+
+  <ellipse cx="68" cy="106" rx="54" ry="10" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <g clip-path="url(#block)" stroke="none">
+    <rect x="0" y="0" width="128" height="128" fill="#5a6988"/>
+    <rect x="16" y="14" width="96" height="66" rx="14" fill="#8b9bb4"/>
+    <rect x="26" y="22" width="34" height="10" rx="5" fill="#c0cbdc"/>
+    <circle cx="26" cy="38" r="5" fill="#c0cbdc"/>
+  </g>
+  <!-- Carved flower ring on the top face -->
+  <circle cx="64" cy="48" r="16" fill="none" stroke="#5a6988" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="64" cy="48" r="5" fill="#5a6988" stroke="none"/>
+  <rect x="16" y="14" width="96" height="92" rx="14" fill="none" stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

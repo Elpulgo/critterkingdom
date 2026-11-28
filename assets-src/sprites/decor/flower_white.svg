@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration flower_white, seen from above:
+       a daisy with five white petals around a marigold heart,
+       with two leaves peeking out below. 16 by 16 world px.
+       Petals, heart and leaves get the 8 px round outline in their paired
+       darker colour; the heart has one highlight dot on its top-left, towards
+       the light. -->
+  <g stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <g fill="#3e8948" stroke="#265c42">
+      <ellipse cx="34" cy="86" rx="18" ry="9" transform="rotate(30 34 86)"/>
+      <ellipse cx="94" cy="86" rx="18" ry="9" transform="rotate(-30 94 86)"/>
+    </g>
+    <g fill="#ffffff" stroke="#c0cbdc">
+      <circle cx="64" cy="36" r="15"/>
+      <circle cx="45" cy="50" r="15"/>
+      <circle cx="83" cy="50" r="15"/>
+      <circle cx="52" cy="72" r="15"/>
+      <circle cx="76" cy="72" r="15"/>
+    </g>
+    <circle cx="64" cy="56" r="12" fill="#feae34" stroke="#d77643"/>
+  </g>
+  <circle cx="61" cy="53" r="4" fill="#fee761" stroke="none"/>
+</svg>

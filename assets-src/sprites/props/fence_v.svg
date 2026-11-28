@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop fence_v: one cell of a fence running top to bottom, 16 by 16 world
+       px. Seen from above, the rails of a fence running away from the viewer
+       lie on one line, so one wood brown rail outlined in bark brown runs down
+       the middle and on past the top and bottom page edges, joining the next
+       fence_v or fence_post seamlessly. A post stands at the centre. Light
+       tan highlight on the rail's left edge and the post's top face, bark
+       brown shade on the post's right, and a soft ink shadow to the right
+       (light comes from the top-left). -->
+  <defs>
+    <clipPath id="post"><rect x="48" y="36" width="32" height="64" rx="10"/></clipPath>
+  </defs>
+
+  <g fill="#181425" opacity="0.22" stroke="none">
+    <rect x="76" y="0" width="10" height="128"/>
+    <ellipse cx="68" cy="102" rx="22" ry="7"/>
+  </g>
+  <rect x="54" y="-16" width="20" height="160" rx="8" fill="#b86f50" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="59" y="-16" width="5" height="160" fill="#e4a672" stroke="none"/>
+  <rect x="48" y="36" width="32" height="64" rx="10" fill="#b86f50" stroke="none"/>
+  <g clip-path="url(#post)" stroke="none">
+    <rect x="70" y="36" width="10" height="64" fill="#733e39"/>
+    <rect x="52" y="40" width="24" height="10" rx="5" fill="#e4a672"/>
+  </g>
+  <rect x="48" y="36" width="32" height="64" rx="10" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop berry_bush_empty: the berry bush after its berries are picked, 16 by
+       16 world px. The same bush as berry_bush_full on the same page, with a
+       small pine green stalk nub where each of the five berries hung, so the
+       two swap in place. -->
+  <defs>
+    <clipPath id="bush">
+      <path d="M 24 92 A 16 16 0 0 1 22 62 A 22 22 0 0 1 46 30 A 24 24 0 0 1 84 30 A 22 22 0 0 1 106 62 A 16 16 0 0 1 104 92 Q 64 106 24 92 Z"/>
+    </clipPath>
+  </defs>
+
+  <ellipse cx="66" cy="100" rx="46" ry="10" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <!-- Bush: pine green shade, the offset leaf green fill leaves a crescent of
+       it on the lower right, and meadow green highlights on the upper left -->
+  <g clip-path="url(#bush)" stroke="none">
+    <rect x="0" y="0" width="128" height="128" fill="#265c42"/>
+    <ellipse cx="56" cy="54" rx="54" ry="40" fill="#3e8948"/>
+    <ellipse cx="44" cy="46" rx="14" ry="8" transform="rotate(-30 44 46)" fill="#63c74d"/>
+    <circle cx="70" cy="32" r="6" fill="#63c74d"/>
+  </g>
+  <!-- Two puff lines inside the bush -->
+  <g fill="none" stroke="#265c42" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 36 74 Q 46 66 56 74"/>
+    <path d="M 68 56 Q 78 48 88 56"/>
+  </g>
+  <path d="M 24 92 A 16 16 0 0 1 22 62 A 22 22 0 0 1 46 30 A 24 24 0 0 1 84 30 A 22 22 0 0 1 106 62 A 16 16 0 0 1 104 92 Q 64 106 24 92 Z" fill="none" stroke="#265c42" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Stalk nubs where the berries were -->
+  <g fill="#265c42" stroke="none">
+    <circle cx="38" cy="60" r="4"/>
+    <circle cx="64" cy="44" r="4"/>
+    <circle cx="90" cy="58" r="4"/>
+    <circle cx="54" cy="82" r="4"/>
+    <circle cx="82" cy="82" r="4"/>
+  </g>
+</svg>
