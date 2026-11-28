@@ -427,7 +427,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 ### M2 Talking: "Hello, neighbour" (2 weeks)
 
 - [x] NPC entities: idle and wander, face the player, "…" bubble
-- [ ] Dialogue box: portrait, name, typewriter text, at most two big choice buttons
+- [x] Dialogue box: portrait, name, typewriter text, at most two big choice buttons
 - [x] Dialogue data format, runner and tests
 - [x] i18n with sv and en string tables; a font with å, ä and ö
 - [ ] Read-aloud via speechSynthesis with a toggle
