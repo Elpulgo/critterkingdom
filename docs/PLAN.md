@@ -420,7 +420,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 - [x] Warps: village to meadow, village to house interior
 - [x] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
 - [x] A* tap-to-walk, joystick alternative
-- [ ] Audio manager: one music loop, footsteps, unlock on first tap
+- [x] Audio manager: one music loop, footsteps, unlock on first tap
 
 **Done when** you can walk around the village, enter a house and reach the meadow.
 
@@ -697,6 +697,12 @@ is bouncy, not scary. Music is the biggest asset, so keep loops short. *Now:*
 the four loops in `assets/audio/music/` are synthesised placeholders from
 `tools/audio`; a BeepBox or Bosca Ceoil track can replace any of them under
 the same name (see 6.6).
+
+**Audio manager** (`internal/audio`): the game embeds
+`assets/audio/music/` and `assets/audio/sfx/`, but not the critter voices.
+The manager caps the master volume at 0.8, plays each map's `music` loop once
+the browser unlocks audio on the first tap (on the desktop at once), and plays
+the `step` sound at most every 0.3 seconds while the critter walks.
 
 **Critter voices**: record about 20 syllables ("ba", "mi", "ko", ...) in a
 high and a low voice and play one per couple of letters while the text types

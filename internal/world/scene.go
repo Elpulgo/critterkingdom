@@ -102,6 +102,9 @@ type Scene struct {
 	peaceful bool
 	onDefeat func(combat.EnemyDefeated)
 	enemies  []*entity.Enemy
+	// audio hears each map's music track and every tick's walking; nil
+	// without WithAudio.
+	audio Audio
 	// entrance is where the critter was placed on entering the current map,
 	// where it wakes from a nap.
 	entrance geom.Vec
@@ -156,10 +159,10 @@ type Scene struct {
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
 // the critter placed at the map's first player_spawn. Warps load their target
-// maps with load too. opts add enemy definitions, a defeat sink and the
-// loader of the critter's character. It returns an error when the critter's
-// character cannot be loaded, when startMap cannot be loaded, has no
-// player_spawn object, or has an enemy object naming an enemy without a
+// maps with load too. opts add enemy definitions, a defeat sink, the loader
+// of the critter's character and audio. It returns an error when the
+// critter's character cannot be loaded, when startMap cannot be loaded, has
+// no player_spawn object, or has an enemy object naming an enemy without a
 // definition.
 func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string, opts ...Option) (*Scene, error) {
 	if load == nil {
@@ -242,11 +245,15 @@ func (s *Scene) spawnEnemies(m *Map) ([]*entity.Enemy, error) {
 // setMap makes m, loaded as name, the scene's map, with the critter entering
 // it at entrance and enemies as its enemies: its size bounds the critter, the
 // enemies and the camera, its collision grid stops them and the villagers, and
-// its npc objects replace the villagers of the map before.
+// its npc objects replace the villagers of the map before, and its music
+// track is asked for.
 func (s *Scene) setMap(name string, m *Map, entrance geom.Vec, enemies []*entity.Enemy) {
 	size := m.Size()
 	s.mapName = name
 	s.m = m
+	if s.audio != nil {
+		s.audio.SetMusic(m.Music)
+	}
 	s.bounds = geom.Rect{Max: size}
 	s.walkable = geom.Rect{
 		Min: geom.Vec{X: feetMarginX, Y: feetMarginTop},
@@ -298,7 +305,8 @@ func (s *Scene) followWarp() error {
 // tick, starts an interaction when the critter reaches a villager it was
 // tapped towards, and moves the critter to another map when its feet end the
 // tick inside a warp. Enemy hazards touching the critter take its petals, and
-// the tick they take the last one the critter naps. It returns an error when
+// the tick they take the last one the critter naps. The scene's audio, if
+// any, hears whether the critter walked this tick. It returns an error when
 // that warp's target map or spawn does not exist, or the map has an enemy
 // without a definition.
 func (s *Scene) Update(f engine.Frame) error {
@@ -336,6 +344,9 @@ func (s *Scene) Update(f engine.Frame) error {
 	}
 	if s.player.Moved() {
 		s.walked += f.DT
+	}
+	if s.audio != nil {
+		s.audio.Tick(f.DT, s.player.Moved())
 	}
 	s.greet = math.Max(0, s.greet-f.DT)
 	if s.walked >= titleWalk {

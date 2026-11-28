@@ -175,6 +175,17 @@ func TestEmbeddedMaps_VillagersStartOnOpenGroundAndWanderInsideTheMapClearOfWarp
 	}
 }
 
+func TestEmbeddedMaps_MusicIsEmptyOrAShippedLoop(t *testing.T) {
+	for name, m := range loadEmbeddedMaps(t) {
+		if m.Music == "" {
+			continue
+		}
+		if _, err := assets.LoadMusic(m.Music); err != nil {
+			t.Errorf("map %s plays music %q, which is not a shipped loop: %v", name, m.Music, err)
+		}
+	}
+}
+
 func TestEmbeddedMaps_VillageHasGrandmaHedgehogBakerBadgerAndMayorOwl(t *testing.T) {
 	m, err := assets.LoadMap("village")
 	if err != nil {

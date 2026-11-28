@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/audio"
 	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
 	"github.com/Elpulgo/critterkingdom/internal/i18n"
@@ -69,10 +70,19 @@ func main() {
 			log.Printf("preset: %v; starting on explorer", err)
 		}
 	}
+	// The manager holds the start map's music until the audio device is
+	// ready: at once on the desktop, after the first tap in the browser.
+	sound := audio.NewManager(audio.NewEbitenBackend(assets.LoadMusic, assets.LoadSound))
 	// The talker needs the stack, which needs the scene, which needs the
 	// talker's sink: the stack is filled in once the scene exists.
 	talk := &talker{font: font, dialogues: dialogues}
-	sceneOpts := []world.Option{world.WithEnemies(enemies), world.WithPreset(preset), world.WithInteraction(talk.interact), world.WithCharacters(assets.LoadCharacter)}
+	sceneOpts := []world.Option{
+    world.WithEnemies(enemies), 
+    world.WithPreset(preset), 
+    world.WithInteraction(talk.interact), 
+    world.WithCharacters(assets.LoadCharacter), 
+    world.WithAudio(sound)
+  }
 	if opts.peaceful {
 		sceneOpts = append(sceneOpts, world.WithPeaceful())
 	}

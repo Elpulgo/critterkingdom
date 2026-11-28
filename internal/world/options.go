@@ -26,6 +26,25 @@ func WithEnemyDefeated(sink func(combat.EnemyDefeated)) Option {
 	}
 }
 
+// Audio is what the scene needs from the game's sound: the music track of
+// each map it enters, and once per tick whether the critter walked.
+type Audio interface {
+	// SetMusic asks for the map's music track, the map's music property;
+	// "" when the map has none.
+	SetMusic(track string)
+	// Tick reports one tick of dt seconds, walking true when the critter
+	// moved during it.
+	Tick(dt float64, walking bool)
+}
+
+// WithAudio gives the scene a to play the music of each map it enters and to
+// hear the critter's steps. Without it, or with a nil a, the scene is silent.
+func WithAudio(a Audio) Option {
+	return func(s *Scene) {
+		s.audio = a
+	}
+}
+
 // CharacterLoader loads the character with the given id, such as "fox": its
 // part layout and the motions that animate it.
 type CharacterLoader func(id string) (anim.Character, error)
