@@ -73,10 +73,11 @@ func (d EnemyDef) Telegraph() time.Duration {
 
 // ParseEnemies parses an enemies.json file, a JSON array of enemy
 // definitions, and checks each one: a missing or duplicate id, an unknown
-// behaviour, a hp, damage or speed that is not positive (speed may be 0 for
-// puff), a telegraph shorter than MinTelegraph, a drop with an empty item or
-// a chance outside (0, 1], and a Little Explorer override that breaks the
-// same rules are all errors naming the enemy.
+// behaviour, a hp, damage or speed that is not positive (for puff, speed is
+// the speed of its spores, so it must be positive too), a telegraph shorter
+// than MinTelegraph, a drop with an empty item or a chance outside (0, 1],
+// and a Little Explorer override that breaks the same rules are all errors
+// naming the enemy. Every definition it accepts can be built by NewBehaviour.
 func ParseEnemies(data []byte) ([]EnemyDef, error) {
 	var defs []EnemyDef
 	if err := json.Unmarshal(data, &defs); err != nil {
@@ -142,7 +143,7 @@ func (d EnemyDef) validateStats(prefix string, hp, damage int, speed float64) er
 		return fmt.Errorf("%shp %d is not positive", prefix, hp)
 	case damage <= 0:
 		return fmt.Errorf("%sdamage %d is not positive", prefix, damage)
-	case speed < 0, speed == 0 && d.Behaviour != BehaviourPuff:
+	case speed <= 0:
 		return fmt.Errorf("%sspeed %v is not positive", prefix, speed)
 	}
 	return nil

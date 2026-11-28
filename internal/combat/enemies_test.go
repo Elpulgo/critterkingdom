@@ -55,6 +55,7 @@ func TestParseEnemies_RejectsABrokenDefinitionNamingTheEnemy(t *testing.T) {
 		{"negative damage", func(e map[string]any) { e["damage"] = -1 }, []string{`"thistle_beast"`, "damage"}},
 		{"zero speed for a charge", func(e map[string]any) { e["speed"] = 0 }, []string{`"thistle_beast"`, "speed"}},
 		{"negative speed for a puff", func(e map[string]any) { e["behaviour"] = "puff"; e["speed"] = -5 }, []string{`"thistle_beast"`, "speed"}},
+		{"zero spore speed for a puff", func(e map[string]any) { e["behaviour"] = "puff"; e["speed"] = 0 }, []string{`"thistle_beast"`, "speed"}},
 		{"telegraph of 0.59 seconds", func(e map[string]any) { e["telegraphSeconds"] = 0.59 }, []string{`"thistle_beast"`, "telegraph"}},
 		{"missing telegraph", func(e map[string]any) { delete(e, "telegraphSeconds") }, []string{`"thistle_beast"`, "telegraph"}},
 		{"drop with an empty item", func(e map[string]any) { e["drops"] = []any{map[string]any{"item": "", "chance": 0.5}} }, []string{`"thistle_beast"`, "drop", "item"}},
@@ -63,6 +64,10 @@ func TestParseEnemies_RejectsABrokenDefinitionNamingTheEnemy(t *testing.T) {
 		{"little explorer hp of 0", override("hp", 0), []string{`"thistle_beast"`, "littleExplorer", "hp"}},
 		{"little explorer damage of -1", override("damage", -1), []string{`"thistle_beast"`, "littleExplorer", "damage"}},
 		{"little explorer speed of 0 for a charge", override("speed", 0), []string{`"thistle_beast"`, "littleExplorer", "speed"}},
+		{"little explorer spore speed of 0 for a puff", func(e map[string]any) {
+			e["behaviour"] = "puff"
+			e["littleExplorer"] = map[string]any{"speed": 0}
+		}, []string{`"thistle_beast"`, "littleExplorer", "speed"}},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -85,11 +90,6 @@ func TestParseEnemies_AcceptsValuesOnTheEdgeOfTheRules(t *testing.T) {
 		edit func(e map[string]any)
 	}{
 		{"telegraph of exactly 0.6 seconds", func(e map[string]any) { e["telegraphSeconds"] = 0.6 }},
-		{"a puff that never moves has speed 0", func(e map[string]any) {
-			e["behaviour"] = "puff"
-			e["speed"] = 0
-			e["littleExplorer"] = map[string]any{"speed": 0}
-		}},
 		{"a drop that always happens has chance 1", func(e map[string]any) { e["drops"] = []any{map[string]any{"item": "heart", "chance": 1}} }},
 		{"no little explorer overrides", func(e map[string]any) { delete(e, "littleExplorer") }},
 	}
