@@ -34,6 +34,9 @@ const (
 	// may change, in world pixels per second, which lets it follow the swing
 	// and settle softly when the critter stops.
 	bobPace = math.Pi / (2 * stepTime)
+	// lanternRadius is how far the lantern the critter carries on dark maps
+	// reaches, in world pixels.
+	lanternRadius = 56
 )
 
 const (
@@ -106,6 +109,8 @@ type Scene struct {
 
 	titleFace  *text.GoTextFace
 	bubbleFace *text.GoTextFace
+
+	mask lightMask // darkness drawn over dark maps
 }
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
@@ -344,7 +349,18 @@ func (s *Scene) updateBob(dt float64) {
 	s.bob += math.Max(-bobPace*dt, math.Min(bobPace*dt, target-s.bob))
 }
 
-// DrawWorld draws the map layers, the villagers and the critter.
+// Lights returns the light sources of the current map: on a dark map the
+// lantern the critter carries, centred on its body at the camera's focus and
+// unmoved by a hop; on any other map none.
+func (s *Scene) Lights() []Light {
+	if !s.m.Dark {
+		return nil
+	}
+	return []Light{{Pos: s.player.Pos.Sub(geom.Vec{Y: focusLift}), Radius: lanternRadius}}
+}
+
+// DrawWorld draws the map layers and the critter, and on a dark map covers
+// them with darkness except where the lights from Lights shine.
 func (s *Scene) DrawWorld(c engine.Canvas) {
 	c.Image.Fill(ink)
 	s.pen.begin(c, s.camera)
@@ -357,6 +373,9 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	drawProps(&s.pen, s.m, s.m.ObjectLayer("props"), view, elapsed)
 	s.drawCharacters()
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
+	if s.m.Dark {
+		s.mask.draw(c, s.camera, s.viewSize, s.Lights())
+	}
 }
 
 // drawCharacters draws the villagers and the critter from the back of the

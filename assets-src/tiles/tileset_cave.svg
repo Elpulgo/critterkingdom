@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="128" viewBox="0 0 1024 128">
+  <!-- Cave tileset: 128 by 128 px tiles (16 by 16 world px) on an 8 by 1 grid.
+       Each tile is a <g> whose id is its tile type, translated to its grid cell
+       (column*128, 0) and clipped to its own 128 px cell by tile_cell.
+       Ground tiles get no outline. Every tile wraps seamlessly on all four edges:
+       a shape crossing a tile edge is repeated 128 px over on the opposite side.
+       Light comes from the top-left.
+       Column 0: cave_floor, 1: cave_floor_2, 2: cave_floor_3, 3: cave_wall;
+       columns 4 to 7 are empty. The three floor tiles share the plain slate blue
+       #5a6988 ground and differ only in details kept clear of the edges, so they
+       mix freely. There are no cave transition tiles: cave_wall is a solid block
+       of rock that fills whole cells next to the floor. -->
+  <defs>
+    <clipPath id="tile_cell">
+      <rect x="0" y="0" width="128" height="128"/>
+    </clipPath>
+
+    <!-- Details, drawn around (0,0). A dent is a dusk indigo #3a4466 hollow with a
+         cool grey #8b9bb4 highlight on its upper-left rim. A pebble is cool grey
+         #8b9bb4 with a pale slate #c0cbdc highlight and a dusk indigo shade below
+         and to the right. -->
+    <g id="cave_dent" stroke="none">
+      <ellipse cx="0" cy="0" rx="12" ry="7" fill="#3a4466"/>
+      <ellipse cx="-5" cy="-3" rx="5" ry="2.5" fill="#8b9bb4"/>
+    </g>
+    <ellipse id="cave_dent_small" cx="0" cy="0" rx="7" ry="4" fill="#3a4466" stroke="none"/>
+    <g id="cave_pebble" stroke="none">
+      <ellipse cx="3" cy="4" rx="11" ry="8" fill="#3a4466"/>
+      <ellipse cx="0" cy="0" rx="11" ry="8" fill="#8b9bb4"/>
+      <ellipse cx="-4" cy="-3" rx="4" ry="2.5" fill="#c0cbdc"/>
+    </g>
+    <g id="cave_pebble_small" stroke="none">
+      <ellipse cx="2" cy="3" rx="7" ry="5" fill="#3a4466"/>
+      <ellipse cx="0" cy="0" rx="7" ry="5" fill="#8b9bb4"/>
+      <ellipse cx="-2" cy="-2" rx="3" ry="2" fill="#c0cbdc"/>
+    </g>
+  </defs>
+
+  <!-- Column 0: cave_floor. Plain slate blue #5a6988 ground with four dents. -->
+  <g id="cave_floor" transform="translate(0,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#5a6988" stroke="none"/>
+    <use xlink:href="#cave_dent" x="36" y="40"/>
+    <use xlink:href="#cave_dent" x="88" y="94"/>
+    <use xlink:href="#cave_dent_small" x="98" y="30"/>
+    <use xlink:href="#cave_dent_small" x="26" y="100"/>
+  </g>
+
+  <!-- Column 1: cave_floor_2. The same ground with a little group of pebbles and
+       one dent. -->
+  <g id="cave_floor_2" transform="translate(128,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#5a6988" stroke="none"/>
+    <use xlink:href="#cave_pebble" x="42" y="46"/>
+    <use xlink:href="#cave_pebble_small" x="62" y="60"/>
+    <use xlink:href="#cave_pebble_small" x="94" y="98"/>
+    <use xlink:href="#cave_dent" x="30" y="96"/>
+    <use xlink:href="#cave_dent_small" x="100" y="28"/>
+  </g>
+
+  <!-- Column 2: cave_floor_3. The same ground with a soft patch of moss: pine
+       green #265c42 lumps with a deep teal #193c3e shade under them and leaf green
+       #3e8948 highlights on their upper-left. -->
+  <g id="cave_floor_3" transform="translate(256,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#5a6988" stroke="none"/>
+    <g fill="#193c3e" stroke="none">
+      <circle cx="50" cy="70" r="18"/>
+      <circle cx="72" cy="62" r="20"/>
+      <circle cx="88" cy="78" r="16"/>
+      <circle cx="66" cy="84" r="16"/>
+    </g>
+    <g fill="#265c42" stroke="none">
+      <circle cx="48" cy="64" r="18"/>
+      <circle cx="70" cy="56" r="20"/>
+      <circle cx="86" cy="72" r="16"/>
+      <circle cx="64" cy="78" r="16"/>
+    </g>
+    <g fill="#3e8948" stroke="none">
+      <ellipse cx="62" cy="46" rx="8" ry="4"/>
+      <ellipse cx="40" cy="56" rx="5" ry="3"/>
+      <ellipse cx="80" cy="64" rx="5" ry="3"/>
+    </g>
+    <use xlink:href="#cave_dent_small" x="104" y="26"/>
+    <use xlink:href="#cave_dent_small" x="24" y="106"/>
+  </g>
+
+  <!-- Column 3: cave_wall. A solid block of dusk indigo #3a4466 stones with
+       rounded corners in two staggered courses, set in midnight blue #262b44
+       joints 8 px wide, with a slate blue #5a6988 highlight on each stone's
+       upper-left. The upper course sits at y 4..60 with stones at x 4..60 and
+       68..124; the lower course at y 68..124 is shifted half a stone, so its
+       middle stones run from x -28 to 28 and 100 to 156: that stone crosses the
+       left and right edges and is drawn on both sides. The 4 px margins at every
+       edge make 8 px joints with the next tile. -->
+  <g id="cave_wall" transform="translate(384,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#262b44" stroke="none"/>
+    <g fill="#3a4466" stroke="none">
+      <rect x="4" y="4" width="56" height="56" rx="12"/>
+      <rect x="68" y="4" width="56" height="56" rx="12"/>
+      <rect x="-28" y="68" width="56" height="56" rx="12"/>
+      <rect x="36" y="68" width="56" height="56" rx="12"/>
+      <rect x="100" y="68" width="56" height="56" rx="12"/>
+    </g>
+    <g fill="#5a6988" stroke="none">
+      <rect x="12" y="12" width="22" height="6" rx="3"/>
+      <rect x="12" y="12" width="6" height="18" rx="3"/>
+      <rect x="76" y="12" width="22" height="6" rx="3"/>
+      <rect x="76" y="12" width="6" height="18" rx="3"/>
+      <rect x="-20" y="76" width="22" height="6" rx="3"/>
+      <rect x="-20" y="76" width="6" height="18" rx="3"/>
+      <rect x="44" y="76" width="22" height="6" rx="3"/>
+      <rect x="44" y="76" width="6" height="18" rx="3"/>
+      <rect x="108" y="76" width="22" height="6" rx="3"/>
+      <rect x="108" y="76" width="6" height="18" rx="3"/>
+    </g>
+  </g>
+</svg>

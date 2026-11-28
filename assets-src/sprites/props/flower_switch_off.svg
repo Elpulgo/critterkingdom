@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop flower_switch_off: a round stone floor switch waiting for a push
+       block, 16 by 16 world px. A cool grey top outlined in slate blue stands
+       on a slate blue side, with a pale slate highlight on its upper left and
+       a sleeping flower carved on top: pale slate petals and a cool grey
+       heart, all outlined in slate blue. flower_switch_on is the pressed
+       switch on the same page. -->
+  <defs>
+    <clipPath id="top"><ellipse cx="64" cy="66" rx="50" ry="32"/></clipPath>
+  </defs>
+
+  <ellipse cx="68" cy="106" rx="54" ry="10" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <g stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Side, then top -->
+    <ellipse cx="64" cy="80" rx="50" ry="26" fill="#5a6988"/>
+    <ellipse cx="64" cy="66" rx="50" ry="32" fill="#8b9bb4"/>
+  </g>
+  <g clip-path="url(#top)" stroke="none">
+    <ellipse cx="38" cy="50" rx="14" ry="7" transform="rotate(-25 38 50)" fill="#c0cbdc"/>
+  </g>
+
+  <!-- Flower -->
+  <g stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <g fill="#c0cbdc" stroke="#5a6988">
+      <circle cx="64" cy="48" r="11"/>
+      <circle cx="81" cy="60" r="11"/>
+      <circle cx="75" cy="81" r="11"/>
+      <circle cx="53" cy="81" r="11"/>
+      <circle cx="47" cy="60" r="11"/>
+    </g>
+    <circle cx="64" cy="66" r="10" fill="#8b9bb4" stroke="#5a6988"/>
+  </g>
+  <circle cx="61" cy="63" r="4" fill="#c0cbdc" stroke="none"/>
+</svg>

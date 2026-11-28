@@ -1,0 +1,11 @@
+{
+  "id": "missing_hat",
+  "giver": "grandma_hedgehog",
+  "title": {"en": "The Missing Hat", "sv": "Den försvunna hatten"},
+  "steps": [
+    {"type": "goto",    "target": "meadow",                   "icon": "footsteps"},
+    {"type": "collect", "item": "grandmas_hat", "count": 1,   "icon": "hat"},
+    {"type": "talk",    "npc": "grandma_hedgehog",            "icon": "speech"}
+  ],
+  "reward": {"sticker": "hat_hero", "item": "cookie"}
+}

@@ -151,9 +151,10 @@ func TestEmbeddedMaps_VillageJoinsTheHouseAndTheMeadowBothWays(t *testing.T) {
 		got[name] = dests
 	}
 	want := map[string][]string{
-		"house":   {"village/from_house"},
-		"meadow":  {"village/from_meadow"},
-		"village": {"house/from_village", "meadow/from_village"},
+		"dark_test": {},
+		"house":     {"village/from_house"},
+		"meadow":    {"village/from_meadow"},
+		"village":   {"house/from_village", "meadow/from_village"},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("warps by map = %v; want %v", got, want)

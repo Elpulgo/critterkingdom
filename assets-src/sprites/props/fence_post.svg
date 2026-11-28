@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop fence_post: a single fence post, 16 by 16 world px, for fence ends
+       and corners. The same post as fence_h and fence_v: wood brown outlined
+       in bark brown, a light tan top face, a bark brown shade on the right and
+       a soft ink shadow below. -->
+  <defs>
+    <clipPath id="post"><rect x="48" y="28" width="32" height="76" rx="10"/></clipPath>
+  </defs>
+
+  <ellipse cx="68" cy="106" rx="24" ry="8" fill="#181425" fill-opacity="0.22" stroke="none"/>
+  <rect x="48" y="28" width="32" height="76" rx="10" fill="#b86f50" stroke="none"/>
+  <g clip-path="url(#post)" stroke="none">
+    <rect x="70" y="28" width="10" height="76" fill="#733e39"/>
+    <rect x="52" y="32" width="24" height="10" rx="5" fill="#e4a672"/>
+  </g>
+  <rect x="48" y="28" width="32" height="76" rx="10" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
