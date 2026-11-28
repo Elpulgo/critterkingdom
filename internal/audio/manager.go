@@ -1,14 +1,25 @@
 // Package audio plays the game's music and sound effects. The Manager holds
 // the rules (channel volumes under a capped master volume, music held back
-// until the device is unlocked, no restart of the track already playing) and
-// talks to the sound device through the small Backend interface, so it has no
-// dependency on Ebitengine and is tested with an in-memory backend.
+// until the device is unlocked, no restart of the track already playing,
+// footsteps paced by a cooldown) and talks to the sound device through the
+// small Backend interface, so it has no dependency on Ebitengine and is tested
+// with an in-memory backend.
 package audio
 
 import "log"
 
 // MaxMaster caps the master volume: everything in the game stays soft.
 const MaxMaster = 0.8
+
+// StepInterval is the shortest time in seconds between two footsteps.
+const StepInterval = 0.3
+
+// StepSound is the sound effect played for a footstep.
+const StepSound = "step"
+
+// stepEpsilon absorbs the rounding of summed frame times, so a cooldown of
+// 0.3 s ends after exactly 18 frames of 1/60 s.
+const stepEpsilon = 1e-9
 
 // Default volumes of a new Manager.
 const (
@@ -44,6 +55,10 @@ type Manager struct {
 	// wanted is the track asked for with SetMusic; playing is the track the
 	// backend is looping. They differ while the device is locked.
 	wanted, playing string
+
+	// stepWait is the time in seconds left before the next footstep may
+	// sound. It keeps running down while the player stands still.
+	stepWait float64
 
 	// failed holds names that already failed, so each is logged once.
 	failed map[string]bool
@@ -111,9 +126,16 @@ func (m *Manager) PlaySound(name string) {
 
 // Tick advances the manager by one frame of dt seconds; walking reports
 // whether the player moved this frame. It starts the music asked for while
-// the backend was locked as soon as the backend is ready.
+// the backend was locked as soon as the backend is ready, and plays a
+// footstep while walking, at once when a walk starts and then every
+// StepInterval. Stopping and walking again does not cut the wait short.
 func (m *Manager) Tick(dt float64, walking bool) {
 	m.startWantedMusic()
+	m.stepWait = max(m.stepWait-dt, 0)
+	if walking && m.stepWait <= stepEpsilon && m.backend.Ready() {
+		m.PlaySound(StepSound)
+		m.stepWait = StepInterval
+	}
 }
 
 // startWantedMusic starts the wanted track when it is not the one playing and

@@ -3,6 +3,7 @@ package audio_test
 import (
 	"errors"
 	"math"
+	"slices"
 	"testing"
 
 	"github.com/Elpulgo/critterkingdom/internal/audio"
@@ -188,5 +189,69 @@ func TestMusic_EmptyTrackStartsNothingWhenSilent(t *testing.T) {
 	m.Tick(frame, false)
 	if len(b.musicPlays) != 0 {
 		t.Errorf("music plays = %v, want nothing", b.musicPlays)
+	}
+}
+
+// stepTicks runs one Tick per entry of walking and returns the indices of the
+// ticks on which a footstep played.
+func stepTicks(t *testing.T, b *fakeBackend, walking []bool) []int {
+	t.Helper()
+	m := audio.NewManager(b)
+	var ticks []int
+	for i, w := range walking {
+		before := len(b.sounds)
+		m.Tick(frame, w)
+		for _, s := range b.sounds[before:] {
+			if s.name != "step" {
+				t.Fatalf("tick %d played %q, want only step", i, s.name)
+			}
+			ticks = append(ticks, i)
+		}
+	}
+	return ticks
+}
+
+// pattern builds a walk of n ticks per run, alternating walking and standing,
+// starting with walking.
+func pattern(runs ...int) []bool {
+	var out []bool
+	for i, n := range runs {
+		for range n {
+			out = append(out, i%2 == 0)
+		}
+	}
+	return out
+}
+
+func TestFootsteps_SoundAtOnceWhenWalkingStartsThenEvery300ms(t *testing.T) {
+	tests := []struct {
+		name    string
+		ready   bool
+		walking []bool
+		want    []int
+	}{
+		// 1.0 s of 1/60 s ticks: steps at 0, 0.3, 0.6 and 0.9 s.
+		{"walking for a second", true, pattern(60), []int{0, 18, 36, 54}},
+		{"standing never steps", true, pattern(0, 60), nil},
+		{"first step of a walk after standing sounds at once", true, pattern(0, 30, 10), []int{30}},
+		{"locked backend plays no step", false, pattern(60), nil},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := stepTicks(t, &fakeBackend{ready: tc.ready}, tc.walking)
+			if !slices.Equal(got, tc.want) {
+				t.Errorf("steps on ticks %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestFootsteps_StopAndGoInsideTheCooldownAddsNoStep(t *testing.T) {
+	// Step at tick 0, stand 0.1 s, walk again: the next step still waits for
+	// the 0.3 s cooldown, as if the critter had never stopped.
+	got := stepTicks(t, &fakeBackend{ready: true}, pattern(1, 6, 3, 2, 48))
+	want := []int{0, 18, 36, 54}
+	if !slices.Equal(got, want) {
+		t.Errorf("steps on ticks %v, want %v", got, want)
 	}
 }
