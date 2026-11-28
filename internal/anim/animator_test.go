@@ -53,17 +53,23 @@ func byName(poses []anim.PartPose) map[string]anim.PartPose {
 
 func TestAnimator_ACritterThatHasNeverWalkedShowsOnlyIdleMotion(t *testing.T) {
 	a := newTestAnimator(t)
-	for range 2 {
-		a.Update(0.125, false) // 0.25 s of idle: breathing at its widest
-	}
-
-	poses := a.Pose(anim.ViewDown)
-	for _, p := range poses {
-		if p.Offset.X != 0 || p.Offset.Y != 0 || p.Turn != 0 {
-			t.Errorf("%s offset %v turn %v, want no bob, patter or wiggle", p.Name, p.Offset, p.Turn)
+	for frame := range 4 {
+		a.Update(0.0625, false)
+		poses := a.Pose(anim.ViewDown)
+		for _, p := range poses {
+			if p.Offset.X != 0 || p.Offset.Y != 0 || p.Turn != 0 {
+				t.Fatalf("frame %d: %s offset %v turn %v, want no bob, patter or wiggle", frame, p.Name, p.Offset, p.Turn)
+			}
+		}
+		// From the first frame on, idle plays at full strength: at 0.0625 s
+		// breathing is 0.1 * sin(pi/8) = 0.0382683... taller.
+		if body := byName(poses)["body"]; frame == 0 && !near(body.ScaleY, 1.0382683432365090) {
+			t.Fatalf("first frame body scaleY %v, want 1.0382683432365090", body.ScaleY)
 		}
 	}
-	parts := byName(poses)
+
+	// 0.25 s of idle: breathing at its widest, eyes in the blink.
+	parts := byName(a.Pose(anim.ViewDown))
 	if body := parts["body"]; !near(body.ScaleX, 0.9) || !near(body.ScaleY, 1.1) {
 		t.Errorf("body scale %v x %v, want breathing at full size 0.9 x 1.1", body.ScaleX, body.ScaleY)
 	}
