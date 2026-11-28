@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
+	"github.com/Elpulgo/critterkingdom/internal/anim"
 	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/entity"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
@@ -75,8 +76,9 @@ const (
 	// villagerHeight is how far the tips of a villager's ears are above its
 	// feet, in world pixels.
 	villagerHeight = 20
-	// bodyRadius is the radius of the critter's round body.
-	bodyRadius = 7
+	// eyeRadius is how wide each of the critter's eyes is from its middle
+	// to its side, in world pixels.
+	eyeRadius = 0.6
 	// reach is how far a prop shape can extend beyond its object rectangle, in
 	// world pixels. Props further than this outside the view are not drawn.
 	reach = 6
@@ -255,39 +257,46 @@ func drawDoor(p *pen, x, y, w, h float64) {
 	p.circle(dx+dw*0.8, y+h*0.62, 0.8, flowerHeart)
 }
 
-// drawCritter draws the placeholder critter, a round orange fox, with its
-// feet at the world point x, y and its body lifted lift world pixels off the
-// ground.
-func drawCritter(p *pen, x, y, lift float64, facing entity.Facing) {
+// drawCritter draws the placeholder critter from its posed parts, in their
+// drawing order, with its feet at the world point feet and lifted lift world
+// pixels off the ground. Each part is a shape drawn in code, picked by the
+// part's name, filling the part's box; the exported part drawings replace
+// these shapes later.
+func drawCritter(p *pen, feet geom.Vec, lift float64, poses []anim.PartPose) {
 	// The shadow stays on the ground while the critter hops.
-	p.ellipse(x, y, 5, 2, shadow)
+	p.ellipse(feet.X, feet.Y, 5, 2, shadow)
+	origin := feet.Sub(geom.Vec{Y: lift})
+	for _, pp := range poses {
+		drawPart(p, origin, pp)
+	}
+}
 
-	by := y - bodyRadius - lift // centre of the body
-	p.polygon(fur, x-6, by-3, x-5, by-10, x-1, by-6)
-	p.polygon(fur, x+6, by-3, x+5, by-10, x+1, by-6)
-
-	switch facing {
-	case entity.FacingUp:
-		p.circle(x, by, bodyRadius, fur)
-		p.circle(x, by+5, 2, cream)
-	case entity.FacingLeft:
-		p.circle(x+7, by+3, 2, cream)
-		p.circle(x, by, bodyRadius, fur)
-		p.circle(x-2, by+2, 3, cream)
-		p.ellipse(x-3.5, by-1, 0.6, 1.05, ink)
-		p.circle(x-5.5, by+0.5, 0.6, cocoa)
-	case entity.FacingRight:
-		p.circle(x-7, by+3, 2, cream)
-		p.circle(x, by, bodyRadius, fur)
-		p.circle(x+2, by+2, 3, cream)
-		p.ellipse(x+3.5, by-1, 0.6, 1.05, ink)
-		p.circle(x+5.5, by+0.5, 0.6, cocoa)
+// drawPart draws the placeholder shape of one posed part, its feet drawn at
+// the world point origin: ears are fur triangles standing on the bottom of
+// their box, eyes are dark ovals, feet are cocoa ovals, and the body, head,
+// tail and any part without a shape of its own are fur ovals.
+func drawPart(p *pen, origin geom.Vec, pp anim.PartPose) {
+	b := pp.Box
+	c := b.Min.Add(b.Max).Scale(0.5)
+	w, h := b.Max.X-b.Min.X, b.Max.Y-b.Min.Y
+	switch pp.Name {
+	case "ear_left", "ear_right":
+		p.posedPolygon(origin, pp, fur, b.Min.X, b.Max.Y, b.Max.X, b.Max.Y, c.X, b.Min.Y)
+		p.posedPolygon(origin, pp, cream, b.Min.X+0.3*w, b.Max.Y, b.Max.X-0.3*w, b.Max.Y, c.X, b.Min.Y+0.4*h)
+	case "eyes":
+		// A box wide enough holds a pair of eyes at its ends, as seen from
+		// the front; a narrow one holds the single eye of the side view.
+		rx := math.Min(eyeRadius, w/2)
+		if w > 4*rx {
+			p.posedEllipse(origin, pp, b.Min.X+rx, c.Y, rx, h/2, ink)
+			p.posedEllipse(origin, pp, b.Max.X-rx, c.Y, rx, h/2, ink)
+		} else {
+			p.posedEllipse(origin, pp, c.X, c.Y, rx, h/2, ink)
+		}
+	case "foot_left", "foot_right":
+		p.posedEllipse(origin, pp, c.X, c.Y, w/2, h/2, cocoa)
 	default:
-		p.circle(x, by, bodyRadius, fur)
-		p.circle(x, by+3, 4, cream)
-		p.ellipse(x-2.5, by-1, 0.6, 1.05, ink)
-		p.ellipse(x+2.5, by-1, 0.6, 1.05, ink)
-		p.ellipse(x, by+0.5, 1.1, 0.6, cocoa)
+		p.posedEllipse(origin, pp, c.X, c.Y, w/2, h/2, fur)
 	}
 }
 

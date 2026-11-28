@@ -1,6 +1,9 @@
 package world
 
-import "github.com/Elpulgo/critterkingdom/internal/combat"
+import (
+	"github.com/Elpulgo/critterkingdom/internal/anim"
+	"github.com/Elpulgo/critterkingdom/internal/combat"
+)
 
 // Option changes how NewScene sets up a scene.
 type Option func(*Scene)
@@ -23,6 +26,18 @@ func WithEnemyDefeated(sink func(combat.EnemyDefeated)) Option {
 	}
 }
 
+// CharacterLoader loads the character with the given id, such as "fox": its
+// part layout and the motions that animate it.
+type CharacterLoader func(id string) (anim.Character, error)
+
+// WithCharacters gives the scene the loader for the critter's character,
+// which NewScene loads and animates. Without it, the critter has no parts and
+// only its shadow is drawn.
+func WithCharacters(load CharacterLoader) Option {
+	return func(s *Scene) {
+		s.loadCharacter = load
+  }
+}
 // WithInteraction gives the scene a sink that is called once for each
 // interaction the critter starts with a villager, on the tick it starts:
 // by paw, or when a tapped walk reaches the villager. TakeInteraction still

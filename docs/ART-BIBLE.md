@@ -116,7 +116,7 @@ so 1 px in the drawing is 1 pixel in the exported PNG). UI art is measured in
 ## Shapes
 
 - **Build everything from simple shapes**: circles, ellipses and rounded
-  rectangles or rounded triangles, just like the M0 placeholder critter in
+  rectangles or rounded triangles, just like the placeholder critter's parts in
   `internal/world/art.go`.
 - **Proportions**: big heads (about half the character's total height, roughly
   16 world pixels / 128 px across in a 32 by 32 box), compact round bodies
@@ -172,8 +172,9 @@ Characters are **sets of vector parts** (head, body, ears, tail, feet, eyes,
 mouth, stick) that the game engine moves, turns and squashes in code instead of
 frame-by-frame sprite sheets:
 
-- **Views**: draw `down`, `up` and `side` views for movable characters; the
-  engine mirrors the `side` view horizontally (`flipX`).
+- **Views**: draw `down`, `up` and `side` views for movable characters. Draw
+  the `side` view facing right; the engine mirrors it horizontally about the
+  feet (`flipX`) for a character facing left.
 - **Part naming and pivots**: each part is an Inkscape object with an id named
   `<view>_<part>` (such as `down_head`, `down_body`, `down_ear_left`,
   `down_tail`), plus spare expression parts (`down_eyes_closed`,

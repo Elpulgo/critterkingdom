@@ -418,7 +418,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 - [x] Tiled JSON loading, layers, collision grid, animated tiles (water)
 - [x] Camera follow and clamp; y-sorted props; "above" layer
 - [x] Warps: village to meadow, village to house interior
-- [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
+- [x] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
 - [x] A* tap-to-walk, joystick alternative
 - [ ] Audio manager: one music loop, footsteps, unlock on first tap
 
@@ -546,12 +546,13 @@ plus the art time in 6.7.
 - **Animation**: characters are sets of parts (head, body, ears, tail, feet,
   eyes) that the engine moves, turns and squashes, instead of drawn frames.
   Idle is a slow breathing squash and a blink every few seconds; walk is a
-  bob with pattering feet and bouncing ears (the M0 critter already bobs);
-  swing is a lean with the stick swept through an arc; hurt is a flash and a
-  squash; small critters hop and squash on landing. Enemies: idle, move,
-  telegraph, attack, hurt and poof, made the same way. Draw down, up and side
-  views; the engine mirrors the side view. Shared emote sprites (heart,
-  exclamation, zzz, sweat, music note) float above anyone.
+  bob with pattering feet and bouncing ears (the shared `bob`, `patter` and
+  `wiggle` motions, which replaced the M0 critter's own bob); swing is a lean
+  with the stick swept through an arc; hurt is a flash and a squash; small
+  critters hop and squash on landing. Enemies: idle, move, telegraph, attack,
+  hurt and poof, made the same way. Draw down, up and side views; the side
+  view faces right and the engine mirrors it for left. Shared emote sprites
+  (heart, exclamation, zzz, sweat, music note) float above anyone.
 - **References**: Cozy Grove and Spiritfarer (soft, hand-drawn, cozy), Sago
   Mini and Toca Boca (simple shapes young children read at a glance), Animal
   Crossing, Link's Awakening (Switch), Tunic (for colour and softness).
@@ -594,7 +595,8 @@ licence terms need checking.
 4. Split it into parts, each its own object with an id named `<view>_<part>`:
    `down_head`, `down_body`, `down_ear_left`, `down_tail`, and so on, plus
    spare parts for expressions (`down_eyes_closed`, `down_eyes_happy`). Draw
-   the down, up and side views; the engine mirrors the side view (`flipX`).
+   the down, up and side views. Draw the side view facing right; the engine
+   mirrors it about the feet (`flipX`) for a character facing left.
 5. Mark the point each part turns around (the base of an ear, the root of the
    tail) with a tiny circle named `<view>_<part>_pivot`, and the feet with one
    named `<view>_feet`.
@@ -602,8 +604,12 @@ licence terms need checking.
    where each part sits and turns, read from Inkscape's `--query-all`, so
    there are no hand-written offset tables.
 7. Animate in code with a few motions every character shares: breathe, blink,
-   bob, patter, wiggle, lean, squash and flash. A character's data picks the
-   motions and their sizes and speeds, so a new critter needs no new code.
+   bob, patter, wiggle, lean, squash and flash. A character's data,
+   `assets/data/rigs/<id>.json`, picks the motions and their sizes and
+   speeds, so a new critter needs no new code. *Now:* breathe, blink, bob,
+   patter and wiggle exist (lean, squash and flash come with fights), and the
+   fox's part sheet is a hand-written placeholder until `fox.svg` is
+   exported over it; the README's Art section lists the fields.
 8. Portrait: the same parts approach at 2 px per CSS pixel, with `neutral`,
    `happy` and `sad` made by swapping eyes and mouth.
 9. Cheap variants: recolour a copy (Edit, Select Same, Fill Color), or share
@@ -715,7 +721,7 @@ assets/       exported and embedded
   maps/       village.tmj, meadow.tmj, ...
   audio/      music/*.ogg, sfx/*.ogg, voices/high/*.ogg, voices/low/*.ogg   (written by make audio)
   fonts/      Fredoka-Medium.ttf
-  data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, strings/sv.json, strings/en.json
+  data/       critters.json, enemies.json, items.json, quests/*.json, dialogue/*.json, rigs/*.json (a character's motions, sizes and speeds), strings/sv.json, strings/en.json
 ```
 
 - `make art` runs `go run ./tools/art`, a Go command (logic in
