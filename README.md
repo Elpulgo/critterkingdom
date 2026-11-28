@@ -85,6 +85,18 @@ maps: each zone has to lie inside its map, keep clear of warps and player
 spawns, have open ground you can walk to, and have a habitat that at least
 one species in `critters.json` lives in by day.
 
+Enemies stand on `enemy` point objects in the `objects` layer, with these
+custom properties:
+
+| Property | Type | Needed | Meaning |
+|---|---|---|---|
+| `enemy` | string | yes | Which enemy stands here: an `id` from `assets/data/enemies.json`, for example `sulky_slime` |
+| `explorer_only` | bool | no, false | Leave this enemy out on Little Explorer, so rooms hold fewer enemies for younger players |
+
+An enemy object without `enemy` stops the map from loading. On Explorer
+every enemy object appears; on Little Explorer those with `explorer_only`
+set to true are left out, at the start, after a warp and after a nap.
+
 In a debug build (`make run TAGS=debug`) the overlay outlines every spawn
 zone of the current map in red, next to the outline of where you may walk,
 and counts the wild critters present.
