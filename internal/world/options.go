@@ -22,3 +22,13 @@ func WithEnemyDefeated(sink func(combat.EnemyDefeated)) Option {
 		s.onDefeat = sink
 	}
 }
+
+// WithInteraction gives the scene a sink that is called once for each
+// interaction the critter starts with a villager, on the tick it starts:
+// by paw, or when a tapped walk reaches the villager. TakeInteraction still
+// reports the same interactions.
+func WithInteraction(sink func(Interaction)) Option {
+	return func(s *Scene) {
+		s.onInteract = sink
+	}
+}

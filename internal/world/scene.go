@@ -123,6 +123,8 @@ type Scene struct {
 	// interacted with, for the debug overlay.
 	pending *Interaction
 	lastNPC string
+	// onInteract, when set, is told of each interaction as it starts.
+	onInteract func(Interaction)
 
 	walked     float64 // seconds the critter has spent walking
 	greet      float64 // seconds left of the greeting
@@ -441,10 +443,14 @@ func (s *Scene) pickVillager() (int, bool) {
 	return entity.PickInteractable(s.player.Pos, s.player.Facing, feet)
 }
 
-// interact starts an interaction with n, replacing one not yet taken.
+// interact starts an interaction with n, replacing one not yet taken, and
+// tells the interaction sink of it.
 func (s *Scene) interact(n *entity.NPC) {
 	s.pending = &Interaction{NPC: n.ID}
 	s.lastNPC = n.ID
+	if s.onInteract != nil {
+		s.onInteract(Interaction{NPC: n.ID})
+	}
 }
 
 // TakeInteraction returns the interaction the critter started since the last
