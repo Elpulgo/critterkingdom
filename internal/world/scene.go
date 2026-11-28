@@ -77,6 +77,8 @@ type Scene struct {
 
 	titleFace  *text.GoTextFace
 	bubbleFace *text.GoTextFace
+
+	mask lightMask // darkness drawn over dark maps
 }
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
@@ -196,7 +198,8 @@ func (s *Scene) Lights() []Light {
 	return []Light{{Pos: s.player.Pos.Sub(geom.Vec{Y: focusLift}), Radius: lanternRadius}}
 }
 
-// DrawWorld draws the map layers and the critter.
+// DrawWorld draws the map layers and the critter, and on a dark map covers
+// them with darkness except where the lights from Lights shine.
 func (s *Scene) DrawWorld(c engine.Canvas) {
 	c.Image.Fill(ink)
 	s.pen.begin(c, s.camera)
@@ -210,6 +213,9 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	feet := s.player.Pos
 	drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
+	if s.m.Dark {
+		s.mask.draw(c, s.camera, s.viewSize, s.Lights())
+	}
 }
 
 // DrawUI draws the title and the greeting bubble at full screen resolution,
