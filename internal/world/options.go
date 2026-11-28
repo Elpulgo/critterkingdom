@@ -36,8 +36,9 @@ type CharacterLoader func(id string) (anim.Character, error)
 func WithCharacters(load CharacterLoader) Option {
 	return func(s *Scene) {
 		s.loadCharacter = load
-  }
+	}
 }
+
 // WithInteraction gives the scene a sink that is called once for each
 // interaction the critter starts with a villager, on the tick it starts:
 // by paw, or when a tapped walk reaches the villager. TakeInteraction still

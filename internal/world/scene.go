@@ -553,8 +553,7 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 		case actorProp:
 			drawProp(&s.pen, s.m, props.Objects[a.i], elapsed)
 		case actorPlayer:
-			feet := s.player.Pos
-			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+			s.drawPlayer()
 		case actorVillager:
 			n := s.npcs[a.i]
 			drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, a.i)
@@ -628,19 +627,6 @@ func (s *Scene) drawOrder(view geom.Rect) []actor {
 	slices.SortStableFunc(s.actors, func(a, b actor) int {
 		return cmp.Compare(a.y, b.y)
 	})
-	for _, a := range s.actors {
-		switch a.kind {
-		case actorPlayer:
-			s.drawPlayer()
-		case actorVillager:
-			n := s.npcs[a.i]
-			drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, a.i)
-		case actorWild:
-			s.drawWild(s.wild[a.i])
-		case actorEnemy:
-			drawEnemy(&s.pen, s.enemies[a.i], s.elapsed)
-		}
-	}
 	return s.actors
 }
 
