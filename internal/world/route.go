@@ -45,6 +45,49 @@ func (r router) waypoint(c Cell) geom.Vec {
 	}
 }
 
+// fit returns the feet position nearest to feet, in the same cell, at which
+// the box overlaps no solid cell, so a walk that ends there can arrive. The
+// box is narrower and shorter than a cell, so from feet in cell c it can only
+// reach into the cells left, right, above, above-left and above-right of c.
+// The result is feet itself when the box already fits, and stays in feet's
+// cell, so cellAt gives the same cell for both. feet's cell must be open.
+func (r router) fit(feet geom.Vec) geom.Vec {
+	g, t := r.grid, r.grid.TileSize
+	c := g.cellAt(feet)
+	left, top := float64(c.Col)*t, float64(c.Row)*t
+	minX, maxX := left+r.box.X/2, left+t-r.box.X/2 // the box clear of the left and right columns
+	minY := top + r.box.Y                          // the box clear of the row above
+
+	if g.Solid(c.Col-1, c.Row) {
+		feet.X = math.Max(feet.X, minX)
+	}
+	if g.Solid(c.Col+1, c.Row) {
+		feet.X = math.Min(feet.X, maxX)
+	}
+	if g.Solid(c.Col, c.Row-1) {
+		feet.Y = math.Max(feet.Y, minY)
+	}
+	// A solid diagonal cell is cleared by moving the box out of either its
+	// column or its row; take the shorter move, the row on a tie.
+	if feet.Y < minY {
+		if g.Solid(c.Col-1, c.Row-1) && feet.X < minX {
+			if minX-feet.X < minY-feet.Y {
+				feet.X = minX
+			} else {
+				feet.Y = minY
+			}
+		}
+		if g.Solid(c.Col+1, c.Row-1) && feet.X > maxX {
+			if feet.X-maxX < minY-feet.Y {
+				feet.X = maxX
+			} else {
+				feet.Y = minY
+			}
+		}
+	}
+	return feet
+}
+
 // clear reports whether the box can move in a straight line from feet a to
 // feet b without overlapping a solid cell with positive area at any moment,
 // the same overlap rule Grid.Slide uses.
@@ -94,16 +137,28 @@ func overlapSpan(lo, hi, d, cellLo, cellHi float64) (float64, float64) {
 
 // plan returns the route for the critter's feet at from to walk to tap, a
 // point already inside the walkable area. With a clear straight line the
-// route is just tap. Otherwise it follows A* to tap's cell, or to the nearest
-// reachable cell when tap's cell is solid or cannot be reached, through cell
-// waypoints smoothed by heading for the furthest one the box can move to in a
-// straight line. toTap reports whether the route ends on tap; when it does
-// not, it ends on the nearest reachable cell's waypoint.
+// route is just tap. When tap's cell is open, tap is first moved to fit (the
+// nearest spot in the cell where the box does not overlap a solid cell), and
+// a clear straight line to that is again the whole route. Otherwise it follows
+// A* to tap's cell, or to the nearest reachable cell when tap's cell is solid
+// or cannot be reached, through cell waypoints smoothed by heading for the
+// furthest one the box can move to in a straight line. toTap reports whether
+// the route ends on tap, as moved by fit; when it does not, it ends on the
+// nearest reachable cell's waypoint.
 func (r router) plan(from, tap geom.Vec) (route []geom.Vec, toTap bool) {
 	if r.clear(from, tap) {
 		return []geom.Vec{tap}, true
 	}
 	start, goal := r.standingCell(from), r.grid.cellAt(tap)
+	if r.grid.open(goal) {
+		// Where the box does not fit at tap, end where it does, so the
+		// critter arrives and stops instead of being blocked short and
+		// sent back each tick while the pointer is held.
+		tap = r.fit(tap)
+		if r.clear(from, tap) {
+			return []geom.Vec{tap}, true
+		}
+	}
 	path, toTap := r.grid.FindPath(start, goal)
 	if !toTap {
 		near, ok := r.grid.NearestReachable(start, goal)

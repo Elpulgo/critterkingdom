@@ -182,7 +182,8 @@ func (s *Scene) Update(f engine.Frame) error {
 // walkToPointer walks the critter to p, the pointer's world position, around
 // solid scenery. It plans a new route when the critter is not walking or p is
 // in another cell than the current route was planned for; otherwise only the
-// route's end follows p, when the route ends on the pointer.
+// route's end follows p, when the route ends on the pointer, moved to where
+// the critter's box fits in p's cell.
 func (s *Scene) walkToPointer(p geom.Vec) {
 	tap := s.walkable.Clamp(p)
 	g := s.m.Collision
@@ -190,15 +191,17 @@ func (s *Scene) walkToPointer(p geom.Vec) {
 		s.player.WalkTo(tap)
 		return
 	}
+	box := s.player.Box()
+	r := router{grid: g, box: box.Max.Sub(box.Min)}
 	cell := g.cellAt(tap)
 	if _, walking := s.player.Target(); walking && s.planned && cell == s.plannedFor {
 		if s.toTap {
-			s.player.Retarget(tap)
+			// The route ends in this open cell; end it where the box fits,
+			// as plan does.
+			s.player.Retarget(r.fit(tap))
 		}
 		return
 	}
-	box := s.player.Box()
-	r := router{grid: g, box: box.Max.Sub(box.Min)}
 	route, toTap := r.plan(s.player.Pos, tap)
 	s.player.WalkAlong(route)
 	s.planned, s.plannedFor, s.toTap = true, cell, toTap

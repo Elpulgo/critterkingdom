@@ -327,3 +327,41 @@ func TestScene_ADirectionInputTakesOverFromARouteForGood(t *testing.T) {
 	update(t, s, pointFrame(false, geom.Vec{}), 60)
 	checkStoppedAt(t, s, want)
 }
+
+func TestScene_HoldingThePointerWhereTheCritterDoesNotFitStopsItAgainstTheWall(t *testing.T) {
+	tests := []struct {
+		name  string
+		point geom.Vec
+		want  geom.Vec
+	}{
+		// In the gap cell (3,3), under the wall's bottom at y=48: the 10 px
+		// tall box fits only with its feet at y=58 or lower.
+		{"under a wall", geom.Vec{X: 56, Y: 52}, geom.Vec{X: 56, Y: 58}},
+		// In cell (2,1), beside the wall's west face at x=48: the 12 px wide
+		// box fits only with its feet at x=42 or further west.
+		{"beside a wall", geom.Vec{X: 46, Y: 29}, geom.Vec{X: 42, Y: 29}},
+		// In cell (2,3), below-left of the wall's bottom corner at (48,48),
+		// with open cells above and to the right: the box clears the wall by
+		// moving 5 px west rather than 8 px down.
+		{"by a wall's corner", geom.Vec{X: 47, Y: 50}, geom.Vec{X: 42, Y: 50}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := newGardenScene(t)
+			held := pointFrame(true, tt.point)
+
+			update(t, s, held, 240)
+			checkStoppedAt(t, s, tt.want)
+
+			// Still holding, the critter stays put rather than stepping
+			// back and forth against the wall.
+			stopped := s.player.Pos
+			for i := range 30 {
+				update(t, s, held, 1)
+				if s.player.Pos != stopped {
+					t.Fatalf("tick %d after stopping: critter at %v; want it to stay at %v", i+1, s.player.Pos, stopped)
+				}
+			}
+		})
+	}
+}
