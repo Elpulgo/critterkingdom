@@ -76,7 +76,13 @@ func main() {
 	// The talker needs the stack, which needs the scene, which needs the
 	// talker's sink: the stack is filled in once the scene exists.
 	talk := &talker{font: font, dialogues: dialogues}
-	sceneOpts := []world.Option{world.WithEnemies(enemies), world.WithPreset(preset), world.WithInteraction(talk.interact), world.WithAudio(sound)}
+	sceneOpts := []world.Option{
+    world.WithEnemies(enemies), 
+    world.WithPreset(preset), 
+    world.WithInteraction(talk.interact), 
+    world.WithCharacters(assets.LoadCharacter), 
+    world.WithAudio(sound)
+  }
 	if opts.peaceful {
 		sceneOpts = append(sceneOpts, world.WithPeaceful())
 	}
