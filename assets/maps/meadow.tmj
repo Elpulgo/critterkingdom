@@ -10,7 +10,7 @@
   "tilewidth": 128,
   "tileheight": 128,
   "nextlayerid": 7,
-  "nextobjectid": 151,
+  "nextobjectid": 152,
   "properties": [
     {
       "name": "biome",
@@ -719,8 +719,8 @@
         1,
         1,
         1,
-        1,
-        1,
+        2,
+        2,
         2,
         2,
         2,
@@ -759,8 +759,8 @@
         1,
         1,
         1,
-        1,
-        1,
+        2,
+        2,
         2,
         2,
         2,
@@ -3733,34 +3733,12 @@
           "visible": true
         },
         {
-          "id": 109,
-          "name": "bush",
-          "type": "bush",
-          "gid": 8,
-          "x": 0,
-          "y": 2048,
-          "width": 128,
-          "height": 128,
-          "visible": true
-        },
-        {
           "id": 110,
           "name": "bush",
           "type": "bush",
           "gid": 8,
           "x": 4992,
           "y": 2048,
-          "width": 128,
-          "height": 128,
-          "visible": true
-        },
-        {
-          "id": 111,
-          "name": "bush",
-          "type": "bush",
-          "gid": 8,
-          "x": 0,
-          "y": 2176,
           "width": 128,
           "height": 128,
           "visible": true
@@ -6623,14 +6601,36 @@
       "objects": [
         {
           "id": 150,
-          "name": "player_spawn",
+          "name": "from_village",
           "type": "player_spawn",
-          "x": 2368,
-          "y": 1856,
+          "x": 448,
+          "y": 2048,
           "width": 0,
           "height": 0,
           "point": true,
           "visible": true
+        },
+        {
+          "id": 151,
+          "name": "to_village",
+          "type": "warp",
+          "x": 128,
+          "y": 1920,
+          "width": 128,
+          "height": 256,
+          "visible": true,
+          "properties": [
+            {
+              "name": "target_map",
+              "type": "string",
+              "value": "village"
+            },
+            {
+              "name": "target_spawn",
+              "type": "string",
+              "value": "from_meadow"
+            }
+          ]
         }
       ]
     }

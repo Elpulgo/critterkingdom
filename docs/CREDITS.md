@@ -25,5 +25,18 @@ an Inkscape swatch palette at
 - Source: https://lospec.com/palette-list/endesga-32.
 - Licence: free to use (Lospec palette list; credit appreciated).
 
-Everything on screen in M0 is drawn in code. Art or audio made by others gets
-an entry here with its author, source and licence before it is added.
+**Sound effects, music and critter voices** in [assets/audio/](../assets/audio/)
+are made by the Critter Kingdom project. Every file, the 21 sound effects in
+`sfx/`, the four music loops in `music/` and the 20 syllables in each voice in
+`voices/high/` and `voices/low/`, is synthesised by our own Go code in
+[tools/audio/](../tools/audio/) and encoded to OGG Vorbis with ffmpeg by
+`make audio`. No samples or recordings by others are used.
+
+- Source: [tools/audio/synth/](../tools/audio/synth/) is the source of truth;
+  the OGG files are generated from it.
+- Licence: CC0 1.0 Universal (public domain dedication),
+  https://creativecommons.org/publicdomain/zero/1.0/. The code in
+  `tools/audio/` itself is MIT like the rest of the code.
+
+The art on screen in M0 is drawn in code. Art or audio made by others gets an
+entry here with its author, source and licence before it is added.

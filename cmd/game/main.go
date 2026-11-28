@@ -18,10 +18,15 @@ import (
 type options struct {
 	// touchPad turns on the floating touch pad.
 	touchPad bool
+	// startMap names the map the game starts on, such as "village".
+	startMap string
 	// lang is the language to start in, "sv" or "en". An empty or unknown
 	// value keeps Swedish.
 	lang string
 }
+
+// defaultStartMap is the map the game starts on unless -map names another.
+const defaultStartMap = "village"
 
 func main() {
 	opts := parseOptions()
@@ -39,11 +44,7 @@ func main() {
 			log.Printf("lang %q: %v; starting in %s", opts.lang, err, i18n.Language())
 		}
 	}
-	m, err := assets.LoadMap("meadow")
-	if err != nil {
-		log.Fatal(err)
-	}
-	scene, err := world.NewScene(font, m)
+	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap)
 	if err != nil {
 		log.Fatal(err)
 	}

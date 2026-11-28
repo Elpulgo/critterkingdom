@@ -65,3 +65,15 @@ func TestPlayer_NeverLeavesTheWalkableArea(t *testing.T) {
 func near(a, b geom.Vec) bool {
 	return math.Abs(a.X-b.X) < 1e-9 && math.Abs(a.Y-b.Y) < 1e-9
 }
+
+func TestPlayer_PlacingTheCritterStopsItsWalk(t *testing.T) {
+	p := NewPlayer(geom.Vec{X: 10, Y: 50})
+	p.WalkTo(geom.Vec{X: 90, Y: 50})
+
+	p.Place(geom.Vec{X: 40, Y: 20})
+	p.Update(tick, geom.Vec{}, field)
+
+	if _, walking := p.Target(); walking || p.Pos != (geom.Vec{X: 40, Y: 20}) {
+		t.Errorf("at %v, walking %v; want standing still on 40,20", p.Pos, walking)
+	}
+}

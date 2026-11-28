@@ -31,8 +31,20 @@ type Map struct {
 	Tilesets   []Tileset
 	Collision  *Grid
 
+	// Music names the track to play on the map, from the string map
+	// property music; "" when absent.
+	Music string
+	// Biome names the kind of land the map shows, from the string map
+	// property biome; "" when absent.
+	Biome string
+	// Dark reports whether the map is dark, from the bool map property dark;
+	// false when absent.
+	Dark bool
+
 	tileLayers   map[string]*TileLayer
 	objectLayers map[string]*ObjectLayer
+	spawns       []spawn
+	warps        []Warp
 }
 
 // Size returns the map's dimensions in world pixels.
@@ -350,6 +362,9 @@ func LoadMap(data []byte) (*Map, error) {
 		tileLayers:   make(map[string]*TileLayer),
 		objectLayers: make(map[string]*ObjectLayer),
 	}
+	if err := m.readTypedProperties(); err != nil {
+		return nil, err
+	}
 
 	for _, rts := range raw.Tilesets {
 		if rts.Source != "" {
@@ -456,9 +471,44 @@ func LoadMap(data []byte) (*Map, error) {
 		}
 	}
 
+	if err := m.loadMarkers(); err != nil {
+		return nil, err
+	}
 	m.Collision = buildCollisionGrid(m)
 
 	return m, nil
+}
+
+// readTypedProperties copies the map properties music, biome and dark into
+// their typed fields. An absent property leaves its zero value; a property of
+// the wrong JSON type is an error.
+func (m *Map) readTypedProperties() error {
+	var err error
+	if m.Music, err = typedProperty[string](m.Properties, "music", "string"); err != nil {
+		return err
+	}
+	if m.Biome, err = typedProperty[string](m.Properties, "biome", "string"); err != nil {
+		return err
+	}
+	if m.Dark, err = typedProperty[bool](m.Properties, "dark", "bool"); err != nil {
+		return err
+	}
+	return nil
+}
+
+// typedProperty returns the property name as a T, the zero T when it is
+// absent, and an error naming the property when it holds another type.
+func typedProperty[T any](p Properties, name, want string) (T, error) {
+	var zero T
+	raw, ok := p[name]
+	if !ok {
+		return zero, nil
+	}
+	v, ok := raw.(T)
+	if !ok {
+		return zero, fmt.Errorf("map property %q is %T (%v); want %s", name, raw, raw, want)
+	}
+	return v, nil
 }
 
 // allowedLayerType reports whether a layer with the given name and Tiled layer
