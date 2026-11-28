@@ -24,6 +24,14 @@ type Input struct {
 	Paw bool
 	// Menu is true on the tick the menu button was pressed.
 	Menu bool
+	// Tap is true on the tick a finger lands anywhere on the screen (the
+	// world, the touch pad half or the paw button) or the left mouse button
+	// goes down, and TapAt is where, in screen pixels. It ignores what the
+	// finger does after that, so interface such as a dialogue box can treat
+	// any touch as a tap. While the scene has an overlay up, tapping is all
+	// a new finger does: it neither presses paw nor steers nor points.
+	Tap   bool
+	TapAt geom.Vec
 }
 
 // stickDeadZone is how far a stick or the touch pad must be pushed, from 0 to
@@ -107,6 +115,16 @@ func (r *inputReader) read(view View, l touchLayout) Input {
 	case ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft):
 		in.Pointing = true
 		in.Point = view.ScreenToView(ebiten.CursorPositionF())
+	}
+
+	switch {
+	case touch.tap:
+		in.Tap = true
+		in.TapAt = touch.tapAt
+	case inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft):
+		x, y := ebiten.CursorPositionF()
+		in.Tap = true
+		in.TapAt = geom.Vec{X: x, Y: y}
 	}
 	return in
 }

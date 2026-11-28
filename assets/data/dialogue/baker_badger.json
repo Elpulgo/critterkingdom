@@ -1,0 +1,26 @@
+{
+  "npc": "baker_badger",
+  "nodes": {
+    "start": {
+      "if": [],
+      "lines": [
+        {"text": "baker.chat.1", "face": "happy"},
+        {"text": "baker.chat.2", "face": "neutral"}
+      ],
+      "choices": [
+        {"text": "ui.yes", "icon": "check", "goto": "yes"},
+        {"text": "ui.no",  "icon": "cross", "goto": "no"}
+      ]
+    },
+    "yes": {
+      "lines": [
+        {"text": "baker.yes.1", "face": "happy"}
+      ]
+    },
+    "no": {
+      "lines": [
+        {"text": "baker.no.1", "face": "sad"}
+      ]
+    }
+  }
+}

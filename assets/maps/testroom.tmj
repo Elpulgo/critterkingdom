@@ -1009,6 +1009,11 @@
               "name": "enemy",
               "type": "string",
               "value": "thistle_beast"
+            },
+            {
+              "name": "explorer_only",
+              "type": "bool",
+              "value": true
             }
           ]
         },

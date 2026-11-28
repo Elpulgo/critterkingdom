@@ -1,0 +1,40 @@
+{
+  "pxPerWorldPixel": 8,
+  "views": {
+    "down": {
+      "parts": [
+        {"name": "tail", "image": "down_tail.png", "x": 3, "y": -10, "w": 5, "h": 6, "pivotX": 4, "pivotY": -5},
+        {"name": "body", "image": "down_body.png", "x": -5, "y": -9, "w": 10, "h": 8, "pivotX": 0, "pivotY": -1},
+        {"name": "foot_left", "image": "down_foot_left.png", "x": -5, "y": -2, "w": 4, "h": 2, "pivotX": -3, "pivotY": -1},
+        {"name": "foot_right", "image": "down_foot_right.png", "x": 1, "y": -2, "w": 4, "h": 2, "pivotX": 3, "pivotY": -1},
+        {"name": "ear_left", "image": "down_ear_left.png", "x": -7, "y": -17, "w": 5, "h": 5, "pivotX": -4.5, "pivotY": -12},
+        {"name": "ear_right", "image": "down_ear_right.png", "x": 2, "y": -17, "w": 5, "h": 5, "pivotX": 4.5, "pivotY": -12},
+        {"name": "head", "image": "down_head.png", "x": -8, "y": -15, "w": 16, "h": 10, "pivotX": 0, "pivotY": -5},
+        {"name": "eyes", "image": "down_eyes.png", "x": -4, "y": -12, "w": 8, "h": 2, "pivotX": 0, "pivotY": -11}
+      ]
+    },
+    "up": {
+      "parts": [
+        {"name": "foot_left", "image": "up_foot_left.png", "x": -5, "y": -2, "w": 4, "h": 2, "pivotX": -3, "pivotY": -1},
+        {"name": "foot_right", "image": "up_foot_right.png", "x": 1, "y": -2, "w": 4, "h": 2, "pivotX": 3, "pivotY": -1},
+        {"name": "body", "image": "up_body.png", "x": -5, "y": -9, "w": 10, "h": 8, "pivotX": 0, "pivotY": -1},
+        {"name": "ear_left", "image": "up_ear_left.png", "x": -7, "y": -17, "w": 5, "h": 5, "pivotX": -4.5, "pivotY": -12},
+        {"name": "ear_right", "image": "up_ear_right.png", "x": 2, "y": -17, "w": 5, "h": 5, "pivotX": 4.5, "pivotY": -12},
+        {"name": "head", "image": "up_head.png", "x": -8, "y": -15, "w": 16, "h": 10, "pivotX": 0, "pivotY": -5},
+        {"name": "tail", "image": "up_tail.png", "x": -2.5, "y": -8, "w": 5, "h": 6, "pivotX": 0, "pivotY": -7}
+      ]
+    },
+    "side": {
+      "parts": [
+        {"name": "tail", "image": "side_tail.png", "x": -9, "y": -9, "w": 6, "h": 5, "pivotX": -4, "pivotY": -6},
+        {"name": "foot_left", "image": "side_foot_left.png", "x": -4, "y": -2, "w": 4, "h": 2, "pivotX": -2, "pivotY": -1},
+        {"name": "body", "image": "side_body.png", "x": -5, "y": -9, "w": 10, "h": 8, "pivotX": 0, "pivotY": -1},
+        {"name": "foot_right", "image": "side_foot_right.png", "x": 1, "y": -2, "w": 4, "h": 2, "pivotX": 3, "pivotY": -1},
+        {"name": "ear_left", "image": "side_ear_left.png", "x": -1, "y": -17, "w": 4, "h": 5, "pivotX": 1, "pivotY": -12},
+        {"name": "head", "image": "side_head.png", "x": -3, "y": -15, "w": 11, "h": 10, "pivotX": 2.5, "pivotY": -5},
+        {"name": "ear_right", "image": "side_ear_right.png", "x": 2, "y": -17, "w": 4, "h": 5, "pivotX": 4, "pivotY": -12},
+        {"name": "eyes", "image": "side_eyes.png", "x": 5, "y": -12, "w": 1.5, "h": 2, "pivotX": 5.75, "pivotY": -11}
+      ]
+    }
+  }
+}

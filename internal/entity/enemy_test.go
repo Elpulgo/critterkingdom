@@ -162,3 +162,75 @@ func TestEnemy_ChargeOnOpenGroundRunsItsFullDistance(t *testing.T) {
 		t.Errorf("Pos %v, want (172, 100), 72 px right of the start", e.Pos)
 	}
 }
+
+func mushroomDef() combat.EnemyDef {
+	return combat.EnemyDef{ID: "grumpy_mushroom", Behaviour: combat.BehaviourPuff, HP: 1, Damage: 1, Speed: 25, TelegraphSeconds: 0.9}
+}
+
+func TestEnemy_ASleepingEnemyNeverMovesTelegraphsOrHurts(t *testing.T) {
+	tests := []struct {
+		name string
+		def  combat.EnemyDef
+	}{
+		{"hop toward", slimeDef()},
+		{"charge", thistleDef()},
+		{"puff", mushroomDef()},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clock := &fakeClock{}
+			start := geom.Vec{X: 100, Y: 100}
+			critter := geom.Vec{X: 96, Y: 100} // on the enemy, a little to its left
+			e, _ := newEnemy(t, tt.def, start, clock)
+			if e.Asleep() {
+				t.Fatal("a new enemy is asleep")
+			}
+			e.Sleep()
+			if !e.Asleep() {
+				t.Fatal("not asleep after Sleep")
+			}
+
+			// 10 s at 60 ticks a second, far past every telegraph (0.9 s at
+			// most), attack and recovery.
+			for i := 0; i <= 600; i++ {
+				clock.now = time.Duration(i) * time.Second / 60
+				e.Update(critter, enemyArea)
+				if e.Pos != start || e.Phase() != combat.Idle || len(e.Hazards()) != 0 {
+					t.Fatalf("at %v: Pos %v phase %v hazards %v; want still at %v, Idle, no hazards",
+						clock.now, e.Pos, e.Phase(), e.Hazards(), start)
+				}
+			}
+		})
+	}
+}
+
+func TestEnemy_ASleepingEnemyCanStillBeDefeatedAndRunsOff(t *testing.T) {
+	clock := &fakeClock{}
+	critter := geom.Vec{X: 70, Y: 100}
+	e, events := newEnemy(t, thistleDef(), geom.Vec{X: 100, Y: 100}, clock)
+	e.Sleep()
+	e.Update(critter, enemyArea)
+
+	if !e.Hit(1) || e.HP() != 1 || e.Defeated() {
+		t.Fatalf("first hit on the sleeping beast: HP %d, defeated %v; want the hit to land, HP 1, not defeated", e.HP(), e.Defeated())
+	}
+	if !e.Hit(1) || !e.Defeated() {
+		t.Fatalf("second hit on the sleeping beast: defeated %v; want defeated", e.Defeated())
+	}
+	want := combat.EnemyDefeated{EnemyID: "thistle_beast"}
+	if len(*events) != 1 || (*events)[0] != want {
+		t.Errorf("defeats reported %v, want exactly [%v]", *events, want)
+	}
+
+	// Runs right, away from the critter, at 60 px/s for 1 s.
+	clock.now = 500 * time.Millisecond
+	e.Update(critter, enemyArea)
+	if !near(e.Pos, geom.Vec{X: 130, Y: 100}) {
+		t.Errorf("half a second after the defeat: Pos %v, want (130, 100)", e.Pos)
+	}
+	clock.now = time.Second
+	e.Update(critter, enemyArea)
+	if !e.Gone() {
+		t.Errorf("a second after the defeat: not gone")
+	}
+}

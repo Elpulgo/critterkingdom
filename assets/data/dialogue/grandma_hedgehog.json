@@ -1,0 +1,13 @@
+{
+  "npc": "grandma_hedgehog",
+  "nodes": {
+    "start": {
+      "if": [],
+      "lines": [
+        {"text": "grandma.chat.1", "face": "happy"},
+        {"text": "grandma.chat.2", "face": "neutral"},
+        {"text": "grandma.chat.3", "face": "happy"}
+      ]
+    }
+  }
+}

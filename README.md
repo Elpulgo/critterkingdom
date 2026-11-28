@@ -5,9 +5,9 @@ A cosy top-down adventure for children aged 5 to 9, written in Go with
 a desktop game. The plan, the roadmap and the reasons behind them are in
 [docs/PLAN.md](docs/PLAN.md).
 
-Status: milestone M1, "A place to walk", in progress. A placeholder critter
-starts in a small village, walks into a house and out to the meadow, hops and
-says hello.
+Status: milestone M1, "A place to walk", in progress. A placeholder critter,
+built from parts animated in code, starts in a small village, walks into a
+house and out to the meadow, hops and says hello.
 
 ## Getting started
 
@@ -23,6 +23,8 @@ make run ARGS=-lang=en # in English instead of Swedish
 make run ARGS='-map meadow'  # start on another map from assets/maps
 make run ARGS='-map dark_test'  # start on the dark test map, lit by the lantern
 make run ARGS='-map testroom'  # start in the test room with one of each enemy
+make run ARGS='-preset little-explorer'  # gentler, fewer enemies (default explorer)
+make run ARGS=-peaceful  # every enemy sleeps and never attacks
 make serve            # play in a browser at http://localhost:8080/web/
 make test             # run the tests
 make check            # what CI runs: gofmt, go mod tidy, vet and tests
@@ -33,6 +35,8 @@ make                  # list every command
 ```
 
 Without make, use `go run ./cmd/game` and `go tool wasmserve ./cmd/game`.
+In the browser, add `?preset=little-explorer` or `?peaceful=1` to the
+address for the same as `-preset little-explorer` and `-peaceful`.
 
 ## Playing on a tablet during development
 
@@ -46,6 +50,10 @@ Without make, use `go run ./cmd/game` and `go tool wasmserve ./cmd/game`.
    screen instead of tapping where to walk.
 5. Add `?lang=en` to play in English instead of Swedish, or both at once:
    `?pad=1&lang=en`.
+6. Add `?preset=little-explorer` for the gentler Little Explorer enemies,
+   and `?peaceful=1` to put every enemy to sleep, for example
+   `?preset=little-explorer&peaceful=1`. An unknown preset name keeps
+   Explorer.
 
 Every reload rebuilds the game, so edit, save and reload the tablet.
 
@@ -85,6 +93,18 @@ maps: each zone has to lie inside its map, keep clear of warps and player
 spawns, have open ground you can walk to, and have a habitat that at least
 one species in `critters.json` lives in by day.
 
+Enemies stand on `enemy` point objects in the `objects` layer, with these
+custom properties:
+
+| Property | Type | Needed | Meaning |
+|---|---|---|---|
+| `enemy` | string | yes | Which enemy stands here: an `id` from `assets/data/enemies.json`, for example `sulky_slime` |
+| `explorer_only` | bool | no, false | Leave this enemy out on Little Explorer, so rooms hold fewer enemies for younger players |
+
+An enemy object without `enemy` stops the map from loading. On Explorer
+every enemy object appears; on Little Explorer those with `explorer_only`
+set to true are left out, at the start, after a warp and after a nap.
+
 In a debug build (`make run TAGS=debug`) the overlay outlines every spawn
 zone of the current map in red, next to the outline of where you may walk,
 and counts the wild critters present.
@@ -109,9 +129,40 @@ since its last export:
   `assets/sprites/critters/fox/`, next to `fox.json`, which says where each
   part sits and turns. Only give whole parts a `<view>_` id: a named object
   inside a part, such as `down_head_shine`, is exported as a part of its own.
+  Draw the `side` view facing right; the game mirrors it about the feet for
+  a character facing left.
 - Every other drawing under `assets-src/sprites/` (props, effects, ui,
   emotes) and `assets-src/tiles/` is exported whole, as one PNG of its page at
   the same path under `assets/`.
+
+Characters are built from parts that the game moves in code, not from drawn
+frames. The player critter is the fox: its part sheet
+`assets/sprites/critters/fox/fox.json` is hand-written in the format `make art`
+writes, with placeholder boxes and pivots, until `fox.svg` is drawn and
+exported over it. The game reads where each part sits and turns from that
+file but still draws every part as a shape in code; the exported part PNGs are
+not loaded yet.
+
+A character's own data file, `assets/data/rigs/<id>.json`, picks its motions,
+sizes and speeds, so a new critter is two data files and no code. Its
+`sprite` names the part sheet (`"critters/fox"` reads
+`sprites/critters/fox/fox.json`), and its `animations` have an `idle` and a
+`walk` list. Each entry is a shared motion with `parts` (the part names it
+moves, in every view that has them; none means the whole character),
+`period` (seconds), `phase` (a fraction of a period) and:
+
+- `breathe`: squashes its parts about their pivots, taller and thinner, then
+  shorter and wider; `size` is the scale fraction.
+- `blink`: closes its parts for the last `duration` seconds of each period.
+- `bob`: lifts its parts smoothly by up to `size` world pixels once per
+  period.
+- `patter`: lifts its parts by up to `size` world pixels for the first half
+  of each period and rests them for the second half.
+- `wiggle`: turns its parts about their pivots by up to `size` degrees each
+  way.
+
+The game plays idle while the critter stands and walk while it moves, and
+blends between the two over a tenth of a second.
 
 A drawing is exported again when its SVG is newer than its JSON or PNG;
 `make art ART_ARGS=-force` exports everything. If Inkscape is not on your

@@ -276,6 +276,29 @@ func TestEmbeddedMaps_MeadowAndTestRoomHoldEveryEnemyAndStartAScene(t *testing.T
 	}
 }
 
+func TestEmbeddedMaps_OnLittleExplorerTheMeadowKeepsItsSlimeAndTheTestRoomItsSlimeAndMushroom(t *testing.T) {
+	want := map[string][]string{
+		"meadow":   {"sulky_slime"},
+		"testroom": {"grumpy_mushroom", "sulky_slime"},
+	}
+	for name, wantIDs := range want {
+		m, err := assets.LoadMap(name)
+		if err != nil {
+			t.Fatalf("LoadMap(%s): %v", name, err)
+		}
+		var ids []string
+		for _, e := range m.Enemies() {
+			if !e.ExplorerOnly {
+				ids = append(ids, e.EnemyID)
+			}
+		}
+		sort.Strings(ids)
+		if !reflect.DeepEqual(ids, wantIDs) {
+			t.Errorf("map %s: enemies not marked explorer_only = %v; want %v", name, ids, wantIDs)
+		}
+	}
+}
+
 func TestEmbeddedMaps_NoEnemyOnTheMeadowOrInTheTestRoomNoticesACritterOnASpawn(t *testing.T) {
 	notice := map[string]float64{
 		combat.BehaviourHopToward: combat.HopNoticeRange,

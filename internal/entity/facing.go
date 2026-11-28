@@ -90,3 +90,19 @@ func (f Facing) String() string {
 		return "down"
 	}
 }
+
+// View returns the name of the part-sheet view a character facing f shows,
+// and whether that view is drawn mirrored. Left and right share the side
+// view: it is drawn facing right and mirrored about the feet for left.
+func (f Facing) View() (name string, mirrored bool) {
+	switch f {
+	case FacingUp:
+		return "up", false
+	case FacingLeft:
+		return "side", true
+	case FacingRight:
+		return "side", false
+	default:
+		return "down", false
+	}
+}

@@ -58,3 +58,31 @@ func TestLoadMap_RejectsAnEnemyObjectWithoutAnEnemyID(t *testing.T) {
 		})
 	}
 }
+
+func TestMap_Enemies_MarksAnEnemyExplorerOnlyOnlyWhenItsBoolPropertyIsTrue(t *testing.T) {
+	tests := []struct {
+		name  string
+		extra string
+		want  bool
+	}{
+		{"explorer_only true", `,{"name": "explorer_only", "type": "bool", "value": true}`, true},
+		{"explorer_only false", `,{"name": "explorer_only", "type": "bool", "value": false}`, false},
+		{"no explorer_only property", ``, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m, err := LoadMap(markerMap(``, `{"id": 7, "type": "enemy", "x": 320, "y": 200, "point": true,
+				"properties": [{"name": "enemy", "type": "string", "value": "thistle_beast"}`+tt.extra+`]}`))
+			if err != nil {
+				t.Fatalf("LoadMap: %v", err)
+			}
+			got := m.Enemies()
+			if len(got) != 1 {
+				t.Fatalf("Enemies() = %+v; want the one enemy object", got)
+			}
+			if got[0].ExplorerOnly != tt.want {
+				t.Errorf("Enemies()[0].ExplorerOnly = %v; want %v", got[0].ExplorerOnly, tt.want)
+			}
+		})
+	}
+}

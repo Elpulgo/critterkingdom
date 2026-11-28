@@ -1,6 +1,9 @@
 package world
 
-import "github.com/Elpulgo/critterkingdom/internal/combat"
+import (
+	"github.com/Elpulgo/critterkingdom/internal/anim"
+	"github.com/Elpulgo/critterkingdom/internal/combat"
+)
 
 // Option changes how NewScene sets up a scene.
 type Option func(*Scene)
@@ -39,5 +42,45 @@ type Audio interface {
 func WithAudio(a Audio) Option {
 	return func(s *Scene) {
 		s.audio = a
+	}
+}
+
+// CharacterLoader loads the character with the given id, such as "fox": its
+// part layout and the motions that animate it.
+type CharacterLoader func(id string) (anim.Character, error)
+
+// WithCharacters gives the scene the loader for the critter's character,
+// which NewScene loads and animates. Without it, the critter has no parts and
+// only its shadow is drawn.
+func WithCharacters(load CharacterLoader) Option {
+	return func(s *Scene) {
+		s.loadCharacter = load
+	}
+}
+
+// WithInteraction gives the scene a sink that is called once for each
+// interaction the critter starts with a villager, on the tick it starts:
+// by paw, or when a tapped walk reaches the villager. TakeInteraction still
+// reports the same interactions.
+func WithInteraction(sink func(Interaction)) Option {
+	return func(s *Scene) {
+		s.onInteract = sink
+	}
+}
+
+// WithPreset spawns every enemy with the stats of the age preset p, as
+// combat.EnemyDef.ForPreset gives them. Without it enemies have their
+// Explorer, base, stats.
+func WithPreset(p combat.Preset) Option {
+	return func(s *Scene) {
+		s.preset = p
+	}
+}
+
+// WithPeaceful puts every enemy the scene spawns to sleep, so none of them
+// ever moves or hurts the critter. They can still be defeated.
+func WithPeaceful() Option {
+	return func(s *Scene) {
+		s.peaceful = true
 	}
 }

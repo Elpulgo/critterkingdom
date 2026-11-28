@@ -131,6 +131,39 @@ func TestScene_PawInFrontOfAVillagerStartsAnInteractionInsteadOfAHop(t *testing.
 	}
 }
 
+func TestScene_PawInFrontOfAVillagerHandsItsIDToTheInteractionSinkOnce(t *testing.T) {
+	// The critter starts at (24,40) facing down, with grandma 20 px in front
+	// of it at Tiled (192,480), world (24,60).
+	load := mapLoader(map[string][]byte{
+		"village": roomMap(6, 4, "village", villageStart+`,`+pointNPC(2, "grandma_hedgehog", 192, 480), ``),
+	})
+	var got []Interaction
+	s, err := NewScene(nil, load, "village", WithInteraction(func(in Interaction) {
+		got = append(got, in)
+	}))
+	if err != nil {
+		t.Fatalf("NewScene: %v", err)
+	}
+
+	if err := s.Update(pawFrame); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+	afterPaw := slices.Clone(got)
+	for range 30 {
+		if err := s.Update(walkFrame(geom.Vec{})); err != nil {
+			t.Fatalf("Update: %v", err)
+		}
+	}
+
+	want := []Interaction{{NPC: "grandma_hedgehog"}}
+	if !slices.Equal(afterPaw, want) {
+		t.Errorf("sink calls on the paw tick = %+v; want %+v", afterPaw, want)
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("sink calls after 30 more idle ticks = %+v; want only %+v", got, want)
+	}
+}
+
 func TestScene_PawWithNoVillagerInFrontHopsAndStartsNoInteraction(t *testing.T) {
 	// The critter starts at (24,40) facing down, on a village 80 px high.
 	tests := []struct {
