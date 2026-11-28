@@ -51,6 +51,8 @@ type Wild struct {
 	Facing Facing
 	// Walls, when non-nil, keeps the critter's hops out of solid scenery.
 	Walls Walls
+	// Rare marks a critter of a rare species, which sparkles.
+	Rare bool
 
 	zone  geom.Rect
 	rng   *rand.Rand

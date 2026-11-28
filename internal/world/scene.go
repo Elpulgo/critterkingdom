@@ -4,12 +4,14 @@ package world
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
+	"github.com/Elpulgo/critterkingdom/internal/critter"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
 	"github.com/Elpulgo/critterkingdom/internal/entity"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
@@ -74,6 +76,18 @@ type Scene struct {
 
 	titleFace  *text.GoTextFace
 	bubbleFace *text.GoTextFace
+
+	// species and rng are set by AddWildCritters; with rng nil the scene has
+	// no wild critters.
+	species []critter.Species
+	rng     *rand.Rand
+	// spawner decides which critters are present in the current map's
+	// zones, and wild holds the entity of each, in zone order.
+	spawner *critter.Spawner
+	wild    []*wildCritter
+	// timeOfDay decides which species are about; it stays critter.Day until
+	// day and night exist.
+	timeOfDay critter.TimeOfDay
 }
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
@@ -99,6 +113,7 @@ func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Sc
 		load:       load,
 		player:     entity.NewPlayer(spawn),
 		titleAlpha: 1,
+		timeOfDay:  critter.Day,
 		titleFace:  engine.NewFace(font, titleTextSize, titleWeight),
 		bubbleFace: engine.NewFace(font, bubbleTextSize, bubbleWeight),
 	}
@@ -107,7 +122,8 @@ func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Sc
 }
 
 // setMap makes m, loaded as name, the scene's map: its size bounds the
-// critter and the camera, and its collision grid stops the critter.
+// critter and the camera, its collision grid stops the critter, and its spawn
+// zones get fresh wild critters if AddWildCritters was called.
 func (s *Scene) setMap(name string, m *Map) {
 	size := m.Size()
 	s.mapName = name
@@ -118,6 +134,7 @@ func (s *Scene) setMap(name string, m *Map) {
 		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
 	}
 	s.player.Walls = m.Collision
+	s.resetWildCritters()
 }
 
 // followWarp moves the critter to the target spawn of the warp its feet are
@@ -138,8 +155,9 @@ func (s *Scene) followWarp() error {
 	return nil
 }
 
-// Update moves the critter and the camera by one tick, and moves the critter
-// to another map when its feet end the tick inside a warp. It returns an error
+// Update moves the critter and the camera by one tick, moves the critter to
+// another map when its feet end the tick inside a warp, and spawns and moves
+// the wild critters. It returns an error
 // when that warp's target map or spawn does not exist.
 func (s *Scene) Update(f engine.Frame) error {
 	s.elapsed += f.DT
@@ -157,6 +175,7 @@ func (s *Scene) Update(f engine.Frame) error {
 	if err := s.followWarp(); err != nil {
 		return err
 	}
+	s.updateWildCritters(f.DT)
 	if s.player.Moved() {
 		s.walked += f.DT
 	}
@@ -245,8 +264,8 @@ func (s *Scene) feetInView() geom.Vec {
 	return s.player.Pos.Sub(s.camera)
 }
 
-// DebugLines adds the map's name, the critter's position, the camera and the
-// walk target to the debug overlay.
+// DebugLines adds the map's name, the critter's position, the camera, the
+// walk target and the number of wild critters to the debug overlay.
 func (s *Scene) DebugLines() []string {
 	p := s.player
 	lines := []string{
@@ -257,6 +276,7 @@ func (s *Scene) DebugLines() []string {
 	if t, ok := p.Target(); ok {
 		lines = append(lines, fmt.Sprintf("walk to %.0f,%.0f", t.X, t.Y))
 	}
+	lines = append(lines, fmt.Sprintf("wild critters %d", len(s.wild)))
 	return lines
 }
 
