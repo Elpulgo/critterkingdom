@@ -3,7 +3,6 @@ package ui
 import (
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	"github.com/Elpulgo/critterkingdom/internal/dialogue"
@@ -39,6 +38,10 @@ type Dialogue struct {
 	text   func(key string) string
 	// face measures the text for wrapping; its size follows the unit.
 	face *text.GoTextFace
+	// nameFace and choiceFace draw the name and the choice buttons' text;
+	// DrawUI sizes them to the unit.
+	nameFace   *text.GoTextFace
+	choiceFace *text.GoTextFace
 
 	// pages are the current line's pages, wrapped to width screen pixels.
 	// They are nil until the first Update, which knows the screen size.
@@ -59,11 +62,13 @@ var _ engine.Overlay = (*Dialogue)(nil)
 // the game's font.
 func NewDialogue(font *text.GoTextFaceSource, runner *dialogue.Runner, npcID string, text func(key string) string) *Dialogue {
 	return &Dialogue{
-		runner:    runner,
-		npcID:     npcID,
-		text:      text,
-		face:      engine.NewFace(font, textSize, textWeight),
-		highlight: noHighlight,
+		runner:     runner,
+		npcID:      npcID,
+		text:       text,
+		face:       engine.NewFace(font, textSize, textWeight),
+		nameFace:   engine.NewFace(font, nameSize, nameWeight),
+		choiceFace: engine.NewFace(font, choiceSize, choiceWeight),
+		highlight:  noHighlight,
 	}
 }
 
@@ -242,6 +247,3 @@ func (d *Dialogue) startPage(i int) {
 
 // DrawWorld draws nothing: the dialogue box is all interface.
 func (d *Dialogue) DrawWorld(engine.Canvas) {}
-
-// DrawUI draws nothing yet.
-func (d *Dialogue) DrawUI(*ebiten.Image, engine.UI) {}
