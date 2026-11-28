@@ -10,6 +10,8 @@
         {"name": "ear_left", "image": "down_ear_left.png", "x": -7, "y": -17, "w": 5, "h": 5, "pivotX": -4.5, "pivotY": -12},
         {"name": "ear_right", "image": "down_ear_right.png", "x": 2, "y": -17, "w": 5, "h": 5, "pivotX": 4.5, "pivotY": -12},
         {"name": "head", "image": "down_head.png", "x": -8, "y": -15, "w": 16, "h": 10, "pivotX": 0, "pivotY": -5},
+        {"name": "muzzle", "image": "down_muzzle.png", "x": -3.5, "y": -11, "w": 7, "h": 6, "pivotX": 0, "pivotY": -8},
+        {"name": "nose", "image": "down_nose.png", "x": -1.1, "y": -10, "w": 2.2, "h": 1.2, "pivotX": 0, "pivotY": -9.4},
         {"name": "eyes", "image": "down_eyes.png", "x": -4, "y": -12, "w": 8, "h": 2, "pivotX": 0, "pivotY": -11}
       ]
     },
@@ -33,6 +35,8 @@
         {"name": "ear_left", "image": "side_ear_left.png", "x": -1, "y": -17, "w": 4, "h": 5, "pivotX": 1, "pivotY": -12},
         {"name": "head", "image": "side_head.png", "x": -3, "y": -15, "w": 11, "h": 10, "pivotX": 2.5, "pivotY": -5},
         {"name": "ear_right", "image": "side_ear_right.png", "x": 2, "y": -17, "w": 4, "h": 5, "pivotX": 4, "pivotY": -12},
+        {"name": "muzzle", "image": "side_muzzle.png", "x": 1.5, "y": -11, "w": 6, "h": 6, "pivotX": 4.5, "pivotY": -8},
+        {"name": "nose", "image": "side_nose.png", "x": 6.8, "y": -10.1, "w": 1.2, "h": 1.2, "pivotX": 7.4, "pivotY": -9.5},
         {"name": "eyes", "image": "side_eyes.png", "x": 5, "y": -12, "w": 1.5, "h": 2, "pivotX": 5.75, "pivotY": -11}
       ]
     }

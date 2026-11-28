@@ -6,7 +6,7 @@
       {"motion": "blink", "parts": ["eyes"], "period": 4, "duration": 0.15}
     ],
     "walk": [
-      {"motion": "bob", "parts": ["body", "head", "ear_left", "ear_right", "eyes", "tail"], "size": 1, "period": 0.3},
+      {"motion": "bob", "parts": ["body", "head", "muzzle", "nose", "ear_left", "ear_right", "eyes", "tail"], "size": 1, "period": 0.3},
       {"motion": "patter", "parts": ["foot_left"], "size": 1, "period": 0.3},
       {"motion": "patter", "parts": ["foot_right"], "size": 1, "period": 0.3, "phase": 0.5},
       {"motion": "wiggle", "parts": ["ear_left", "ear_right"], "size": 5, "period": 0.6},

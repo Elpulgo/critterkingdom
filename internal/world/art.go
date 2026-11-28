@@ -273,8 +273,9 @@ func drawCritter(p *pen, feet geom.Vec, lift float64, poses []anim.PartPose) {
 
 // drawPart draws the placeholder shape of one posed part, its feet drawn at
 // the world point origin: ears are fur triangles standing on the bottom of
-// their box, eyes are dark ovals, feet are cocoa ovals, and the body, head,
-// tail and any part without a shape of its own are fur ovals.
+// their box, eyes are dark ovals, the muzzle is a cream oval, feet and the
+// nose are cocoa ovals, and the body, head, tail and any part without a shape
+// of its own are fur ovals.
 func drawPart(p *pen, origin geom.Vec, pp anim.PartPose) {
 	b := pp.Box
 	c := b.Min.Add(b.Max).Scale(0.5)
@@ -293,7 +294,9 @@ func drawPart(p *pen, origin geom.Vec, pp anim.PartPose) {
 		} else {
 			p.posedEllipse(origin, pp, c.X, c.Y, rx, h/2, ink)
 		}
-	case "foot_left", "foot_right":
+	case "muzzle":
+		p.posedEllipse(origin, pp, c.X, c.Y, w/2, h/2, cream)
+	case "foot_left", "foot_right", "nose":
 		p.posedEllipse(origin, pp, c.X, c.Y, w/2, h/2, cocoa)
 	default:
 		p.posedEllipse(origin, pp, c.X, c.Y, w/2, h/2, fur)
