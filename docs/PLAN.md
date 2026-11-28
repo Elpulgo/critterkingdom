@@ -472,7 +472,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 - [ ] Gating items: Snippers (brambles), Splash Boots (shallow water)
 - [ ] Puzzle pieces: push block, flower switch, mushrooms in order, key and door, pots
-- [ ] Darkness with a light radius (firefly companion or lantern) using a light-mask image
+- [x] Darkness with a light radius (firefly companion or lantern) using a light-mask image
 - [ ] Rooms that lock until cleared; sunflower checkpoint
 - [ ] Boss: the Grumbling Grub with three telegraphed phases, star health bar, berry ending and sticker
 - [ ] Glow Cave map (five rooms), Glow Seed, Sturdy Stick, main quest skeleton; "Fix the Bridge" opens the Woods
@@ -648,8 +648,9 @@ only face down). Small critters: 5 to 10. Enemies: about 12. The boss: about
    `target_map` and `target_spawn`, `spawn_zone` with `habitat`, `enemy` with
    `id`, `room` rectangles with `locks_doors`, `item` with `item_id`,
    `trigger` with `event`, puzzle objects). Map properties: `music`, `biome`,
-   `dark`. The loader divides Tiled's positions by 8, so the game works in
-   world pixels.
+   `dark`. *Now:* a dark map is covered by a light mask with a lantern light
+   on the critter; the firefly light and the lantern item come later. The
+   loader divides Tiled's positions by 8, so the game works in world pixels.
 8. Turn on "Repeat last export on save" in Tiled so the `.tmj` in
    `assets/maps/` is always current. Test with `go run ./cmd/game -map meadow`.
 
