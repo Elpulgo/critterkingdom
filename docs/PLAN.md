@@ -426,7 +426,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 ### M2 Talking: "Hello, neighbour" (2 weeks)
 
-- [ ] NPC entities: idle and wander, face the player, "…" bubble
+- [x] NPC entities: idle and wander, face the player, "…" bubble
 - [ ] Dialogue box: portrait, name, typewriter text, at most two big choice buttons
 - [ ] Dialogue data format, runner and tests
 - [x] i18n with sv and en string tables; a font with å, ä and ö
@@ -644,7 +644,8 @@ only face down). Small critters: 5 to 10. Enemies: about 12. The boss: about
 7. Map layout in Tiled (orthogonal, 128 px tiles, about 40 by 30). Layers:
    `ground`, `decor`, `props` (object layer with tile objects, y-sorted),
    `above` (tree tops, roofs), `collision` (a one-tile "solid" tileset, or
-   rectangles), `objects` (`player_spawn`, `npc` with `id`, `warp` with
+   rectangles), `objects` (`player_spawn`, `npc` rectangles with `id`,
+   where the rectangle is the area the villager wanders in, `warp` with
    `target_map` and `target_spawn`, `spawn_zone` with `habitat`, `enemy` with
    `id`, `room` rectangles with `locks_doors`, `item` with `item_id`,
    `trigger` with `event`, puzzle objects). Map properties: `music`, `biome`,

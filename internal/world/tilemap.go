@@ -45,6 +45,7 @@ type Map struct {
 	objectLayers map[string]*ObjectLayer
 	spawns       []spawn
 	warps        []Warp
+	npcs         []NPCSpawn
 }
 
 // Size returns the map's dimensions in world pixels.

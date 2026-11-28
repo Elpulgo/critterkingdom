@@ -99,6 +99,46 @@ func TestEmbeddedMaps_EveryWarpCanBeWalkedToFromEverySpawn(t *testing.T) {
 	}
 }
 
+func TestEmbeddedMaps_VillagersStartOnOpenGroundAndWanderInsideTheMapClearOfWarps(t *testing.T) {
+	for name, m := range loadEmbeddedMaps(t) {
+		size := m.Size()
+		for _, n := range m.NPCs() {
+			if n.Pos.X <= 0 || n.Pos.X >= size.X || n.Pos.Y <= 0 || n.Pos.Y >= size.Y {
+				t.Errorf("map %s: npc %q (object %d) starts at %v, outside the map (0,0)..%v", name, n.ID, n.ObjectID, n.Pos, size)
+			} else if col, row := int(n.Pos.X/m.TileSize), int(n.Pos.Y/m.TileSize); m.Collision.Solid(col, row) {
+				t.Errorf("map %s: npc %q (object %d) starts on solid cell (%d, %d)", name, n.ID, n.ObjectID, col, row)
+			}
+			if w, ok := m.WarpAt(n.Pos); ok {
+				t.Errorf("map %s: npc %q (object %d) starts at %v inside the warp to %s/%s", name, n.ID, n.ObjectID, n.Pos, w.TargetMap, w.TargetSpawn)
+			}
+			if n.Area.Min.X < 0 || n.Area.Min.Y < 0 || n.Area.Max.X > size.X || n.Area.Max.Y > size.Y {
+				t.Errorf("map %s: npc %q (object %d) wanders in %v, which reaches outside the map (0,0)..%v", name, n.ID, n.ObjectID, n.Area, size)
+			}
+			for _, w := range m.Warps() {
+				if overlaps(n.Area, w.Rect) {
+					t.Errorf("map %s: npc %q (object %d) wanders in %v, which overlaps the warp to %s/%s at %v", name, n.ID, n.ObjectID, n.Area, w.TargetMap, w.TargetSpawn, w.Rect)
+				}
+			}
+		}
+	}
+}
+
+func TestEmbeddedMaps_VillageHasGrandmaHedgehogBakerBadgerAndMayorOwl(t *testing.T) {
+	m, err := assets.LoadMap("village")
+	if err != nil {
+		t.Fatalf("LoadMap(village): %v", err)
+	}
+	got := []string{}
+	for _, n := range m.NPCs() {
+		got = append(got, n.ID)
+	}
+	sort.Strings(got)
+	want := []string{"baker_badger", "grandma_hedgehog", "mayor_owl"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("village villagers = %v; want %v", got, want)
+	}
+}
+
 func TestEmbeddedMaps_VillageJoinsTheHouseAndTheMeadowBothWays(t *testing.T) {
 	maps := loadEmbeddedMaps(t)
 	got := make(map[string][]string, len(maps))
@@ -160,4 +200,10 @@ func anyCellReached(m *world.Map, reached map[[2]int]bool, rect geom.Rect) bool 
 		}
 	}
 	return false
+}
+
+// overlaps reports whether a and b share some area; rectangles that only
+// touch along an edge do not overlap.
+func overlaps(a, b geom.Rect) bool {
+	return a.Min.X < b.Max.X && b.Min.X < a.Max.X && a.Min.Y < b.Max.Y && b.Min.Y < a.Max.Y
 }
