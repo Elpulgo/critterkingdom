@@ -53,7 +53,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap, world.WithEnemies(enemies))
+	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap,
+		world.WithEnemies(enemies), world.WithCharacters(assets.LoadCharacter))
 	if err != nil {
 		log.Fatal(err)
 	}
