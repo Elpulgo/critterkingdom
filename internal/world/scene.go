@@ -201,14 +201,18 @@ func (s *Scene) now() time.Duration {
 
 // spawnEnemies builds the enemies of m's enemy objects, each at its start
 // position with full hit points and the stats of the scene's preset, reading
-// the scene's clock, and asleep in Peaceful mode. It returns an error naming
-// the object id and the enemy id for an enemy without a definition.
+// the scene's clock, and asleep in Peaceful mode. On Little Explorer it leaves
+// out the objects marked explorer_only. It returns an error naming the object
+// id and the enemy id for an enemy without a definition.
 func (s *Scene) spawnEnemies(m *Map) ([]*entity.Enemy, error) {
 	var enemies []*entity.Enemy
 	for _, mk := range m.Enemies() {
 		def, ok := s.enemyDefs[mk.EnemyID]
 		if !ok {
 			return nil, fmt.Errorf("%s object %d: no enemy definition %q", objectsLayer, mk.ObjectID, mk.EnemyID)
+		}
+		if mk.ExplorerOnly && s.preset == combat.PresetLittleExplorer {
+			continue
 		}
 		e, err := entity.NewEnemy(def.ForPreset(s.preset), mk.Pos, s.clock, s.onDefeat)
 		if err != nil {
