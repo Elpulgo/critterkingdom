@@ -90,6 +90,12 @@ type Scene struct {
 	// after a warp, so a held tap does not walk the critter straight back, and
 	// after a press on a villager, which walks to the villager instead.
 	awaitRelease bool
+	// planned is true while plannedFor holds the cell the current pointer
+	// route was planned for, and toTap whether that route ends on the
+	// pointer rather than on the nearest reachable cell.
+	planned    bool
+	plannedFor Cell
+	toTap      bool
 	// wasPointing is whether the pointer was held on the tick before, so a
 	// press can be told from a hold.
 	wasPointing bool
@@ -185,6 +191,7 @@ func (s *Scene) followWarp() error {
 	s.setMap(w.TargetMap, m)
 	s.player.Place(pos)
 	s.awaitRelease = true
+	s.planned = false
 	return nil
 }
 
@@ -201,6 +208,12 @@ func (s *Scene) Update(f engine.Frame) error {
 	if !in.Pointing {
 		s.awaitRelease = false
 	}
+	if in.Move.IsZero() && in.Pointing && !s.awaitRelease {
+		s.walkToPointer(s.camera.Add(in.Point))
+	}
+	if in.Paw && s.player.Hop() {
+		s.greet = greetTime
+  }
 	s.steer(in, pressed)
 	if in.Paw {
 		s.paw()
@@ -234,6 +247,33 @@ func (s *Scene) Update(f engine.Frame) error {
 	return nil
 }
 
+// walkToPointer walks the critter to p, the pointer's world position, around
+// solid scenery. It plans a new route when the critter is not walking or p is
+// in another cell than the current route was planned for; otherwise only the
+// route's end follows p, when the route ends on the pointer, moved to where
+// the critter's box fits in p's cell.
+func (s *Scene) walkToPointer(p geom.Vec) {
+	tap := s.walkable.Clamp(p)
+	g := s.m.Collision
+	if g == nil || g.TileSize <= 0 {
+		s.player.WalkTo(tap)
+		return
+	}
+	box := s.player.Box()
+	r := router{grid: g, box: box.Max.Sub(box.Min)}
+	cell := g.cellAt(tap)
+	if _, walking := s.player.Target(); walking && s.planned && cell == s.plannedFor {
+		if s.toTap {
+			// The route ends in this open cell; end it where the box fits,
+			// as plan does.
+			s.player.Retarget(r.fit(tap))
+		}
+		return
+	}
+	route, toTap := r.plan(s.player.Pos, tap)
+	s.player.WalkAlong(route)
+	s.planned, s.plannedFor, s.toTap = true, cell, toTap
+}
 // steer turns this tick's movement input into where the critter goes. The
 // stick or keys win and drop a tapped villager. A press on a villager makes
 // it the tap target, which the critter walks to until it is in reach; a

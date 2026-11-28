@@ -52,10 +52,10 @@ Every reload rebuilds the game, so edit, save and reload the tablet.
 
 | Input | Move | Paw, say hello |
 |---|---|---|
-| Touch | Tap where to walk, or hold and lead the critter. With `?pad=1`, drag on the left half. | The paw button at the bottom right, shown after the first touch |
+| Touch | Tap where to walk, or hold and lead the critter. It walks around anything in the way, and if you tap something solid or out of reach it walks as near as it can get. With `?pad=1`, drag on the left half. | The paw button at the bottom right, shown after the first touch |
 | Keyboard | Arrows or WASD | Space, Enter or E |
 | Gamepad | Left stick or d-pad | A, the bottom face button |
-| Mouse | Click where to walk, or hold and lead | |
+| Mouse | Click where to walk, or hold and lead, the same as touch | |
 
 Esc, Tab, Start and Y are the menu buttons. Nothing opens yet. In a debug
 build, F3 shows and hides the overlay.
