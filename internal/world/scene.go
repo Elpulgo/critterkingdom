@@ -67,6 +67,12 @@ type Scene struct {
 	// awaitRelease ignores pointer walking after a warp until the pointer has
 	// been let go, so a held tap does not walk the critter straight back.
 	awaitRelease bool
+	// planned is true while plannedFor holds the cell the current pointer
+	// route was planned for, and toTap whether that route ends on the
+	// pointer rather than on the nearest reachable cell.
+	planned    bool
+	plannedFor Cell
+	toTap      bool
 
 	walked     float64 // seconds the critter has spent walking
 	greet      float64 // seconds left of the greeting
@@ -135,6 +141,7 @@ func (s *Scene) followWarp() error {
 	s.setMap(w.TargetMap, m)
 	s.player.Place(pos)
 	s.awaitRelease = true
+	s.planned = false
 	return nil
 }
 
@@ -148,7 +155,7 @@ func (s *Scene) Update(f engine.Frame) error {
 		s.awaitRelease = false
 	}
 	if in.Move.IsZero() && in.Pointing && !s.awaitRelease {
-		s.player.WalkTo(s.camera.Add(in.Point))
+		s.walkToPointer(s.camera.Add(in.Point))
 	}
 	if in.Paw && s.player.Hop() {
 		s.greet = greetTime
@@ -170,6 +177,31 @@ func (s *Scene) Update(f engine.Frame) error {
 	focus := s.player.Pos.Sub(geom.Vec{Y: focusLift})
 	s.camera = engine.SmoothCameraFor(focus, f.View.W, f.View.H, s.bounds, f.View.Scale)
 	return nil
+}
+
+// walkToPointer walks the critter to p, the pointer's world position, around
+// solid scenery. It plans a new route when the critter is not walking or p is
+// in another cell than the current route was planned for; otherwise only the
+// route's end follows p, when the route ends on the pointer.
+func (s *Scene) walkToPointer(p geom.Vec) {
+	tap := s.walkable.Clamp(p)
+	g := s.m.Collision
+	if g == nil || g.TileSize <= 0 {
+		s.player.WalkTo(tap)
+		return
+	}
+	cell := g.cellAt(tap)
+	if _, walking := s.player.Target(); walking && s.planned && cell == s.plannedFor {
+		if s.toTap {
+			s.player.Retarget(tap)
+		}
+		return
+	}
+	box := s.player.Box()
+	r := router{grid: g, box: box.Max.Sub(box.Min)}
+	route, toTap := r.plan(s.player.Pos, tap)
+	s.player.WalkAlong(route)
+	s.planned, s.plannedFor, s.toTap = true, cell, toTap
 }
 
 // updateBob swings the walk bob while the critter walks and lets it
