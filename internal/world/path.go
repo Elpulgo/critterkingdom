@@ -154,3 +154,50 @@ func (q *pathQueue) Pop() any {
 	*q = old[:len(old)-1]
 	return n
 }
+
+// NearestReachable returns the cell reachable from from (by the same moves as
+// FindPath, from itself included) whose centre is closest to target's centre
+// in a straight line. Ties go to the lowest row, then the lowest column. It
+// returns false only when from is solid or outside the grid. target may be any
+// cell, solid or outside the grid; an open target reachable from from is
+// returned itself.
+func (g *Grid) NearestReachable(from, target Cell) (Cell, bool) {
+	if !g.open(from) {
+		return Cell{}, false
+	}
+
+	// Flood fill every cell reachable from from.
+	reached := make([]bool, g.Cols*g.Rows)
+	reached[from.Row*g.Cols+from.Col] = true
+	queue := []Cell{from}
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		for _, d := range neighbours {
+			if !g.canStep(cur, d) {
+				continue
+			}
+			next := Cell{cur.Col + d.Col, cur.Row + d.Row}
+			if i := next.Row*g.Cols + next.Col; !reached[i] {
+				reached[i] = true
+				queue = append(queue, next)
+			}
+		}
+	}
+
+	// All cells are the same size, so comparing squared cell offsets compares
+	// centre distances exactly. Scanning in row-major order and keeping only a
+	// strictly closer cell resolves ties to the lowest row, then column.
+	best, bestDist := from, -1
+	for i, ok := range reached {
+		if !ok {
+			continue
+		}
+		c := Cell{Col: i % g.Cols, Row: i / g.Cols}
+		dc, dr := c.Col-target.Col, c.Row-target.Row
+		if dist := dc*dc + dr*dr; bestDist < 0 || dist < bestDist {
+			best, bestDist = c, dist
+		}
+	}
+	return best, true
+}

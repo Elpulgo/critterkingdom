@@ -149,3 +149,60 @@ func TestGrid_FindPath_StartingOnTheGoalIsAOneCellPath(t *testing.T) {
 		t.Errorf("FindPath((1,0), (1,0)) = %v, %v; want [(1,0)], true", path, ok)
 	}
 }
+
+func TestGrid_NearestReachable_PicksTheReachableCellClosestToASolidTarget(t *testing.T) {
+	// Everything open is reachable from (0,6): the gap in row 2 joins both
+	// sides of the top wall.
+	walls := gridOf(t,
+		"...#...",
+		"...#...",
+		".......",
+		".#####.",
+		".#####.",
+		".#####.",
+		".......",
+	)
+	// (3,2) is open but sealed in: none of its eight neighbours is open.
+	pocket := gridOf(t,
+		".......",
+		".#####.",
+		".##.##.",
+		".#####.",
+		".......",
+	)
+
+	tests := []struct {
+		name         string
+		g            *Grid
+		from, target Cell
+		want         Cell
+	}{
+		{"one open cell beside the target is closest", walls, Cell{0, 6}, Cell{2, 3}, Cell{2, 2}},
+		{"a tie within a row goes to the lowest column", walls, Cell{0, 6}, Cell{3, 0}, Cell{2, 0}},
+		{"a tie across rows goes to the lowest row", walls, Cell{0, 6}, Cell{3, 4}, Cell{3, 2}},
+		// (3,2) is 1 from the target; the reachable cells are 2 away at best.
+		{"a closer cell behind a closed wall is passed over", pocket, Cell{0, 0}, Cell{2, 2}, Cell{2, 0}},
+		{"with nothing else reachable it is the start", pocket, Cell{3, 2}, Cell{6, 4}, Cell{3, 2}},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := tc.g.NearestReachable(tc.from, tc.target)
+			if !ok || got != tc.want {
+				t.Errorf("NearestReachable(%v, %v) = %v, %v; want %v, true", tc.from, tc.target, got, ok, tc.want)
+			}
+		})
+	}
+}
+
+func TestGrid_NearestReachable_FailsFromAnUnwalkableStart(t *testing.T) {
+	g := gridOf(t,
+		"..#",
+		"...",
+	)
+
+	for _, from := range []Cell{{2, 0}, {-1, 0}, {3, 1}, {0, -1}, {0, 2}} {
+		if got, ok := g.NearestReachable(from, Cell{0, 0}); ok {
+			t.Errorf("NearestReachable(%v, (0,0)) = %v, true; want false", from, got)
+		}
+	}
+}
