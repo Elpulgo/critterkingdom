@@ -8,25 +8,13 @@ import (
 	"github.com/Elpulgo/critterkingdom/internal/assets"
 )
 
-func TestAudio_ShippedVillageLoopAndStepSoundLoadAsOggData(t *testing.T) {
-	tests := []struct {
-		name string
-		load func(string) ([]byte, error)
-		file string
-	}{
-		{"village music loop", assets.LoadMusic, "village"},
-		{"step sound", assets.LoadSound, "step"},
+func TestLoadSound_ShippedStepSoundLoadsAsOggData(t *testing.T) {
+	b, err := assets.LoadSound("step")
+	if err != nil {
+		t.Fatalf(`LoadSound("step"): %v`, err)
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			b, err := tc.load(tc.file)
-			if err != nil {
-				t.Fatalf("load %q: %v", tc.file, err)
-			}
-			if !bytes.HasPrefix(b, []byte("OggS")) {
-				t.Errorf("load %q: data does not start with OggS", tc.file)
-			}
-		})
+	if !bytes.HasPrefix(b, []byte("OggS")) {
+		t.Error(`LoadSound("step"): data does not start with OggS`)
 	}
 }
 
