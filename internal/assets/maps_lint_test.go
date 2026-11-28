@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/critter"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
 	"github.com/Elpulgo/critterkingdom/internal/world"
 )
@@ -120,6 +121,30 @@ func TestEmbeddedMaps_SpawnZonesLieInsideTheMapClearOfWarpsAndSpawnsOnReachableG
 				if !anyCellReached(m, reached, z.Rect) {
 					t.Errorf("map %s: spawn zone %s at %v has no open cell that can be walked to from spawn %q", name, z.ID, z.Rect, s.name)
 				}
+			}
+		}
+	}
+}
+
+func TestEmbeddedMaps_EverySpawnZoneHasASpeciesThatComesOutByDay(t *testing.T) {
+	species, err := assets.LoadCritters()
+	if err != nil {
+		t.Fatalf("LoadCritters: %v", err)
+	}
+	// The world the game hands the spawner until night (#50), quest flags,
+	// companions and the daily visitor exist.
+	day := critter.World{TimeOfDay: critter.Day}
+	for name, m := range loadEmbeddedMaps(t) {
+		for _, z := range m.SpawnZones() {
+			found := false
+			for i := range species {
+				if species[i].Habitat == z.Habitat && species[i].Active(day) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("map %s: spawn zone %s has habitat %q, which no species of critters.json lives in by day", name, z.ID, z.Habitat)
 			}
 		}
 	}
