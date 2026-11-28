@@ -14,6 +14,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
+	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/critter"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
 	"github.com/Elpulgo/critterkingdom/internal/entity"
@@ -72,8 +73,10 @@ type Interaction struct {
 
 // Scene is the world scene: a Tiled map where the critter walks around,
 // collides with solid scenery, talks to the villager in front of it or hops
-// and says hello when the paw button is pressed, and moves to another map
-// when it walks into a warp.
+// and says hello when the paw button is pressed, moves to another map when it
+// walks into a warp, and meets the map's enemies. When enemy hazards take its
+// last petal it naps: it wakes at the spot it entered the map at with full
+// petals, and the enemies reset.
 type Scene struct {
 	load     MapLoader
 	mapName  string // the name m was loaded under
@@ -86,7 +89,17 @@ type Scene struct {
 	viewSize geom.Vec      // size of the view, in world pixels
 	pen      pen
 	bob      float64 // how far the walk bob lifts the critter, in world pixels
-	elapsed  float64 // total elapsed seconds, for tile animations
+	elapsed  float64 // total elapsed seconds, for tile animations and the clock
+
+	// clock returns elapsed as game time; health and every enemy read it.
+	clock     combat.Clock
+	health    *combat.Health
+	enemyDefs map[string]combat.EnemyDef
+	onDefeat  func(combat.EnemyDefeated)
+	enemies   []*entity.Enemy
+	// entrance is where the critter was placed on entering the current map,
+	// where it wakes from a nap.
+	entrance geom.Vec
 
 	// awaitRelease ignores pointer walking until the pointer has been let go:
 	// after a warp, so a held tap does not walk the critter straight back, and
@@ -126,8 +139,8 @@ type Scene struct {
 	// zones, and wild holds the entity of each, in zone order.
 	spawner *critter.Spawner
 	wild    []*wildCritter
-	// inView is reused by DrawWorld for the wild critters it draws.
-	inView []*wildCritter
+	// actors is reused by drawActors for the things it draws.
+	actors []actor
 	// timeOfDay decides which species are about; it stays critter.Day until
 	// day and night exist.
 	timeOfDay critter.TimeOfDay
@@ -136,9 +149,10 @@ type Scene struct {
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
 // the critter placed at the map's first player_spawn. Warps load their target
-// maps with load too. It returns an error when startMap cannot be loaded or
-// has no player_spawn object.
-func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Scene, error) {
+// maps with load too. opts add enemy definitions and a defeat sink. It
+// returns an error when startMap cannot be loaded, has no player_spawn object,
+// or has an enemy object naming an enemy without a definition.
+func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string, opts ...Option) (*Scene, error) {
 	if load == nil {
 		return nil, fmt.Errorf("map loader is nil")
 	}
@@ -156,19 +170,57 @@ func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Sc
 	s := &Scene{
 		load:       load,
 		player:     entity.NewPlayer(spawn),
+		enemyDefs:  make(map[string]combat.EnemyDef),
 		titleAlpha: 1,
 		timeOfDay:  critter.Day,
 		titleFace:  engine.NewFace(font, titleTextSize, titleWeight),
 		bubbleFace: engine.NewFace(font, bubbleTextSize, bubbleWeight),
 	}
-	s.setMap(startMap, m)
+	s.clock = s.now
+	s.health = combat.NewHealth(s.clock)
+	for _, opt := range opts {
+		opt(s)
+	}
+	enemies, err := s.spawnEnemies(m)
+	if err != nil {
+		return nil, fmt.Errorf("start map %q: %w", startMap, err)
+	}
+	s.setMap(startMap, m, spawn, enemies)
 	return s, nil
 }
 
-// setMap makes m, loaded as name, the scene's map: its size bounds the
-// critter and the camera, its collision grid stops the critter and the
-// villagers, and its npc objects replace the villagers of the map before.
-func (s *Scene) setMap(name string, m *Map) {
+// now returns the scene's game time: the sum of every tick's Frame.DT,
+// rounded to the nanosecond.
+func (s *Scene) now() time.Duration {
+	return time.Duration(math.Round(s.elapsed * float64(time.Second)))
+}
+
+// spawnEnemies builds the enemies of m's enemy objects, each at its start
+// position with full hit points, reading the scene's clock. It returns an
+// error naming the object id and the enemy id for an enemy without a
+// definition.
+func (s *Scene) spawnEnemies(m *Map) ([]*entity.Enemy, error) {
+	var enemies []*entity.Enemy
+	for _, mk := range m.Enemies() {
+		def, ok := s.enemyDefs[mk.EnemyID]
+		if !ok {
+			return nil, fmt.Errorf("%s object %d: no enemy definition %q", objectsLayer, mk.ObjectID, mk.EnemyID)
+		}
+		e, err := entity.NewEnemy(def, mk.Pos, s.clock, s.onDefeat)
+		if err != nil {
+			return nil, fmt.Errorf("%s object %d: %w", objectsLayer, mk.ObjectID, err)
+		}
+		e.Walls = m.Collision
+		enemies = append(enemies, e)
+	}
+	return enemies, nil
+}
+
+// setMap makes m, loaded as name, the scene's map, with the critter entering
+// it at entrance and enemies as its enemies: its size bounds the critter, the
+// enemies and the camera, its collision grid stops them and the villagers, and
+// its npc objects replace the villagers of the map before.
+func (s *Scene) setMap(name string, m *Map, entrance geom.Vec, enemies []*entity.Enemy) {
 	size := m.Size()
 	s.mapName = name
 	s.m = m
@@ -178,6 +230,9 @@ func (s *Scene) setMap(name string, m *Map) {
 		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
 	}
 	s.player.Walls = m.Collision
+	s.player.Place(entrance)
+	s.entrance = entrance
+	s.enemies = enemies
 	s.resetWildCritters()
 	// A tapped villager belongs to the map before.
 	s.tapTarget = nil
@@ -194,8 +249,9 @@ func (s *Scene) setMap(name string, m *Map) {
 }
 
 // followWarp moves the critter to the target spawn of the warp its feet are
-// in, if any, on the warp's target map. It returns the error from ResolveWarp
-// when the target map or spawn does not exist.
+// in, if any, on the warp's target map, with that map's enemies. It returns
+// the error from ResolveWarp when the target map or spawn does not exist, and
+// an error naming the map when one of its enemies has no definition.
 func (s *Scene) followWarp() error {
 	w, ok := s.m.WarpAt(s.player.Pos)
 	if !ok {
@@ -205,18 +261,23 @@ func (s *Scene) followWarp() error {
 	if err != nil {
 		return err
 	}
-	s.setMap(w.TargetMap, m)
-	s.player.Place(pos)
+	enemies, err := s.spawnEnemies(m)
+	if err != nil {
+		return fmt.Errorf("warp to map %q: %w", w.TargetMap, err)
+	}
+	s.setMap(w.TargetMap, m, pos, enemies)
 	s.awaitRelease = true
 	s.planned = false
 	return nil
 }
 
-// Update moves the critter, the villagers and the camera by one tick, starts
-// an interaction when the critter reaches a villager it was tapped towards,
-// and moves the critter to another map when its feet end the tick inside a
-// warp.
-// It returns an error when that warp's target map or spawn does not exist.
+// Update moves the critter, the villagers, the enemies and the camera by one
+// tick, starts an interaction when the critter reaches a villager it was
+// tapped towards, and moves the critter to another map when its feet end the
+// tick inside a warp. Enemy hazards touching the critter take its petals, and
+// the tick they take the last one the critter naps. It returns an error when
+// that warp's target map or spawn does not exist, or the map has an enemy
+// without a definition.
 func (s *Scene) Update(f engine.Frame) error {
 	s.elapsed += f.DT
 	in := f.Input
@@ -243,6 +304,12 @@ func (s *Scene) Update(f engine.Frame) error {
 	}
 	for _, n := range s.npcs {
 		n.Update(f.DT, s.player.Pos)
+	}
+	s.updateEnemies()
+	if s.health.Napping() {
+		if err := s.nap(); err != nil {
+			return err
+		}
 	}
 	if s.player.Moved() {
 		s.walked += f.DT
@@ -391,6 +458,44 @@ func (s *Scene) TakeInteraction() (Interaction, bool) {
 	return in, true
 }
 
+// updateEnemies steps every enemy toward the critter, lets each hazard that
+// touches the critter's hurt-box hit it for the enemy's damage, and drops the
+// enemies that have run off after their defeat.
+func (s *Scene) updateEnemies() {
+	hurt := s.player.HurtBox()
+	kept := s.enemies[:0]
+	for _, e := range s.enemies {
+		e.Update(s.player.Pos, s.walkable)
+		for _, h := range e.Hazards() {
+			if combat.Overlap(h, hurt) {
+				s.health.Hit(e.Def().Damage)
+			}
+		}
+		if !e.Gone() {
+			kept = append(kept, e)
+		}
+	}
+	clear(s.enemies[len(kept):])
+	s.enemies = kept
+}
+
+// nap wakes the critter at the spot it entered the map at, with full petals,
+// and rebuilds every enemy of the map at its start. Pointer walking waits for
+// a release, as after a warp.
+func (s *Scene) nap() error {
+	enemies, err := s.spawnEnemies(s.m)
+	if err != nil {
+		return fmt.Errorf("map %q: %w", s.mapName, err)
+	}
+	s.player.Place(s.entrance)
+	// A tapped villager is no longer walked to after a nap.
+	s.tapTarget = nil
+	s.enemies = enemies
+	s.health.Wake()
+	s.awaitRelease = true
+	return nil
+}
+
 // updateBob swings the walk bob while the critter walks and lets it
 // settle back to the ground when it stops.
 func (s *Scene) updateBob(dt float64) {
@@ -412,8 +517,9 @@ func (s *Scene) Lights() []Light {
 	return []Light{{Pos: s.player.Pos.Sub(geom.Vec{Y: focusLift}), Radius: lanternRadius}}
 }
 
-// DrawWorld draws the map layers and the critter, and on a dark map covers
-// them with darkness except where the lights from Lights shine.
+// DrawWorld draws the map layers, the critter, the villagers, the wild
+// critters, the enemies and their spores, and on a dark map covers them with
+// darkness except where the lights from Lights shine.
 func (s *Scene) DrawWorld(c engine.Canvas) {
 	c.Image.Fill(ink)
 	s.pen.begin(c, s.camera)
@@ -424,68 +530,82 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("ground"), c0, r0, c1, r1, elapsed)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("decor"), c0, r0, c1, r1, elapsed)
 	drawProps(&s.pen, s.m, s.m.ObjectLayer("props"), view, elapsed)
-	s.drawCritters(view)
-	s.drawCharacters()
+	s.drawActors(view)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
 	if s.m.Dark {
 		s.mask.draw(c, s.camera, s.viewSize, s.Lights())
 	}
 }
 
-// drawCharacters draws the villagers and the critter from the back of the
-// view to the front, by the Y of their feet, so whoever stands lower in the
-// view overlaps whoever stands behind. The critter is drawn last of those
-// with the same Y.
-func (s *Scene) drawCharacters() {
-	order := make([]int, len(s.npcs))
-	for i := range order {
-		order[i] = i
-	}
-	slices.SortStableFunc(order, func(a, b int) int {
-		return cmp.Compare(s.npcs[a].Pos.Y, s.npcs[b].Pos.Y)
-	})
-	feet := s.player.Pos
-	critterDrawn := false
-	for _, i := range order {
-		n := s.npcs[i]
-		if !critterDrawn && n.Pos.Y > feet.Y {
-			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
-			critterDrawn = true
-		}
-		drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, i)
-	}
-	if !critterDrawn {
-		drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
-	}
+// actorKind is the kind of thing drawActors draws.
+type actorKind int
+
+const (
+	actorVillager actorKind = iota
+	actorWild
+	actorEnemy
+	actorPlayer
+)
+
+// actor is one thing drawActors draws: its kind, its index in s.npcs, s.wild
+// or s.enemies, and the Y of its feet.
+type actor struct {
+	kind actorKind
+	i    int
+	y    float64
 }
 
-// drawCritters draws the player and the wild critters in view, the ones
-// whose feet are higher up the map first, so a critter in front of another
-// is drawn over it. The player is drawn over a wild critter with its feet at
-// the same height.
-func (s *Scene) drawCritters(view geom.Rect) {
-	near := view.Inset(-wildReach)
-	s.inView = s.inView[:0]
-	for _, w := range s.wild {
-		if near.Contains(w.Pos) {
-			s.inView = append(s.inView, w)
+// drawActors draws the critter, the villagers, and the wild critters and
+// enemies near view from the back of the view to the front, by the Y of their
+// feet, so whoever stands lower in the view overlaps whoever stands behind.
+// The critter is drawn last of those with the same Y. Spores are drawn on top
+// of everyone.
+func (s *Scene) drawActors(view geom.Rect) {
+	s.actors = s.actors[:0]
+	for i, n := range s.npcs {
+		s.actors = append(s.actors, actor{kind: actorVillager, i: i, y: n.Pos.Y})
+	}
+	nearWild := view.Inset(-wildReach)
+	for i, w := range s.wild {
+		if nearWild.Contains(w.Pos) {
+			s.actors = append(s.actors, actor{kind: actorWild, i: i, y: w.Pos.Y})
 		}
 	}
-	slices.SortStableFunc(s.inView, func(a, b *wildCritter) int {
-		return cmp.Compare(a.Pos.Y, b.Pos.Y)
+	nearEnemy := view.Inset(-enemyReach)
+	for i, e := range s.enemies {
+		if rectsOverlap(e.Box(), nearEnemy) {
+			s.actors = append(s.actors, actor{kind: actorEnemy, i: i, y: e.Pos.Y})
+		}
+	}
+	// The critter goes in last, so the stable sort draws it over the others
+	// at its Y.
+	s.actors = append(s.actors, actor{kind: actorPlayer, y: s.player.Pos.Y})
+	slices.SortStableFunc(s.actors, func(a, b actor) int {
+		return cmp.Compare(a.y, b.y)
 	})
-
-	feet := s.player.Pos
-	playerDrawn := false
-	for _, w := range s.inView {
-		if !playerDrawn && w.Pos.Y > feet.Y {
+	for _, a := range s.actors {
+		switch a.kind {
+		case actorPlayer:
+			feet := s.player.Pos
 			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
-			playerDrawn = true
+		case actorVillager:
+			n := s.npcs[a.i]
+			drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, a.i)
+		case actorWild:
+			s.drawWild(s.wild[a.i])
+		case actorEnemy:
+			drawEnemy(&s.pen, s.enemies[a.i], s.elapsed)
 		}
-		s.drawWild(w)
 	}
-	if !playerDrawn {
-		drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	for _, e := range s.enemies {
+		if e.Def().Behaviour != combat.BehaviourPuff {
+			continue // only a puff's hazards are spores; the others are bodies
+		}
+		for _, h := range e.Hazards() {
+			if rectsOverlap(h, nearEnemy) {
+				drawSpore(&s.pen, h)
+			}
+		}
 	}
 }
 
@@ -576,15 +696,15 @@ func (s *Scene) feetInView() geom.Vec {
 }
 
 // DebugLines adds the map's name, the critter's position, the camera, the
-// walk target and the number of wild critters to the debug overlay.
-// number of villagers, the villager last interacted with and the walk target
-// to the debug overlay.
+// critter's petals, the number of villagers, the villager last interacted
+// with, the walk target and the number of wild critters to the debug overlay.
 func (s *Scene) DebugLines() []string {
 	p := s.player
 	lines := []string{
 		"map " + s.mapName,
 		fmt.Sprintf("critter %.1f,%.1f facing %s", p.Pos.X, p.Pos.Y, p.Facing),
 		fmt.Sprintf("camera %.0f,%.0f", s.camera.X, s.camera.Y),
+		fmt.Sprintf("petals %d/%d", s.health.Petals(), s.health.Max()),
 		fmt.Sprintf("villagers %d", len(s.npcs)),
 	}
 	if s.lastNPC != "" {

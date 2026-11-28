@@ -8,7 +8,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
+	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/entity"
+	"github.com/Elpulgo/critterkingdom/internal/geom"
 )
 
 // Placeholder art drawn in code with smooth shapes, in colours from the
@@ -31,6 +33,12 @@ var (
 	cocoa       = color.NRGBA{0x3e, 0x27, 0x31, 0xff}
 	shadow      = color.NRGBA{0x00, 0x00, 0x00, 0x3c}
 	white       = color.NRGBA{0xff, 0xff, 0xff, 0xff}
+	plum        = color.NRGBA{0x68, 0x38, 0x6c, 0xff}
+	orchid      = color.NRGBA{0xb5, 0x50, 0x88, 0xff}
+	pineGreen   = color.NRGBA{0x26, 0x5c, 0x42, 0xff}
+	poppyRed    = color.NRGBA{0xe4, 0x3b, 0x44, 0xff}
+	berryRed    = color.NRGBA{0xa2, 0x26, 0x33, 0xff}
+	taupe       = color.NRGBA{0xc2, 0x85, 0x69, 0xff}
 	debugColor  = color.NRGBA{0xfe, 0xe7, 0x61, 0xff}
 	missingTile = color.NRGBA{0xff, 0x00, 0xff, 0xff}
 	zoneDebug   = color.NRGBA{0xff, 0x00, 0x44, 0xff}
@@ -85,6 +93,13 @@ const (
 	sparkleCount = 3
 	// sparklePace is how fast a star twinkles, in radians per second.
 	sparklePace = 2 * math.Pi / 1.2
+	// enemyReach is how far an enemy's drawing, with its flowers and shake,
+	// can extend beyond its sprite box, in world pixels.
+	enemyReach = 6
+	// shakeRate is how many times a second a telegraphing Thistle Beast
+	// shakes from side to side, and shakeWidth how far, in world pixels.
+	shakeRate  = 12
+	shakeWidth = 1.0
 )
 
 // drawTileArt draws the art for a tile or prop of the given type filling the
@@ -391,6 +406,154 @@ func drawVillager(p *pen, x, y float64, facing entity.Facing, index int) {
 		p.ellipse(x, hy+1.2, 1.1, 0.6, cocoa)
 		p.rect(x-0.5, y-8, 1, 6, fade(cream, 0.6))
 	}
+}
+
+// drawEnemy draws the placeholder art of e, with its feet at e.Pos: a grumpy
+// face while it fights, its telegraph (the slime squashes, the beast shakes,
+// the mushroom puffs up), and a smiling face among flowers once defeated.
+// elapsed is the scene's game time in seconds, which drives the shake. An
+// enemy without a drawing is a magenta square, so it stands out.
+func drawEnemy(p *pen, e *entity.Enemy, elapsed float64) {
+	x, y := e.Pos.X, e.Pos.Y
+	phase := e.Phase()
+	happy := e.Defeated()
+	p.ellipse(x, y, 6, 2, shadow)
+	switch e.Def().ID {
+	case "sulky_slime":
+		drawSlime(p, x, y, phase, happy)
+	case "thistle_beast":
+		if phase == combat.Telegraph {
+			x += shakeWidth * math.Sin(2*math.Pi*shakeRate*elapsed)
+		}
+		drawThistleBeast(p, x, y, happy)
+	case "grumpy_mushroom":
+		drawMushroom(p, x, y, phase == combat.Telegraph, happy)
+	default:
+		p.rect(x-combat.EnemySize/2, y-combat.EnemySize, combat.EnemySize, combat.EnemySize, missingTile)
+		return
+	}
+	if happy {
+		drawPoofFlowers(p, x, y-combat.EnemySize/2)
+	}
+}
+
+// drawSlime draws the Sulky Slime, an orchid blob: wide and flat while it
+// squashes for its hop, lifted off the ground while it hops.
+func drawSlime(p *pen, x, y float64, phase combat.Phase, happy bool) {
+	rx, ry, lift := 6.5, 5.5, 0.0
+	switch phase {
+	case combat.Telegraph:
+		rx, ry = 7.5, 4.0
+	case combat.Attack:
+		rx, ry, lift = 5.8, 6.2, 3
+	}
+	cy := y - ry - lift
+	p.ellipse(x, cy, rx+1, ry+1, plum)
+	p.ellipse(x, cy, rx, ry, orchid)
+	p.ellipse(x-rx*0.45, cy-ry*0.45, rx*0.3, ry*0.2, petalPink)
+	drawFace(p, x, cy+ry*0.15, happy)
+}
+
+// drawThistleBeast draws the Thistle Beast, a round leafy body with a crown of
+// orchid thistle spikes, soft and rounded rather than sharp.
+func drawThistleBeast(p *pen, x, y float64, happy bool) {
+	cy := y - 6
+	for i := -2; i <= 2; i++ {
+		tx := x + float64(i)*2.4
+		ty := cy - 6 + math.Abs(float64(i))*0.8
+		p.circle(tx, ty, 2.0, plum)
+		p.circle(tx, ty, 1.4, orchid)
+	}
+	p.ellipse(x, cy, 7.5, 6.5, pineGreen)
+	p.ellipse(x, cy, 6.5, 5.5, grassDark)
+	p.ellipse(x-3, cy-3, 1.8, 1.0, grass)
+	drawFace(p, x, cy+0.5, happy)
+}
+
+// drawMushroom draws the Grumpy Mushroom, a red spotted cap on a cream stem
+// with its face on the stem. puffed swells the cap while it gathers spores.
+func drawMushroom(p *pen, x, y float64, puffed, happy bool) {
+	k := 1.0
+	if puffed {
+		k = 1.25
+	}
+	p.rect(x-4.5, y-7, 9, 7, taupe)
+	p.rect(x-3.8, y-7, 7.6, 6.3, cream)
+	capY := y - 9
+	p.ellipse(x, capY, 8*k+1, 4.5*k+1, berryRed)
+	p.ellipse(x, capY, 8*k, 4.5*k, poppyRed)
+	p.circle(x-3.5*k, capY-1*k, 1.2*k, white)
+	p.circle(x+2.5*k, capY-2*k, 1.0*k, white)
+	p.circle(x+4.5*k, capY+0.8*k, 0.8*k, white)
+	drawFace(p, x, y-3.5, happy)
+}
+
+// drawFace draws a small face centred on x, y: big dark eyes with a white
+// highlight, and either a grumpy look (eyebrows tilted inward and a little
+// pout) or a happy smile.
+func drawFace(p *pen, x, y float64, happy bool) {
+	for _, side := range []float64{-1, 1} {
+		ex := x + side*2.2
+		p.ellipse(ex, y-1, 0.9, 1.2, ink)
+		p.circle(ex-0.3, y-1.5, 0.35, white)
+		if !happy {
+			// The inner end of each eyebrow sits lower: grumpy, not angry.
+			inner, outer := x+side*1.0, x+side*3.4
+			p.polygon(cocoa, outer, y-3.4, inner, y-2.6, inner, y-2.0, outer, y-2.8)
+		}
+	}
+	if happy {
+		drawArc(p, x, y+0.6, 1.6, true, cocoa)
+	} else {
+		drawArc(p, x, y+2.0, 1.0, false, cocoa)
+	}
+}
+
+// drawArc draws a half-world-pixel-thick half ring of radius r around x, y:
+// the lower half, a smile, when smile is true, else the upper half, a pout.
+func drawArc(p *pen, x, y, r float64, smile bool, clr color.NRGBA) {
+	const (
+		steps = 8
+		thick = 0.5
+	)
+	dir := 1.0
+	if !smile {
+		dir = -1
+	}
+	xy := make([]float64, 0, 4*(steps+1))
+	for i := 0; i <= steps; i++ {
+		a := math.Pi * float64(i) / steps
+		xy = append(xy, x+r*math.Cos(a), y+dir*r*math.Sin(a))
+	}
+	for i := steps; i >= 0; i-- {
+		a := math.Pi * float64(i) / steps
+		xy = append(xy, x+(r-thick)*math.Cos(a), y+dir*(r-thick)*math.Sin(a))
+	}
+	p.polygon(clr, xy...)
+}
+
+// drawPoofFlowers draws the ring of flowers a defeated enemy poofs into,
+// around x, y.
+func drawPoofFlowers(p *pen, x, y float64) {
+	for i := 0; i < 6; i++ {
+		a := math.Pi * float64(i) / 3
+		petal := petalWhite
+		if i%2 != 0 {
+			petal = petalPink
+		}
+		drawFlower(p, x+9*math.Cos(a), y+7*math.Sin(a), petal)
+	}
+}
+
+// drawSpore draws a puffed spore filling the box r: a big soft cloud.
+func drawSpore(p *pen, r geom.Rect) {
+	c := r.Min.Add(r.Max).Scale(0.5)
+	w := (r.Max.X - r.Min.X) / 2
+	soft := fade(stoneLight, 0.85)
+	p.circle(c.X-w*0.4, c.Y+w*0.15, w*0.6, soft)
+	p.circle(c.X+w*0.4, c.Y+w*0.15, w*0.6, soft)
+	p.circle(c.X, c.Y-w*0.2, w*0.7, soft)
+	p.circle(c.X-w*0.15, c.Y-w*0.35, w*0.35, fade(white, 0.9))
 }
 
 // fillBubble fills a speech bubble with rounded corners of radius r. The

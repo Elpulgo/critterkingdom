@@ -47,6 +47,7 @@ type Map struct {
 	warps        []Warp
 	zones        []SpawnZone
 	npcs         []NPCSpawn
+	enemies      []EnemyMarker
 }
 
 // Size returns the map's dimensions in world pixels.

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/critter"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
 	"github.com/Elpulgo/critterkingdom/internal/world"
@@ -205,11 +206,103 @@ func TestEmbeddedMaps_VillageJoinsTheHouseAndTheMeadowBothWays(t *testing.T) {
 		"dark_test": {},
 		"house":     {"village/from_house"},
 		"meadow":    {"village/from_meadow"},
+		"testroom":  {},
 		"village":   {"house/from_village", "meadow/from_village"},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("warps by map = %v; want %v", got, want)
 	}
+}
+
+func TestEmbeddedMaps_EnemiesAreKnownStandOnOpenGroundAndNeverInTheVillage(t *testing.T) {
+	defs := enemyDefsByID(t)
+	for name, m := range loadEmbeddedMaps(t) {
+		enemies := m.Enemies()
+		if (m.Biome == "village" || m.Biome == "house") && len(enemies) > 0 {
+			t.Errorf("map %s has biome %s, part of the village, but %d enemy objects; enemies never appear in the village", name, m.Biome, len(enemies))
+		}
+		size := m.Size()
+		for _, e := range enemies {
+			if _, ok := defs[e.EnemyID]; !ok {
+				t.Errorf("map %s: enemy object %d names %q, which enemies.json does not define", name, e.ObjectID, e.EnemyID)
+			}
+			if e.Pos.X <= 0 || e.Pos.X >= size.X || e.Pos.Y <= 0 || e.Pos.Y >= size.Y {
+				t.Errorf("map %s: enemy object %d at %v is outside the map (0,0)..%v", name, e.ObjectID, e.Pos, size)
+				continue
+			}
+			col, row := int(e.Pos.X/m.TileSize), int(e.Pos.Y/m.TileSize)
+			if m.Collision.Solid(col, row) {
+				t.Errorf("map %s: enemy object %d (%s) stands on solid cell (%d, %d)", name, e.ObjectID, e.EnemyID, col, row)
+			}
+		}
+	}
+}
+
+func TestEmbeddedMaps_MeadowAndTestRoomHoldEveryEnemyAndStartAScene(t *testing.T) {
+	defs, err := assets.LoadEnemies()
+	if err != nil {
+		t.Fatalf("LoadEnemies: %v", err)
+	}
+	for _, name := range []string{"meadow", "testroom"} {
+		t.Run(name, func(t *testing.T) {
+			m, err := assets.LoadMap(name)
+			if err != nil {
+				t.Fatalf("LoadMap(%s): %v", name, err)
+			}
+			var ids []string
+			for _, e := range m.Enemies() {
+				ids = append(ids, e.EnemyID)
+			}
+			sort.Strings(ids)
+			want := []string{"grumpy_mushroom", "sulky_slime", "thistle_beast"}
+			if !reflect.DeepEqual(ids, want) {
+				t.Errorf("enemies = %v; want one of each, %v", ids, want)
+			}
+			if _, err := world.NewScene(nil, assets.LoadMap, name, world.WithEnemies(defs)); err != nil {
+				t.Errorf("NewScene(%s) with the embedded enemies: %v", name, err)
+			}
+		})
+	}
+}
+
+func TestEmbeddedMaps_NoEnemyOnTheMeadowOrInTheTestRoomNoticesACritterOnASpawn(t *testing.T) {
+	notice := map[string]float64{
+		combat.BehaviourHopToward: combat.HopNoticeRange,
+		combat.BehaviourCharge:    combat.ChargeNoticeRange,
+		combat.BehaviourPuff:      combat.PuffNoticeRange,
+	}
+	defs := enemyDefsByID(t)
+	for _, name := range []string{"meadow", "testroom"} {
+		m, err := assets.LoadMap(name)
+		if err != nil {
+			t.Fatalf("LoadMap(%s): %v", name, err)
+		}
+		for _, s := range spawnsOf(m) {
+			for _, e := range m.Enemies() {
+				r, ok := notice[defs[e.EnemyID].Behaviour]
+				if !ok {
+					t.Fatalf("map %s: enemy object %d (%s) has no known behaviour", name, e.ObjectID, e.EnemyID)
+				}
+				if d := e.Pos.Sub(s.pos).Len(); d <= r {
+					t.Errorf("map %s: %s at %v is %.1f from spawn %q, within its notice range %v, so it attacks a critter arriving there", name, e.EnemyID, e.Pos, d, s.name, r)
+				}
+			}
+		}
+	}
+}
+
+// enemyDefsByID loads the embedded enemies.json, by enemy id.
+func enemyDefsByID(t *testing.T) map[string]combat.EnemyDef {
+	t.Helper()
+	defs, err := assets.LoadEnemies()
+	if err != nil {
+		t.Fatalf("LoadEnemies: %v", err)
+	}
+	byID := make(map[string]combat.EnemyDef, len(defs))
+	for _, d := range defs {
+		byID[d.ID] = d
+	}
+	return byID
 }
 
 // openCellsReachableFrom flood-fills m's non-solid cells from (col, row),
