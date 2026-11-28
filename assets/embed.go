@@ -7,8 +7,10 @@ import "embed"
 // FS holds the embedded files, such as fonts/Fredoka.ttf, the Tiled maps
 // maps/*.tmj (village, house, meadow, dark_test, and testroom with one of each
 // enemy), which internal/assets.MapNames lists, the item catalog
-// data/items.json, the enemy definitions data/enemies.json, the string tables
-// data/strings/sv.json and data/strings/en.json, and critters.json.
+// data/items.json, the enemy definitions data/enemies.json, the quest
+// definitions data/quests/*.json, the villagers' dialogues
+// data/dialogue/*.json, the string tables data/strings/sv.json and
+// data/strings/en.json, and critters.json.
 //
 //go:embed fonts maps critters.json
 //go:embed fonts maps data

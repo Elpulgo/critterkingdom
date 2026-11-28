@@ -1,4 +1,18 @@
 {
   "ui.title": "Critter Kingdom",
-  "ui.greeting": "Hi!"
+  "ui.greeting": "Hi!",
+  "ui.yes": "Yes!",
+  "ui.no": "No",
+  "npc.baker_badger.name": "Baker Badger",
+  "npc.mayor_owl.name": "Mayor Owl",
+  "npc.grandma_hedgehog.name": "Grandma Hedgehog",
+  "baker.chat.1": "Hello! I have been baking buns all morning.",
+  "baker.chat.2": "Would you like to smell them?",
+  "baker.yes.1": "Mmm, cinnamon and sugar! Come back soon.",
+  "baker.no.1": "Oh, okay. The buns will wait here for you.",
+  "mayor.chat.1": "Hoo! Welcome to Acorn Hollow.",
+  "mayor.chat.2": "Here, everyone looks after each other.",
+  "grandma.chat.1": "Hello, little friend! How nice of you to visit.",
+  "grandma.chat.2": "The flowers on the meadow are blooming today.",
+  "grandma.chat.3": "Remember to rest when you get tired."
 }
