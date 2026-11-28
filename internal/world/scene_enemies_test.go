@@ -240,3 +240,54 @@ func standUntilNap(t *testing.T, s *Scene) {
 	}
 	t.Fatalf("no nap after 1000 ticks: %d petals, critter at %v", s.health.Petals(), s.player.Pos)
 }
+
+func TestScene_InPeacefulModeACritterStandingOnAnEnemyLosesNoPetal(t *testing.T) {
+	// The arena's only spawn, from_village at (24,40), is where both a start
+	// on the arena and the warp from the village put the critter, right next
+	// to the slime at (33,40), whose awake hop lands within 100 ticks.
+	arena := `{"id": 1, "name": "from_village", "type": "player_spawn", "x": 192, "y": 320, "point": true},` +
+		enemyObject(2, 33, 40, "sulky_slime")
+	load := mapsLoader(map[string][]byte{
+		"village": roomMap(6, 4, "village", villageStart+`,`+warpObject(2, 4, 2, "arena", "from_village"), ``),
+		"arena":   roomMap(6, 4, "arena", arena, ``),
+	})
+
+	tests := []struct {
+		name     string
+		peaceful bool
+		start    string
+		wantHurt bool
+	}{
+		{name: "awake, the slime's hop takes a petal", start: "arena", wantHurt: true},
+		{name: "peaceful, starting on the map", peaceful: true, start: "arena"},
+		{name: "peaceful, after a warp into the map", peaceful: true, start: "village"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			opts := []Option{WithEnemies([]combat.EnemyDef{slimeDef})}
+			if tc.peaceful {
+				opts = append(opts, WithPeaceful())
+			}
+			s, err := NewScene(nil, load, tc.start, opts...)
+			if err != nil {
+				t.Fatalf("NewScene: %v", err)
+			}
+			if tc.start == "village" {
+				updateUntilMap(t, s, "arena", walkFrame(geom.Vec{X: 1}))
+			}
+
+			// Ten seconds of game time, many times the slime's telegraph,
+			// hop and rest.
+			hurt := false
+			for range 600 {
+				if err := s.Update(standFrame); err != nil {
+					t.Fatalf("Update: %v", err)
+				}
+				hurt = hurt || s.health.Petals() < 3
+			}
+			if hurt != tc.wantHurt {
+				t.Errorf("10 s on the slime: lost a petal %v; want %v", hurt, tc.wantHurt)
+			}
+		})
+	}
+}

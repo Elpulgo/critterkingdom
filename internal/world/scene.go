@@ -96,7 +96,9 @@ type Scene struct {
 	health    *combat.Health
 	enemyDefs map[string]combat.EnemyDef
 	// preset scales every enemy spawnEnemies builds.
-	preset   combat.Preset
+	preset combat.Preset
+	// peaceful puts every enemy spawnEnemies builds to sleep.
+	peaceful bool
 	onDefeat func(combat.EnemyDefeated)
 	enemies  []*entity.Enemy
 	// entrance is where the critter was placed on entering the current map,
@@ -199,8 +201,8 @@ func (s *Scene) now() time.Duration {
 
 // spawnEnemies builds the enemies of m's enemy objects, each at its start
 // position with full hit points and the stats of the scene's preset, reading
-// the scene's clock. It returns an error naming the object id and the enemy
-// id for an enemy without a definition.
+// the scene's clock, and asleep in Peaceful mode. It returns an error naming
+// the object id and the enemy id for an enemy without a definition.
 func (s *Scene) spawnEnemies(m *Map) ([]*entity.Enemy, error) {
 	var enemies []*entity.Enemy
 	for _, mk := range m.Enemies() {
@@ -213,6 +215,9 @@ func (s *Scene) spawnEnemies(m *Map) ([]*entity.Enemy, error) {
 			return nil, fmt.Errorf("%s object %d: %w", objectsLayer, mk.ObjectID, err)
 		}
 		e.Walls = m.Collision
+		if s.peaceful {
+			e.Sleep()
+		}
 		enemies = append(enemies, e)
 	}
 	return enemies, nil

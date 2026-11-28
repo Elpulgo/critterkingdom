@@ -31,3 +31,11 @@ func WithPreset(p combat.Preset) Option {
 		s.preset = p
 	}
 }
+
+// WithPeaceful puts every enemy the scene spawns to sleep, so none of them
+// ever moves or hurts the critter. They can still be defeated.
+func WithPeaceful() Option {
+	return func(s *Scene) {
+		s.peaceful = true
+	}
+}
