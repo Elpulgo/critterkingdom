@@ -109,3 +109,10 @@ func span(prev, now, start, end time.Duration) float64 {
 	}
 	return (to - from).Seconds()
 }
+
+// EnemyDefeated is reported once when an enemy's hit points reach zero.
+type EnemyDefeated struct {
+	// EnemyID is the id of the defeated enemy's definition, such as
+	// "sulky_slime".
+	EnemyID string
+}
