@@ -9,16 +9,23 @@ import (
 	"github.com/Elpulgo/critterkingdom/internal/geom"
 )
 
+// maskMargin is how many texels of ink the mask image has around the view
+// on every side. The linear upscale samples half a texel past the view edge,
+// and DrawImage gives no guarantee what lies outside an image, so without the
+// margin the edge of the darkness would let the world show through.
+const maskMargin = 1
+
 // lightSpriteSize is the width and height of the radial light sprite, in
 // pixels. The sprite is scaled to each light's diameter when it is drawn.
 const lightSpriteSize = 64
 
 // lightMask covers a dark map with darkness except where lights shine. It is
-// a render cache only: the mask image is one pixel per world pixel and is
-// rebuilt when the view size changes, and the light sprite is built once.
+// a render cache only: the mask image is one pixel per world pixel, the view
+// plus maskMargin on every side, and is rebuilt when the view size changes;
+// the light sprite is built once.
 type lightMask struct {
 	image  *ebiten.Image
-	w, h   int // size of image, in world pixels
+	w, h   int // size of the view the image covers, in world pixels
 	sprite *ebiten.Image
 }
 
@@ -34,7 +41,7 @@ func (lm *lightMask) draw(c engine.Canvas, camera, view geom.Vec, lights []Light
 		if lm.image != nil {
 			lm.image.Deallocate()
 		}
-		lm.image = ebiten.NewImage(w, h)
+		lm.image = ebiten.NewImage(w+2*maskMargin, h+2*maskMargin)
 		lm.w, lm.h = w, h
 	}
 	if lm.sprite == nil {
@@ -49,13 +56,15 @@ func (lm *lightMask) draw(c engine.Canvas, camera, view geom.Vec, lights []Light
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(-lightSpriteSize/2, -lightSpriteSize/2)
 		op.GeoM.Scale(2*l.Radius/lightSpriteSize, 2*l.Radius/lightSpriteSize)
-		op.GeoM.Translate(l.Pos.X-camera.X, l.Pos.Y-camera.Y)
+		op.GeoM.Translate(l.Pos.X-camera.X+maskMargin, l.Pos.Y-camera.Y+maskMargin)
 		op.Filter = ebiten.FilterLinear
 		op.Blend = ebiten.BlendDestinationOut
 		lm.image.DrawImage(lm.sprite, op)
 	}
 
+	// The margin hangs outside the view, where the canvas clips it.
 	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-maskMargin, -maskMargin)
 	op.GeoM.Scale(c.Scale, c.Scale)
 	op.GeoM.Translate(c.OffX, c.OffY)
 	op.Filter = ebiten.FilterLinear
