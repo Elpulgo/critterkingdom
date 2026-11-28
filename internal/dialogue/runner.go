@@ -11,7 +11,7 @@ var ErrNoEntry = errors.New("no entry node holds")
 
 // Conditions decides whether a node's `if` conditions hold. The runner never
 // looks inside a condition: it hands each one over as the raw JSON from the
-// file, and the caller (later quests and flags) decides what it means.
+// file, and the caller decides what it means.
 type Conditions interface {
 	Holds(Condition) (bool, error)
 }
