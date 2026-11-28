@@ -5,6 +5,7 @@ package entity
 import (
 	"math"
 
+	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/geom"
 )
 
@@ -21,6 +22,10 @@ const (
 	// box, whose bottom centre sits at Pos.
 	boxHalfWidth = 6.0
 	boxHeight    = 10.0
+
+	// hurtSize is the width and height of the critter's sprite box that its
+	// hurt-box is cut from, with its bottom centre at Pos.
+	hurtSize = 16.0
 )
 
 // Walls stops the critter from walking through solid scenery and slides it
@@ -60,6 +65,15 @@ func feetBox(pos geom.Vec) geom.Rect {
 		Min: geom.Vec{X: pos.X - boxHalfWidth, Y: pos.Y - boxHeight},
 		Max: geom.Vec{X: pos.X + boxHalfWidth, Y: pos.Y},
 	}
+}
+
+// HurtBox returns the part of the critter an enemy hazard must touch to hurt
+// it: combat.HurtBox of a 16 by 16 box whose bottom centre is at Pos.
+func (p *Player) HurtBox() geom.Rect {
+	return combat.HurtBox(geom.Rect{
+		Min: geom.Vec{X: p.Pos.X - hurtSize/2, Y: p.Pos.Y - hurtSize},
+		Max: geom.Vec{X: p.Pos.X + hurtSize/2, Y: p.Pos.Y},
+	})
 }
 
 // WalkTo makes the critter walk in a straight line to target and stop there.
