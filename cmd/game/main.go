@@ -53,14 +53,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap, world.WithEnemies(enemies))
+	dialogues, err := assets.LoadDialogues()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// The talker needs the stack, which needs the scene, which needs the
+	// talker's sink: the stack is filled in once the scene exists.
+	talk := &talker{font: font, dialogues: dialogues}
+	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap,
+		world.WithEnemies(enemies), world.WithInteraction(talk.interact))
 	if err != nil {
 		log.Fatal(err)
 	}
 	// One generator, seeded once from the runtime's random source, drives
 	// every wild critter for the whole run.
 	scene.AddWildCritters(species, rand.New(rand.NewPCG(rand.Uint64(), rand.Uint64())))
-	game := engine.NewGame(scene, engine.Options{
+	talk.stack = engine.NewStack(scene)
+	game := engine.NewGame(talk.stack, engine.Options{
 		Font:     font,
 		TouchPad: opts.touchPad,
 	})
