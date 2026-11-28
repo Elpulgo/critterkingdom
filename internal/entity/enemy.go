@@ -14,6 +14,9 @@ const (
 	// RunOffTime is how long a defeated enemy runs off, smiling, before it is
 	// gone.
 	RunOffTime = time.Second
+	// blockSlack is how much shorter, in world pixels, a move may come out
+	// than wanted from float rounding alone before it counts as blocked.
+	blockSlack = 1e-6
 )
 
 // Enemy is one enemy in the world: where it stands, its hit points, what its
@@ -126,7 +129,10 @@ func (e *Enemy) Hit(damage int) bool {
 // Update moves the enemy one step toward or away from the critter at target.
 // A live enemy steps its behaviour; a defeated one runs straight away from
 // target at RunOffSpeed until RunOffTime has passed since the defeat. Either
-// way the move slides along Walls and the enemy's feet never leave area.
+// way the move slides along Walls and the enemy's feet never leave area. When
+// a wall or area cuts a live enemy's move short and its behaviour is
+// combat.Blockable, the behaviour is told, so a charge stops at the wall and
+// recovers.
 func (e *Enemy) Update(target geom.Vec, area geom.Rect) {
 	var move geom.Vec
 	if e.defeated {
@@ -139,7 +145,16 @@ func (e *Enemy) Update(target geom.Vec, area geom.Rect) {
 	if e.Walls != nil {
 		next = e.Pos.Add(e.Walls.Slide(e.feetBox(), next.Sub(e.Pos)))
 	}
+	if b, ok := e.behaviour.(combat.Blockable); ok && !e.defeated && cutShort(move, next.Sub(e.Pos)) {
+		e.action = b.Blocked()
+	}
 	e.Pos = next
+}
+
+// cutShort reports whether the move made is shorter than the move wanted, by
+// more than float rounding.
+func cutShort(wanted, made geom.Vec) bool {
+	return made.Len() < wanted.Len()-blockSlack
 }
 
 // runOff returns the run-off move for the part of the run-off time since the

@@ -60,6 +60,16 @@ type Behaviour interface {
 	Step(self, target geom.Vec) Action
 }
 
+// Blockable is implemented by behaviours whose attack ends when scenery or the
+// map's edge cuts its move short, such as a charge that runs into a wall.
+// Whoever moves the enemy calls Blocked right after a Step whose Move it could
+// not make in full.
+type Blockable interface {
+	// Blocked tells the behaviour that the Move of the last Step was cut
+	// short, and returns what the enemy does for the rest of that step.
+	Blocked() Action
+}
+
 // NewBehaviour returns the state machine def.Behaviour names, reading game
 // time from clock. It returns an error for a behaviour name it does not know,
 // for a telegraph shorter than MinTelegraph, and for a charge or puff without

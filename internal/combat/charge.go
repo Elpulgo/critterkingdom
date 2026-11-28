@@ -22,7 +22,8 @@ const (
 // to the critter and shakes for the telegraph, then runs ChargeDistance along
 // that line, hurting with its body only while running, then rests. The line
 // never changes once picked, so a child who steps sideways during the shake
-// is safe.
+// is safe. A wall or the map's edge that cuts the run short ends it there
+// (see Blocked).
 type charge struct {
 	clock     Clock
 	telegraph time.Duration
@@ -83,4 +84,17 @@ func (c *charge) Step(self, target geom.Vec) Action {
 			c.phase = Idle
 		}
 	}
+}
+
+// Blocked implements Blockable: a charge whose move was cut short by a wall or
+// the map's edge stops there and rests for ChargeRecover from now, with no
+// hazards, instead of pushing on against the wall. Ending the charge at the
+// first cut also keeps the beast in its line: it never slides along a wall
+// toward a child who stepped aside. In the step that already ended the
+// charge, the rest has begun and keeps its start.
+func (c *charge) Blocked() Action {
+	if c.phase == Attack {
+		c.phase, c.start = Recover, c.clock()
+	}
+	return Action{Phase: c.phase}
 }

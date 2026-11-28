@@ -125,21 +125,40 @@ func TestEnemy_ChargeIntoAWallStopsAtTheWallAndRecovers(t *testing.T) {
 	e, _ := newEnemy(t, thistleDef(), geom.Vec{X: 8, Y: 28}, clock)
 	e.Walls = loadTestGrid(t)
 
-	// Shake 0.8 s, charge 72 px at 60 px/s for 1.2 s until 2.0 s, then rest.
-	for i := 0; i <= 25; i++ {
+	// Shake 0.8 s, then charge right at 60 px/s. By 0.9 s it wants 6 px but
+	// the wall lets it go only 2, to x 10: the charge ends there and the
+	// beast rests, harmless, for 1 s from 0.9 s instead of pushing on until
+	// the full 72 px would have taken (2.0 s).
+	for i := 0; i <= 18; i++ {
 		clock.now = time.Duration(i) * 100 * time.Millisecond
 		e.Update(critter, mapArea)
 		if e.Pos.X > 10 {
 			t.Fatalf("at %v: Pos %v, feet box past the wall at x 16", clock.now, e.Pos)
 		}
-		if clock.now == 1900*time.Millisecond && e.Phase() != combat.Attack {
-			t.Fatalf("at 1.9 s: phase %v, want still pushing against the wall in Attack", e.Phase())
+		if clock.now >= 900*time.Millisecond && (e.Phase() != combat.Recover || len(e.Hazards()) != 0) {
+			t.Fatalf("at %v: phase %v hazards %v, want Recover with no hazards once the wall stopped the charge", clock.now, e.Phase(), e.Hazards())
 		}
-	}
-	if e.Phase() != combat.Recover {
-		t.Errorf("at 2.5 s: phase %v, want Recover", e.Phase())
 	}
 	if !near(e.Pos, geom.Vec{X: 10, Y: 28}) {
 		t.Errorf("Pos %v, want (10, 28), flush against the wall", e.Pos)
+	}
+}
+
+func TestEnemy_ChargeOnOpenGroundRunsItsFullDistance(t *testing.T) {
+	clock := &fakeClock{}
+	critter := geom.Vec{X: 150, Y: 100} // 50 px to the right, inside notice range
+	e, _ := newEnemy(t, thistleDef(), geom.Vec{X: 100, Y: 100}, clock)
+	e.Walls = loadTestGrid(t) // its one solid cell is far from the charge
+
+	// 60 ticks a second: shake until 0.8 s, charge 72 px right until 2.0 s.
+	for i := 0; i <= 120; i++ {
+		clock.now = time.Duration(i) * time.Second / 60
+		e.Update(critter, openArea)
+		if clock.now > 800*time.Millisecond && e.Phase() != combat.Attack {
+			t.Fatalf("at %v: phase %v at Pos %v, want the charge still running", clock.now, e.Phase(), e.Pos)
+		}
+	}
+	if !near(e.Pos, geom.Vec{X: 172, Y: 100}) {
+		t.Errorf("Pos %v, want (172, 100), 72 px right of the start", e.Pos)
 	}
 }
