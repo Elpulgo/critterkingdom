@@ -120,3 +120,18 @@ func TestScene_APropOutsideTheViewIsLeftOutOfTheDrawOrder(t *testing.T) {
 		t.Errorf("draw order = %q; want %q", got, want)
 	}
 }
+
+func TestScene_ARugLiesUnderTheCritterAndVillagersStandingOnItAndUnderPropsBehindIt(t *testing.T) {
+	// The rug covers world (16,32)-(64,56), so its bottom edge is at Y 56.
+	// The critter stands on its upper half at Y 40 and grandma on it at Y 44,
+	// and the oak behind it has its base at Y 32.
+	rug := `{"id": 4, "name": "rug", "type": "rug", "x": 128, "y": 256, "width": 384, "height": 192}`
+	villagers := `,` + pointNPC(2, "grandma_hedgehog", 36*tiledScale, 44*tiledScale)
+	s := newPropScene(t, villagers, treeProp(1, "oak", 48, 0)+`,`+rug)
+	s.player.Pos = geom.Vec{X: 24, Y: 40}
+
+	want := []string{"rug", "oak", "critter", "grandma_hedgehog"}
+	if got := drawOrderOf(s, ysortView); !slices.Equal(got, want) {
+		t.Errorf("draw order = %q; want %q", got, want)
+	}
+}

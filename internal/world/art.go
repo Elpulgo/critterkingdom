@@ -153,6 +153,14 @@ func drawTileArt(p *pen, kind string, x, y, w, h float64, col, row int) {
 		drawRoof(p, x, y, w, h)
 	case "door":
 		drawDoor(p, x, y, w, h)
+	case "bed":
+		drawBed(p, x, y, w, h)
+	case "table":
+		drawTable(p, x, y, w, h)
+	case "shelf":
+		drawShelf(p, x, y, w, h)
+	case "rug":
+		drawRug(p, x, y, w, h)
 	default:
 		p.rect(x, y, w, h, missingTile)
 	}
@@ -255,6 +263,67 @@ func drawDoor(p *pen, x, y, w, h float64) {
 	p.rect(dx, top, dw, y+h-top, barkBrown)
 	p.rect(x+w/2-0.25, top-dw/2+1, 0.5, y+h-top+dw/2-1, cocoa)
 	p.circle(dx+dw*0.8, y+h*0.62, 0.8, flowerHeart)
+}
+
+// drawBed draws a wooden bed seen from above, filling the w by h rectangle at
+// x, y with its headboard at the top: a pillow, a white sheet and a pink
+// blanket folded back over the lower part.
+func drawBed(p *pen, x, y, w, h float64) {
+	cx := x + w/2
+	p.ellipse(cx, y+h, w/2, 1.5, shadow)
+	p.rect(x+1, y+2, w-2, h-3, barkBrown)
+	p.rect(x, y, w, 4, cocoa)
+	p.rect(x+2, y+4, w-4, h-7, white)
+	p.ellipse(cx, y+7, w/2-3.5, 2, cream)
+	blanket := y + h*0.45
+	p.rect(x+2, blanket, w-4, y+h-3-blanket, petalPink)
+	p.rect(x+2, blanket, w-4, 1.2, fade(white, 0.6))
+}
+
+// drawTable draws a wooden table with a flower on it, its legs standing on
+// the bottom of the w by h rectangle at x, y.
+func drawTable(p *pen, x, y, w, h float64) {
+	p.ellipse(x+w/2, y+h-1, w/2-1, 2, shadow)
+	p.rect(x+2.5, y+h/2, 1.5, h/2-1, cocoa)
+	p.rect(x+w-4, y+h/2, 1.5, h/2-1, cocoa)
+	p.rect(x+1, y+1, w-2, h/2, barkBrown)
+	p.rect(x+1, y+h/2, w-2, 1.2, cocoa)
+	drawFlower(p, x+w*0.7, y+h/4+0.5, petalPink)
+}
+
+// shelfBooks are the colours of the books on a shelf, left to right.
+var shelfBooks = []color.NRGBA{poppyRed, plum, pineGreen, flowerHeart, stoneGrey}
+
+// drawShelf draws a bookshelf standing against the wall, its foot on the
+// bottom of the w by h rectangle at x, y and its top rising reach world
+// pixels above the rectangle: books on the upper shelf and jars on the
+// lower one.
+func drawShelf(p *pen, x, y, w, h float64) {
+	top, bottom := y-reach, y+h-1
+	mid := (top + bottom) / 2
+	p.ellipse(x+w/2, bottom, w/2-1, 1.5, shadow)
+	p.rect(x+1, top, w-2, bottom-top, barkBrown)
+	p.rect(x+2.5, top+1.5, w-5, mid-top-2.25, cocoa)
+	p.rect(x+2.5, mid+0.75, w-5, bottom-mid-2.25, cocoa)
+	for i, clr := range shelfBooks {
+		bh := 4.5 + float64(i%2)
+		p.rect(x+3.5+float64(i)*2, mid-0.75-bh, 1.6, bh, clr)
+	}
+	for _, jx := range []float64{x + 5, x + w/2, x + w - 5} {
+		p.circle(jx, bottom-3.5, 1.8, stoneLight)
+		p.rect(jx-1.2, bottom-6, 2.4, 1, cream)
+	}
+}
+
+// drawRug draws an oval rug with a striped border lying flat in the w by h
+// rectangle at x, y.
+func drawRug(p *pen, x, y, w, h float64) {
+	cx, cy := x+w/2, y+h/2
+	for i, clr := range []color.NRGBA{berryRed, petalPink, berryRed, petalPink} {
+		inset := 1 + 2*float64(i)
+		p.ellipse(cx, cy, w/2-inset, h/2-inset, clr)
+	}
+	drawFlower(p, cx, cy, white)
 }
 
 // drawCritter draws the placeholder critter from its posed parts, in their

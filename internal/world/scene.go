@@ -603,7 +603,8 @@ type actor struct {
 // drawOrder returns the props, villagers, wild critters and enemies near view
 // and the critter, from the back of the view to the front by the Y of their
 // feet, so whatever stands lower in the view overlaps whatever stands behind
-// it. A prop's feet are the bottom edge of its rectangle. At the same Y a
+// it. A prop's feet are the bottom edge of its rectangle, and a flat prop
+// such as a rug goes behind everything else. At the same Y a
 // character is drawn over a prop, and the critter over the other characters.
 // The returned slice is reused by the next call.
 func (s *Scene) drawOrder(view geom.Rect) []actor {
@@ -614,9 +615,14 @@ func (s *Scene) drawOrder(view geom.Rect) []actor {
 		near := view.Inset(-reach)
 		for i, obj := range props.Objects {
 			r := obj.Rect()
-			if rectsOverlap(r, near) {
-				s.actors = append(s.actors, actor{kind: actorProp, i: i, y: r.Max.Y})
+			if !rectsOverlap(r, near) {
+				continue
 			}
+			y := r.Max.Y
+			if flatProp(propKind(s.m, obj, 0)) {
+				y = math.Inf(-1) // under everything, wherever it stands
+			}
+			s.actors = append(s.actors, actor{kind: actorProp, i: i, y: y})
 		}
 	}
 	for i, n := range s.npcs {
