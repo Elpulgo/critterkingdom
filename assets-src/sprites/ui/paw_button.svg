@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Paw-print button, 192 by 192 px (96 by 96 CSS px at 2 px per CSS px,
+     pawButtonRadius 48 CSS px in internal/engine/touch.go). A round marigold
+     button in the colours of button.svg, with a paw print in the colours of
+     the footsteps icon: a big pad and four toes, laid out like the
+     code-drawn print. One drawing only; the engine scales or tints it when
+     pressed. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Soft drop shadow, the button 6 px lower -->
+  <circle id="paw_button_shadow" cx="96" cy="102" r="82" fill="#181425" stroke="#181425" stroke-width="6" opacity="0.22"/>
+  <!-- Marigold body -->
+  <circle id="paw_button_body" cx="96" cy="96" r="82" fill="#feae34" stroke="none"/>
+  <!-- Warm ochre shade along the lower-right edge -->
+  <path id="paw_button_shade" d="M 171 96 A 75 75 0 0 1 96 171" fill="none" stroke="#d77643" stroke-width="8" stroke-linecap="round"/>
+  <!-- Sunny yellow highlight dab, top-left -->
+  <ellipse id="paw_button_highlight" cx="52" cy="52" rx="9" ry="5" transform="rotate(-45 52 52)" fill="#fee761" stroke="none"/>
+  <!-- Rust red outline -->
+  <circle id="paw_button_outline" cx="96" cy="96" r="82" fill="none" stroke="#be4a2f" stroke-width="6"/>
+  <!-- Paw print: wood brown pad and toes with bark brown outline -->
+  <g id="paw_button_print" fill="#b86f50" stroke="#733e39" stroke-width="6" stroke-linejoin="round">
+    <ellipse cx="96" cy="112" rx="27" ry="25"/>
+    <circle cx="58" cy="83" r="11"/>
+    <circle cx="80" cy="58" r="11"/>
+    <circle cx="112" cy="58" r="11"/>
+    <circle cx="134" cy="83" r="11"/>
+  </g>
+  <!-- Light tan highlight dab on the pad, top-left -->
+  <ellipse id="paw_button_print_highlight" cx="86" cy="102" rx="8" ry="5" fill="#e4a672" stroke="none"/>
+</svg>

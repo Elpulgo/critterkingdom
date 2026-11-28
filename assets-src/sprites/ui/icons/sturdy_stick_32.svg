@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sturdy stick icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A thick, straight wood brown club with a cream cloth wrap on the grip and
+     a round knob at the top, the simplified redraw of sturdy_stick_64.svg.
+     The stick is a 20 px bark brown stroke under a 12 px wood brown stroke:
+     its wood is three times as wide as stick_32.svg's. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, stick, wrap and knob 6 px lower -->
+  <g id="sturdy_stick_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 15 46 L 45 17" fill="none" stroke="#181425" stroke-width="20" stroke-linecap="round"/>
+    <path d="M 15 46 L 27.9 33.5" fill="none" stroke="#181425" stroke-width="22" stroke-linecap="butt"/>
+    <circle cx="46" cy="15" r="9" fill="#181425" stroke="#181425" stroke-width="4"/>
+  </g>
+  <!-- Stick -->
+  <path id="sturdy_stick_32_outline" d="M 15 46 L 45 17" fill="none" stroke="#733e39" stroke-width="20" stroke-linecap="round"/>
+  <path id="sturdy_stick_32_body" d="M 15 46 L 45 17" fill="none" stroke="#b86f50" stroke-width="12" stroke-linecap="round"/>
+  <!-- Light tan highlight on the upper-left edge -->
+  <path id="sturdy_stick_32_highlight" d="M 30.3 27 L 35.7 21.8" fill="none" stroke="#e4a672" stroke-width="4" stroke-linecap="round"/>
+  <!-- Cream cloth wrap round the grip, warm taupe outline and turns -->
+  <!-- Cream cloth wrap round the grip, a band with square ends: a 22 px warm
+       taupe stroke 4 px longer at each end than the 14 px cream stroke, so
+       the outline is 4 px all round; one warm taupe turn across its middle -->
+  <path id="sturdy_stick_32_wrap_outline" d="M 15 46 L 27.9 33.5" fill="none" stroke="#c28569" stroke-width="22" stroke-linecap="butt"/>
+  <path id="sturdy_stick_32_wrap" d="M 17.9 43.2 L 25 36.3" fill="none" stroke="#ead4aa" stroke-width="14" stroke-linecap="butt"/>
+  <path id="sturdy_stick_32_wrap_turn" d="M 18 36.1 L 24.9 43.3" fill="none" stroke="#c28569" stroke-width="4" stroke-linecap="round"/>
+  <!-- Round knob at the top -->
+  <circle id="sturdy_stick_32_knob" cx="46" cy="15" r="9" fill="#b86f50" stroke="#733e39" stroke-width="4"/>
+  <ellipse id="sturdy_stick_32_knob_highlight" cx="43" cy="12" rx="3" ry="2" transform="rotate(-35 43 12)" fill="#e4a672" stroke="none"/>
+</svg>

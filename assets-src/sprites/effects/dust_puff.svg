@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Dust puff, 128 by 128 px (16 by 16 world px at 8 px per world px), one
+     tile. Three cream puffs in a low row, kicked up by feet or a landing,
+     centred on the page so the engine can scale and fade it about the
+     centre. Light tan shade on the lower-right of each puff, warm taupe 8 px
+     outline. No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Outline: each puff 8 px bigger, in #c28569 -->
+  <g id="dust_puff_outline" fill="#c28569" stroke="none">
+    <circle cx="64" cy="63" r="34"/>
+    <circle cx="34" cy="73" r="26"/>
+    <circle cx="94" cy="73" r="26"/>
+  </g>
+  <!-- Shade: the puffs in #e4a672; the fill above leaves a 10 px crescent on each lower-right edge -->
+  <g id="dust_puff_shade" fill="#e4a672" stroke="none">
+    <circle cx="64" cy="63" r="26"/>
+    <circle cx="34" cy="73" r="18"/>
+    <circle cx="94" cy="73" r="18"/>
+  </g>
+  <!-- Fill: each puff 5 px smaller and 5 px towards the top-left -->
+  <g id="dust_puff_fill" fill="#ead4aa" stroke="none">
+    <circle cx="60.5" cy="59.5" r="21"/>
+    <circle cx="30.5" cy="69.5" r="13"/>
+    <circle cx="90.5" cy="69.5" r="13"/>
+  </g>
+</svg>

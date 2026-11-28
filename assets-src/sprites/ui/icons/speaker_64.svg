@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Speaker icon (sound), 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A pond blue loudspeaker facing right with two sound waves. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, speaker and waves 6 px lower -->
+  <g id="speaker_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 18 52 Q 18 46 24 46 H 40 L 62 26 Q 70 20 70 30 V 98 Q 70 108 62 102 L 40 82 H 24 Q 18 82 18 76 Z" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M 84 50 Q 94 64 84 78" fill="none" stroke="#181425" stroke-width="8" stroke-linecap="round"/>
+    <path d="M 96 34 Q 116 64 96 94" fill="none" stroke="#181425" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <!-- Pond blue speaker with deep water blue outline -->
+  <path id="speaker_64_body" d="M 18 52 Q 18 46 24 46 H 40 L 62 26 Q 70 20 70 30 V 98 Q 70 108 62 102 L 40 82 H 24 Q 18 82 18 76 Z" fill="#0099db" stroke="#124e89" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Line between the box and the cone -->
+  <path id="speaker_64_seam" d="M 40 48 V 80" fill="none" stroke="#124e89" stroke-width="6" stroke-linecap="round"/>
+  <!-- Sky cyan highlight on the upper-left of the cone -->
+  <path id="speaker_64_highlight" d="M 48 50 L 60 40" fill="none" stroke="#2ce8f5" stroke-width="6" stroke-linecap="round"/>
+  <!-- Two sound waves -->
+  <path id="speaker_64_wave_small" d="M 84 50 Q 94 64 84 78" fill="none" stroke="#124e89" stroke-width="8" stroke-linecap="round"/>
+  <path id="speaker_64_wave_big" d="M 96 34 Q 116 64 96 94" fill="none" stroke="#124e89" stroke-width="8" stroke-linecap="round"/>
+</svg>

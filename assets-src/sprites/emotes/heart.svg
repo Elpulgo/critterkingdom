@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Heart emote, 128 by 128 px (16 by 16 world px at 8 px per world px).
+     A plump poppy red heart that floats above a character, centred on the
+     page. Berry crimson 8 px outline and lower-right shade, blossom pink
+     highlight on the upper-left lobe, like the heart icon. No drop shadow:
+     it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Poppy red heart with berry crimson outline -->
+  <path id="heart_body" d="M 64 106 C 28 86 12 64 14 44 C 16 22 48 14 64 36 C 80 14 112 22 114 44 C 116 64 100 86 64 106 Z" fill="#e43b44" stroke="#a22633" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Shade along the lower-right curve, 7 px inside the outline's centre line -->
+  <path id="heart_shade" d="M 105.5 57 C 103 68 90 80 75 91" fill="none" stroke="#a22633" stroke-width="7" stroke-linecap="round"/>
+  <!-- Highlight on the upper-left lobe -->
+  <ellipse id="heart_highlight" cx="34" cy="40" rx="7" ry="12" transform="rotate(40 34 40)" fill="#f6757a" stroke="none"/>
+</svg>

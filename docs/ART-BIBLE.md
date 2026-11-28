@@ -260,6 +260,146 @@ so serve it from the repository root with any static file server (note:
       cute, keeping `go test ./assets-src/...` green so every colour stays on
       the palette.
 
+## UI, effects and emotes
+
+The UI pieces, icons, petals, stars, touch pad, logo, effects and shared emotes
+from PLAN §6.5 are hand-written SVGs under `assets-src/sprites/`, one drawing
+per piece. `make art` exports each one as one PNG of its page at the mirrored
+path (for example `assets-src/sprites/ui/icons/berry_32.svg` becomes
+`assets/sprites/ui/icons/berry_32.png`) at 1 drawing px per PNG px. So each
+SVG's page is the piece's exact size: UI art at 2 px per CSS pixel, effects
+and emotes at 8 px per world pixel, with a transparent background.
+
+### Pieces
+
+Paths are under `assets-src/sprites/`. This table lists the same rows, in the
+same order, as the `uiArt` manifest in
+[`assets-src/sprites/ui_art_test.go`](../assets-src/sprites/ui_art_test.go);
+change both together.
+
+| Drawing | Drawing size | CSS or world size | Notes |
+|---|---|---|---|
+| `ui/panel.svg` | 96 by 96 px | 48 by 48 CSS px | 9-slice panel |
+| `ui/button.svg` | 96 by 96 px | 48 by 48 CSS px | 9-slice button, normal |
+| `ui/button_pressed.svg` | 96 by 96 px | 48 by 48 CSS px | 9-slice button, pressed: the same shape 4 px lower, no drop shadow, the shade colour as fill |
+| `ui/arrow_next.svg` | 64 by 64 px | 32 by 32 CSS px | "Next" arrow, HUD size |
+| `ui/checkmark.svg` | 64 by 64 px | 32 by 32 CSS px | Checkmark, HUD size |
+| `ui/petal_full.svg` | 64 by 64 px | 32 by 32 CSS px | Petals HUD |
+| `ui/petal_empty.svg` | 64 by 64 px | 32 by 32 CSS px | Same outline as the full petal, muted fill |
+| `ui/star_full.svg` | 96 by 96 px | 48 by 48 CSS px | The boss's row of stars |
+| `ui/star_empty.svg` | 96 by 96 px | 48 by 48 CSS px | Same outline as the full star, muted fill |
+| `ui/joystick_ring.svg` | 256 by 256 px | 128 by 128 CSS px | `padRadius` 64 CSS px; transparent centre so the world shows through |
+| `ui/joystick_knob.svg` | 112 by 112 px | 56 by 56 CSS px | `padKnobRadius` 28 CSS px |
+| `ui/paw_button.svg` | 192 by 192 px | 96 by 96 CSS px | `pawButtonRadius` 48 CSS px; no pressed drawing |
+| `ui/logo.svg` | 256 by 256 px | 128 by 128 CSS px | Emblem only: a crowned paw print in a leafy badge; the engine sets the title in Fredoka |
+| `ui/icons/speech_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/footsteps_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/berry_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/hat_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/heart_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/star_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/sticker_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/backpack_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/gear_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/speaker_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/flag_sv_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/flag_en_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/snacks_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/key_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/lantern_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/zzz_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/stick_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/sturdy_stick_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/wand_32.svg` | 64 by 64 px | 32 by 32 CSS px | HUD icon, a simplified redraw of the `_64` drawing |
+| `ui/icons/speech_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/footsteps_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/berry_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/hat_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/heart_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/star_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/sticker_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/backpack_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/gear_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/speaker_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/flag_sv_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/flag_en_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/snacks_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/key_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/lantern_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/zzz_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/stick_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/sturdy_stick_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `ui/icons/wand_64.svg` | 128 by 128 px | 64 by 64 CSS px | Menu icon |
+| `effects/swoosh_arc.svg` | 256 by 256 px | 32 by 32 world px | The player's box; drawn for a swing to the right |
+| `effects/poof_cloud.svg` | 192 by 192 px | 24 by 24 world px | The largest normal enemy |
+| `effects/flower_burst.svg` | 192 by 192 px | 24 by 24 world px | The largest normal enemy |
+| `effects/spore_cloud.svg` | 192 by 192 px | 24 by 24 world px | The largest normal enemy |
+| `effects/hit_spark.svg` | 128 by 128 px | 16 by 16 world px | One tile |
+| `effects/dust_puff.svg` | 128 by 128 px | 16 by 16 world px | One tile |
+| `emotes/heart.svg` | 128 by 128 px | 16 by 16 world px | Floats above a 32 world px character |
+| `emotes/exclamation.svg` | 128 by 128 px | 16 by 16 world px | Floats above a 32 world px character |
+| `emotes/zzz.svg` | 128 by 128 px | 16 by 16 world px | Floats above a 32 world px character |
+| `emotes/sweat.svg` | 128 by 128 px | 16 by 16 world px | Floats above a 32 world px character |
+| `emotes/music_note.svg` | 128 by 128 px | 16 by 16 world px | Floats above a 32 world px character |
+
+### 9-slice insets
+
+`ui/panel.svg`, `ui/button.svg` and `ui/button_pressed.svg` are 9-slice
+sources with **32 px (16 CSS px) insets on all four sides**. The corners,
+outline, highlight and shade strips and drop shadow stay inside the insets, so
+the middle 32 by 32 px is plain fill. A 9-slice draw keeps the four 32 by
+32 px corners as they are, stretches the edges along their length and the
+middle both ways, so one drawing makes a panel or button of any size. Nothing
+in the game draws these images yet; the UI code that loads them must use
+these insets.
+
+### Effects are single drawings
+
+Each effect is **one drawing, not a set of frames**, centred on its page. The
+engine animates it in code: it scales, turns and fades the drawing about the
+page centre (the same idea as characters, which are parts animated in code).
+`effects/swoosh_arc.svg` is drawn for a swing to the right; the engine turns
+or mirrors it for the other directions. Emotes are single drawings too,
+centred on their pages, and float above a character.
+
+### Lint
+
+`go test ./assets-src/...` (part of `make test`) lints every drawing in the
+manifest with `tools/art/artlint`. A test fails when:
+
+- a listed drawing is missing, or its page is not its listed size (`width`
+  and `height` must be whole numbers matching the row, with
+  `viewBox="0 0 w h"`);
+- a `fill`, `stroke`, `stop-color`, `flood-color` or `color` (as an attribute
+  or inside `style`) is not `none` or an Endesga 32 colour;
+- it has a `linearGradient`, `radialGradient`, `filter`, `image`, `text` or
+  `pattern` element;
+- a `stroke-width` is thinner than 4 px;
+- an `.svg` under `ui/`, `effects/` or `emotes/` is not in the manifest.
+
+So when you add or resize a piece, add or change its manifest row and its row
+in the table above. The lint can't judge how a drawing looks; the checklist
+below is for that.
+
+### Human sign-off checklist for UI, effects and emotes
+
+- [ ] Install Inkscape 1.x and run `make art ART_ARGS=-force` (add
+      `INKSCAPE=/path/to/inkscape` when it is not on `PATH`).
+- [ ] Check the PNGs under `assets/sprites/ui/`, `assets/sprites/ui/icons/`,
+      `assets/sprites/effects/` and `assets/sprites/emotes/`: one for every row
+      in the table above, each at its drawing size, with a transparent
+      background and nothing cut off at the page edge.
+- [ ] View the icons at 32 CSS px on the tablet. A 64 by 64 px `_32` PNG shows
+      at 32 CSS px with `width="32"`, so put a throwaway page in the ignored
+      `build/` folder, for example `build/icons.html` with one
+      `<img src="../assets/sprites/ui/icons/berry_32.png" width="32">` per
+      icon. Serve the repository root as in
+      [Viewing the style sheet on the tablet](#viewing-the-style-sheet-on-the-tablet)
+      and open `http://<computer-ip>:8080/build/icons.html`. Check that every
+      icon reads at arm's length and that the outlines don't fill in.
+- [ ] Show the icons, petals, stars, pad, logo, effects and emotes on the
+      tablet to the kids and ask what each one means. Redraw any they can't
+      name, keeping `go test ./assets-src/...` green.
 ## World art set
 
 The terrain tiles, ground decorations, props and interior pieces of PLAN §6.4

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Footsteps icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     Two round paw prints walking up to the right. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, both prints 6 px lower -->
+  <g id="footsteps_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <ellipse cx="40" cy="92" rx="15" ry="16" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <circle cx="22" cy="64" r="7" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <circle cx="40" cy="56" r="7" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <circle cx="58" cy="64" r="7" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <ellipse cx="88" cy="56" rx="15" ry="16" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <circle cx="70" cy="28" r="7" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <circle cx="88" cy="20" r="7" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <circle cx="106" cy="28" r="7" fill="#181425" stroke="#181425" stroke-width="6"/>
+  </g>
+  <!-- Lower-left print: wood brown pad and toes with bark brown outline -->
+  <g id="footsteps_64_print_left" fill="#b86f50" stroke="#733e39" stroke-width="6">
+    <ellipse cx="40" cy="92" rx="15" ry="16"/>
+    <circle cx="22" cy="64" r="7"/>
+    <circle cx="40" cy="56" r="7"/>
+    <circle cx="58" cy="64" r="7"/>
+  </g>
+  <!-- Upper-right print -->
+  <g id="footsteps_64_print_right" fill="#b86f50" stroke="#733e39" stroke-width="6">
+    <ellipse cx="88" cy="56" rx="15" ry="16"/>
+    <circle cx="70" cy="28" r="7"/>
+    <circle cx="88" cy="20" r="7"/>
+    <circle cx="106" cy="28" r="7"/>
+  </g>
+  <!-- Highlight dabs on the pads, top-left -->
+  <ellipse id="footsteps_64_highlight_left" cx="34" cy="86" rx="5" ry="4" fill="#e4a672" stroke="none"/>
+  <ellipse id="footsteps_64_highlight_right" cx="82" cy="50" rx="5" ry="4" fill="#e4a672" stroke="none"/>
+</svg>

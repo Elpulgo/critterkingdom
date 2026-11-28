@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Star icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A chubby five-point sunny yellow star with rounded points, the simplified
+     redraw of star_64.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the star 6 px lower -->
+  <g id="star_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 32 7 L 39.4 21.9 L 55.8 24.3 L 43.9 35.9 L 46.7 52.3 L 32 44.5 L 17.3 52.3 L 20.1 35.9 L 8.2 24.3 L 24.6 21.9 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <!-- Sunny yellow star fill -->
+  <path id="star_32_body" d="M 32 7 L 39.4 21.9 L 55.8 24.3 L 43.9 35.9 L 46.7 52.3 L 32 44.5 L 17.3 52.3 L 20.1 35.9 L 8.2 24.3 L 24.6 21.9 Z" fill="#fee761" stroke="none"/>
+  <!-- Marigold shade on the lower-right arm -->
+  <path id="star_32_shade" d="M 40 37 L 42 46 L 35 43 Z" fill="#feae34" stroke="#feae34" stroke-width="4" stroke-linejoin="round"/>
+  <!-- White highlight dab near the top-left -->
+  <ellipse id="star_32_highlight" cx="27" cy="27" rx="2.5" ry="3.5" transform="rotate(30 27 27)" fill="#ffffff" stroke="none"/>
+  <!-- Warm ochre outline on top -->
+  <path id="star_32_outline" d="M 32 7 L 39.4 21.9 L 55.8 24.3 L 43.9 35.9 L 46.7 52.3 L 32 44.5 L 17.3 52.3 L 20.1 35.9 L 8.2 24.3 L 24.6 21.9 Z" fill="none" stroke="#d77643" stroke-width="4" stroke-linejoin="round"/>
+</svg>

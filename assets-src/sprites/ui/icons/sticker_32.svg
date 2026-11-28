@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sticker icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A round critter sticker with a white (#ffffff) sticker border and its
+     lower-right edge peeling up, the simplified redraw of sticker_64.svg
+     (the fox has no eye shines). -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the sticker 6 px lower -->
+  <g id="sticker_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <circle cx="32" cy="30" r="23" fill="#181425" stroke="#181425" stroke-width="4"/>
+  </g>
+  <!-- White sticker border with pale slate outline -->
+  <circle id="sticker_32_border" cx="32" cy="30" r="23" fill="#ffffff" stroke="#c0cbdc" stroke-width="4"/>
+  <!-- Meadow green picture inside the border -->
+  <circle id="sticker_32_picture" cx="32" cy="30" r="16" fill="#63c74d" stroke="none"/>
+  <!-- A little fox face: ears, head, muzzle, eyes and nose -->
+  <path id="sticker_32_ear_left" d="M 25 29 L 23 18 L 31 24 Z" fill="#f77622" stroke="#be4a2f" stroke-width="4" stroke-linejoin="round"/>
+  <path id="sticker_32_ear_right" d="M 39 29 L 41 18 L 33 24 Z" fill="#f77622" stroke="#be4a2f" stroke-width="4" stroke-linejoin="round"/>
+  <circle id="sticker_32_head" cx="32" cy="33" r="10" fill="#f77622" stroke="#be4a2f" stroke-width="4"/>
+  <ellipse id="sticker_32_muzzle" cx="32" cy="38" rx="5" ry="3.5" fill="#ead4aa" stroke="none"/>
+  <circle id="sticker_32_eye_left" cx="28" cy="31.5" r="2" fill="#181425" stroke="none"/>
+  <circle id="sticker_32_eye_right" cx="36" cy="31.5" r="2" fill="#181425" stroke="none"/>
+  <circle id="sticker_32_nose" cx="32" cy="36" r="2" fill="#3e2731" stroke="none"/>
+  <!-- Peeled-up flap at the lower right, showing the pale back of the sticker -->
+  <path id="sticker_32_peel" d="M 41 52 Q 44 42 55 39 Q 55 51 41 52 Z" fill="#c0cbdc" stroke="#8b9bb4" stroke-width="4" stroke-linejoin="round"/>
+</svg>

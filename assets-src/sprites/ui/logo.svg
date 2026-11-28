@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logo emblem, 256 by 256 px (128 by 128 CSS px at 2 px per CSS px).
+     A paw print with a small crown in a leafy round badge: a cream badge in
+     the UI panel colours, ringed by a wreath of ten leaves that leaves the
+     top open for a sunny yellow crown sitting on the rim, and a wood brown
+     paw print in the middle drawn like the one on paw_button.svg. Emblem
+     only, no lettering: the engine sets the title in Fredoka beside it. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Soft drop shadow: badge, leaves and crown 6 px lower -->
+  <g id="logo_shadow" transform="translate(0 6)" opacity="0.22" fill="#181425" stroke="#181425" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(52.1 101.6) rotate(-87)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(42.1 139) rotate(-113)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(49.4 177) rotate(-139)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(72.7 207.9) rotate(-165)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(104.3 224.7) rotate(-189)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(203.9 101.6) rotate(-93)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(213.9 139) rotate(-67)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(206.6 177) rotate(-41)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(183.3 207.9) rotate(-15)" stroke-width="6"/>
+    <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" transform="translate(151.7 224.7) rotate(9)" stroke-width="6"/>
+    <circle cx="128" cy="142" r="76" stroke-width="8"/>
+    <path d="M 98 84 L 92 38 L 112 56 L 128 28 L 144 56 L 164 38 L 158 84 Z" stroke-width="6"/>
+    <circle cx="92" cy="38" r="6" stroke-width="6"/>
+    <circle cx="128" cy="28" r="6" stroke-width="6"/>
+    <circle cx="164" cy="38" r="6" stroke-width="6"/>
+  </g>
+  <!-- Wreath: leaf green leaves with pine green outlines and a meadow green
+       midrib, tucked behind the badge, open at the top for the crown -->
+  <g id="logo_wreath" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(52.1 101.6) rotate(-87)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(42.1 139) rotate(-113)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(49.4 177) rotate(-139)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(72.7 207.9) rotate(-165)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(104.3 224.7) rotate(-189)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(203.9 101.6) rotate(-93)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(213.9 139) rotate(-67)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(206.6 177) rotate(-41)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(183.3 207.9) rotate(-15)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+    <g transform="translate(151.7 224.7) rotate(9)">
+      <path d="M -18 0 Q 0 -16 18 0 Q 0 16 -18 0 Z" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+      <path d="M -9 0 H 9" fill="none" stroke="#63c74d" stroke-width="4"/>
+    </g>
+  </g>
+  <!-- Cream badge -->
+  <circle id="logo_badge" cx="128" cy="142" r="76" fill="#ead4aa" stroke="none"/>
+  <!-- Light tan shade just inside the rim, lower-right -->
+  <path id="logo_badge_shade" d="M 196 142 A 68 68 0 0 1 128 210" fill="none" stroke="#e4a672" stroke-width="8" stroke-linecap="round"/>
+  <!-- White highlight dab, upper-left -->
+  <ellipse id="logo_badge_highlight" cx="84" cy="108" rx="10" ry="5" transform="rotate(-45 84 108)" fill="#ffffff" stroke="none"/>
+  <!-- Warm taupe rim, the UI panel outline colour -->
+  <circle id="logo_badge_outline" cx="128" cy="142" r="76" fill="none" stroke="#c28569" stroke-width="8"/>
+  <!-- Paw print: wood brown pad and four toes with bark brown outlines -->
+  <g id="logo_paw" fill="#b86f50" stroke="#733e39" stroke-width="6" stroke-linejoin="round">
+    <ellipse cx="128" cy="164" rx="30" ry="26"/>
+    <circle cx="90" cy="135" r="12"/>
+    <circle cx="112" cy="110" r="12"/>
+    <circle cx="144" cy="110" r="12"/>
+    <circle cx="166" cy="135" r="12"/>
+  </g>
+  <!-- Light tan highlight dab on the pad, top-left -->
+  <ellipse id="logo_paw_highlight" cx="117" cy="153" rx="9" ry="5" fill="#e4a672" stroke="none"/>
+  <!-- Crown: sunny yellow body, marigold shade band along the base, poppy
+       red jewel, white highlight, warm ochre outline (the star pairing) -->
+  <path id="logo_crown" d="M 98 84 L 92 38 L 112 56 L 128 28 L 144 56 L 164 38 L 158 84 Z" fill="#fee761" stroke="none"/>
+  <path id="logo_crown_shade" d="M 96.7 74 L 159.3 74 L 158 84 L 98 84 Z" fill="#feae34" stroke="none"/>
+  <ellipse id="logo_crown_highlight" cx="105" cy="66" rx="3.5" ry="6" transform="rotate(-10 105 66)" fill="#ffffff" stroke="none"/>
+  <path id="logo_crown_outline" d="M 98 84 L 92 38 L 112 56 L 128 28 L 144 56 L 164 38 L 158 84 Z" fill="none" stroke="#d77643" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle id="logo_crown_jewel" cx="128" cy="62" r="6" fill="#e43b44" stroke="#a22633" stroke-width="4"/>
+  <!-- Round balls on the three crown points -->
+  <g id="logo_crown_balls" fill="#fee761" stroke="#d77643" stroke-width="6">
+    <circle cx="92" cy="38" r="6"/>
+    <circle cx="128" cy="28" r="6"/>
+    <circle cx="164" cy="38" r="6"/>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Wand icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     An orchid purple wand with a sunny yellow star tip and two sky cyan
+     sparkles, the simplified redraw of wand_64.svg with plumper sparkles. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, wand, star and sparkles 6 px lower -->
+  <g id="wand_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 12 50 L 35 27" fill="none" stroke="#181425" stroke-width="12" stroke-linecap="round"/>
+    <path d="M 42 9 L 45.8 16.8 L 54.4 18 L 48.2 24 L 49.7 32.5 L 42 28.5 L 34.3 32.5 L 35.8 24 L 29.6 18 L 38.2 16.8 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M 17 6 Q 19 13 26 15 Q 19 17 17 24 Q 15 17 8 15 Q 15 13 17 6 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M 52 36 Q 54 42 60 44 Q 54 46 52 52 Q 50 46 44 44 Q 50 42 52 36 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <!-- Wand: a 12 px plum purple stroke under a 4 px orchid purple stroke -->
+  <path id="wand_32_shaft_outline" d="M 12 50 L 35 27" fill="none" stroke="#68386c" stroke-width="12" stroke-linecap="round"/>
+  <path id="wand_32_shaft" d="M 12 50 L 35 27" fill="none" stroke="#b55088" stroke-width="4" stroke-linecap="round"/>
+  <!-- Star tip: sunny yellow with warm ochre outline -->
+  <path id="wand_32_star" d="M 42 9 L 45.8 16.8 L 54.4 18 L 48.2 24 L 49.7 32.5 L 42 28.5 L 34.3 32.5 L 35.8 24 L 29.6 18 L 38.2 16.8 Z" fill="#fee761" stroke="#d77643" stroke-width="4" stroke-linejoin="round"/>
+  <circle id="wand_32_star_highlight" cx="40" cy="21" r="2" fill="#ffffff" stroke="none"/>
+  <!-- Sparkles: sky cyan with pond blue outline -->
+  <path id="wand_32_sparkle_left" d="M 17 6 Q 19 13 26 15 Q 19 17 17 24 Q 15 17 8 15 Q 15 13 17 6 Z" fill="#2ce8f5" stroke="#0099db" stroke-width="4" stroke-linejoin="round"/>
+  <path id="wand_32_sparkle_right" d="M 52 36 Q 54 42 60 44 Q 54 46 52 52 Q 50 46 44 44 Q 50 42 52 36 Z" fill="#2ce8f5" stroke="#0099db" stroke-width="4" stroke-linejoin="round"/>
+</svg>

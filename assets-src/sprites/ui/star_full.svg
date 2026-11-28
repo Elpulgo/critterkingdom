@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Full boss star, 96 by 96 px (48 by 48 CSS px at 2 px per CSS px).
+     One star of the Grumbling Grub's health row: a chubby five-point sunny
+     yellow star with rounded points, drawn like the star icon. star_empty.svg
+     uses the same outline path so a row of stars lines up. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="96" height="96" viewBox="0 0 96 96">
+  <!-- Soft drop shadow, the star 6 px lower -->
+  <path id="star_full_shadow" d="M 48 13 L 58.3 34.8 L 82.2 37.9 L 64.6 54.4 L 69.2 78.1 L 48 66.5 L 26.8 78.1 L 31.4 54.4 L 13.8 37.9 L 37.7 34.8 Z" transform="translate(0 6)" opacity="0.22" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Sunny yellow star fill -->
+  <path id="star_full_body" d="M 48 13 L 58.3 34.8 L 82.2 37.9 L 64.6 54.4 L 69.2 78.1 L 48 66.5 L 26.8 78.1 L 31.4 54.4 L 13.8 37.9 L 37.7 34.8 Z" fill="#fee761" stroke="none"/>
+  <!-- Marigold shade on the lower-right arm -->
+  <path id="star_full_shade" d="M 62.6 60.4 L 64.9 72.2 L 54.3 66.4 Z" fill="#feae34" stroke="#feae34" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- White highlight dab near the top-left -->
+  <ellipse id="star_full_highlight" cx="41" cy="42" rx="3.5" ry="5" transform="rotate(30 41 42)" fill="#ffffff" stroke="none"/>
+  <!-- Warm ochre outline on top -->
+  <path id="star_full_outline" d="M 48 13 L 58.3 34.8 L 82.2 37.9 L 64.6 54.4 L 69.2 78.1 L 48 66.5 L 26.8 78.1 L 31.4 54.4 L 13.8 37.9 L 37.7 34.8 Z" fill="none" stroke="#d77643" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

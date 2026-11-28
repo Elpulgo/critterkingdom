@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sweat drop emote, 128 by 128 px (16 by 16 world px at 8 px per world px).
+     One upright drop, pointed at the top and round at the bottom, centred on
+     the page. Sky cyan fill, pond blue shade on the lower-right, deep water
+     blue 8 px outline and a white highlight on the upper-left. No drop
+     shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Drop: tip at (64, 14), round bottom of radius 34 around (64, 80) -->
+  <path id="sweat_body" d="M 64 14 C 72 34 98 52 98 80 A 34 34 0 0 1 30 80 C 30 52 56 34 64 14 Z" fill="#2ce8f5" stroke="#124e89" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Shade: an arc 7 px inside the round bottom's lower-right -->
+  <path id="sweat_shade" d="M 91 76 A 27 27 0 0 1 59.3 106.6" fill="none" stroke="#0099db" stroke-width="7" stroke-linecap="round"/>
+  <!-- Highlight on the upper-left -->
+  <ellipse id="sweat_highlight" cx="47" cy="70" rx="6" ry="11" transform="rotate(20 47 70)" fill="#ffffff" stroke="none"/>
+</svg>

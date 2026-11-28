@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Speaker icon (sound), 64 by 64 px (32 by 32 CSS px HUD size at 2 px per
+     CSS px). A pond blue loudspeaker facing right with two sound waves, the
+     simplified redraw of speaker_64.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, speaker and waves 6 px lower -->
+  <g id="speaker_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 9 24 Q 9 21 12 21 H 20 L 31 11 Q 35 8 35 13 V 47 Q 35 52 31 49 L 20 39 H 12 Q 9 39 9 36 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M 42 23 Q 47 30 42 37" fill="none" stroke="#181425" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 48 15 Q 58 30 48 45" fill="none" stroke="#181425" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- Pond blue speaker with deep water blue outline -->
+  <path id="speaker_32_body" d="M 9 24 Q 9 21 12 21 H 20 L 31 11 Q 35 8 35 13 V 47 Q 35 52 31 49 L 20 39 H 12 Q 9 39 9 36 Z" fill="#0099db" stroke="#124e89" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Line between the box and the cone -->
+  <path id="speaker_32_seam" d="M 20 22 V 38" fill="none" stroke="#124e89" stroke-width="4" stroke-linecap="round"/>
+  <!-- Sky cyan highlight on the upper-left of the cone -->
+  <path id="speaker_32_highlight" d="M 25 23 L 30 19" fill="none" stroke="#2ce8f5" stroke-width="4" stroke-linecap="round"/>
+  <!-- Two sound waves -->
+  <path id="speaker_32_wave_small" d="M 42 23 Q 47 30 42 37" fill="none" stroke="#124e89" stroke-width="4" stroke-linecap="round"/>
+  <path id="speaker_32_wave_big" d="M 48 15 Q 58 30 48 45" fill="none" stroke="#124e89" stroke-width="4" stroke-linecap="round"/>
+</svg>

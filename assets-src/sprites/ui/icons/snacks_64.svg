@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Snacks icon (the snack category), 128 by 128 px (64 by 64 CSS px menu
+     size at 2 px per CSS px). A wooden bowl of mixed snacks: a green leaf,
+     a red berry and a cream seed peeking over the rim. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, snacks and bowl 6 px lower -->
+  <g id="snacks_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <ellipse cx="38" cy="46" rx="12" ry="22" transform="rotate(-35 38 46)" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <ellipse cx="92" cy="46" rx="11" ry="16" transform="rotate(30 92 46)" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <circle cx="64" cy="44" r="18" fill="#181425" stroke="#181425" stroke-width="6"/>
+    <path d="M 16 66 H 112 Q 108 106 64 106 Q 20 106 16 66 Z" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="10" y="58" width="108" height="14" rx="7" fill="#181425" stroke="#181425" stroke-width="6"/>
+  </g>
+  <!-- Leaf green leaf with pine green outline and vein -->
+  <ellipse id="snacks_64_leaf" cx="38" cy="46" rx="12" ry="22" transform="rotate(-35 38 46)" fill="#3e8948" stroke="#265c42" stroke-width="6"/>
+  <path id="snacks_64_leaf_vein" d="M 48 60 L 30 34" fill="none" stroke="#265c42" stroke-width="4" stroke-linecap="round"/>
+  <!-- Cream seed with warm taupe outline and stripe -->
+  <ellipse id="snacks_64_seed" cx="92" cy="46" rx="11" ry="16" transform="rotate(30 92 46)" fill="#ead4aa" stroke="#c28569" stroke-width="6"/>
+  <path id="snacks_64_seed_stripe" d="M 86 56 L 97 38" fill="none" stroke="#c28569" stroke-width="4" stroke-linecap="round"/>
+  <!-- Poppy red berry with berry crimson outline and a blossom pink highlight -->
+  <circle id="snacks_64_berry" cx="64" cy="44" r="18" fill="#e43b44" stroke="#a22633" stroke-width="6"/>
+  <ellipse id="snacks_64_berry_highlight" cx="57" cy="37" rx="4" ry="6" transform="rotate(35 57 37)" fill="#f6757a" stroke="none"/>
+  <!-- Wood brown bowl with bark brown outline -->
+  <path id="snacks_64_bowl" d="M 16 66 H 112 Q 108 106 64 106 Q 20 106 16 66 Z" fill="#b86f50" stroke="#733e39" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Light tan highlight on the bowl's upper-left curve -->
+  <path id="snacks_64_bowl_highlight" d="M 28 78 Q 32 90 42 96" fill="none" stroke="#e4a672" stroke-width="6" stroke-linecap="round"/>
+  <!-- Light tan rim -->
+  <rect id="snacks_64_rim" x="10" y="58" width="108" height="14" rx="7" fill="#e4a672" stroke="#733e39" stroke-width="6"/>
+</svg>

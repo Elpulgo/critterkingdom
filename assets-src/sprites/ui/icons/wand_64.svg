@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Wand icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     An orchid purple wand with a sunny yellow star tip and two sky cyan sparkles. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, wand, star and sparkles 6 px lower -->
+  <g id="wand_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 24 104 L 70 58" fill="none" stroke="#181425" stroke-width="18" stroke-linecap="round"/>
+    <path d="M 84 18 L 91.6 33.5 L 108.7 36 L 96.4 48 L 99.3 65 L 84 57 L 68.7 65 L 71.6 48 L 59.3 36 L 76.4 33.5 Z" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M 36 22 Q 39 31 48 34 Q 39 37 36 46 Q 33 37 24 34 Q 33 31 36 22 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M 104 76 Q 107 85 116 88 Q 107 91 104 100 Q 101 91 92 88 Q 101 85 104 76 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <!-- Wand: an 18 px plum purple stroke under a 6 px orchid purple stroke -->
+  <path id="wand_64_shaft_outline" d="M 24 104 L 70 58" fill="none" stroke="#68386c" stroke-width="18" stroke-linecap="round"/>
+  <path id="wand_64_shaft" d="M 24 104 L 70 58" fill="none" stroke="#b55088" stroke-width="6" stroke-linecap="round"/>
+  <!-- Star tip: sunny yellow with warm ochre outline -->
+  <path id="wand_64_star" d="M 84 18 L 91.6 33.5 L 108.7 36 L 96.4 48 L 99.3 65 L 84 57 L 68.7 65 L 71.6 48 L 59.3 36 L 76.4 33.5 Z" fill="#fee761" stroke="#d77643" stroke-width="6" stroke-linejoin="round"/>
+  <circle id="wand_64_star_highlight" cx="79" cy="40" r="3" fill="#ffffff" stroke="none"/>
+  <!-- Sparkles: sky cyan with pond blue outline -->
+  <path id="wand_64_sparkle_left" d="M 36 22 Q 39 31 48 34 Q 39 37 36 46 Q 33 37 24 34 Q 33 31 36 22 Z" fill="#2ce8f5" stroke="#0099db" stroke-width="4" stroke-linejoin="round"/>
+  <path id="wand_64_sparkle_right" d="M 104 76 Q 107 85 116 88 Q 107 91 104 100 Q 101 91 92 88 Q 101 85 104 76 Z" fill="#2ce8f5" stroke="#0099db" stroke-width="4" stroke-linejoin="round"/>
+</svg>
