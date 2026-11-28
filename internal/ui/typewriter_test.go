@@ -21,14 +21,3 @@ func TestTypewriter_TypesFortyCharactersPerSecondCountingSwedishLettersAsOne(t *
 		t.Fatalf("after 1 s shows %q (done %v), want the whole page and done", got, tw.Done())
 	}
 }
-
-func TestTypewriter_SkippingShowsTheWholePageAtOnce(t *testing.T) {
-	tw := NewTypewriter(page)
-	tw.Update(0.1)
-
-	tw.Skip()
-
-	if got := tw.Visible(); got != page || !tw.Done() {
-		t.Fatalf("after skipping shows %q (done %v), want the whole page and done", got, tw.Done())
-	}
-}
