@@ -68,6 +68,15 @@ func (p *Player) WalkAlong(points []geom.Vec) {
 	p.route = append(p.route[:0:0], points...)
 }
 
+// Retarget moves the last point of the walk route to target, keeping the
+// points before it, as when a held pointer moves within the spot it was
+// pointing at. It does nothing when the critter is not walking.
+func (p *Player) Retarget(target geom.Vec) {
+	if n := len(p.route); n > 0 {
+		p.route[n-1] = target
+	}
+}
+
 // Place puts the critter's feet at pos, as when it arrives on another map. It
 // stops any walk, since a walk target belongs to the map the critter left;
 // facing and a hop under way are kept.
