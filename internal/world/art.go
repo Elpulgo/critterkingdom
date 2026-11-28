@@ -1,6 +1,7 @@
 package world
 
 import (
+	"hash/fnv"
 	"image/color"
 	"math"
 
@@ -32,7 +33,23 @@ var (
 	white       = color.NRGBA{0xff, 0xff, 0xff, 0xff}
 	debugColor  = color.NRGBA{0xfe, 0xe7, 0x61, 0xff}
 	missingTile = color.NRGBA{0xff, 0x00, 0xff, 0xff}
+	zoneDebug   = color.NRGBA{0xff, 0x00, 0x44, 0xff}
+	sparkle     = color.NRGBA{0xfe, 0xe7, 0x61, 0xff}
 )
+
+// wildBodies are the body colours of placeholder wild critters, one picked
+// per species. Greens and light blues are left out, so a critter stands out
+// on grass and by water.
+var wildBodies = []color.NRGBA{
+	{0xbe, 0x4a, 0x2f, 0xff},
+	{0xfe, 0xae, 0x34, 0xff},
+	{0xb5, 0x50, 0x88, 0xff},
+	{0x12, 0x4e, 0x89, 0xff},
+	{0xe8, 0xb7, 0x96, 0xff},
+	{0x68, 0x38, 0x6c, 0xff},
+	{0xc0, 0xcb, 0xdc, 0xff},
+	{0xe4, 0x3b, 0x44, 0xff},
+}
 
 const (
 	// critterHeight is how far the tips of the critter's ears are above its
@@ -43,6 +60,16 @@ const (
 	// reach is how far a prop shape can extend beyond its object rectangle, in
 	// world pixels. Props further than this outside the view are not drawn.
 	reach = 6
+	// wildRadius is the radius of a placeholder wild critter's body, about
+	// half the size of the player's.
+	wildRadius = 4
+	// wildReach is how far a wild critter's drawing, hop and sparkles
+	// included, can extend from its feet, in world pixels.
+	wildReach = 20
+	// sparkleCount is how many stars twinkle around a rare critter.
+	sparkleCount = 3
+	// sparklePace is how fast a star twinkles, in radians per second.
+	sparklePace = 2 * math.Pi / 1.2
 )
 
 // drawTileArt draws the art for a tile or prop of the given type filling the
@@ -232,6 +259,68 @@ func drawCritter(p *pen, x, y, lift float64, facing entity.Facing) {
 		p.ellipse(x+2.5, by-1, 0.6, 1.05, ink)
 		p.ellipse(x, by+0.5, 1.1, 0.6, cocoa)
 	}
+}
+
+// speciesColor returns the body colour of a placeholder critter of the
+// species with the given id. The same id always gets the same colour.
+func speciesColor(id string) color.NRGBA {
+	h := fnv.New32a()
+	h.Write([]byte(id))
+	return wildBodies[h.Sum32()%uint32(len(wildBodies))]
+}
+
+// drawWildCritter draws a placeholder wild critter, a round blob in the body
+// colour, with its feet at the world point x, y and its body lifted lift world
+// pixels off the ground. Its eyes show which way it faces.
+func drawWildCritter(p *pen, x, y, lift float64, facing entity.Facing, body color.NRGBA) {
+	// The shadow stays on the ground while the critter hops.
+	p.ellipse(x, y, 3.5, 1.4, shadow)
+
+	by := y - wildRadius - lift // centre of the body
+	p.ellipse(x, by, wildRadius+0.5, wildRadius, body)
+	p.ellipse(x-1.2, by-1.8, 1.4, 0.8, fade(white, 0.4))
+
+	switch facing {
+	case entity.FacingUp:
+		// Seen from behind: no face, just a little tail.
+		p.circle(x, by+2.5, 1, fade(white, 0.6))
+	case entity.FacingLeft:
+		p.ellipse(x-2.6, by-0.3, 0.5, 0.9, ink)
+	case entity.FacingRight:
+		p.ellipse(x+2.6, by-0.3, 0.5, 0.9, ink)
+	default:
+		p.ellipse(x-1.5, by-0.3, 0.5, 0.9, ink)
+		p.ellipse(x+1.5, by-0.3, 0.5, 0.9, ink)
+	}
+}
+
+// drawSparkle draws sparkleCount four-point stars around a rare critter whose
+// body is centred on x, y. Each star grows and shrinks in turn as t, in
+// seconds, goes on; phase shifts the twinkle so neighbouring critters do not
+// twinkle in step.
+func drawSparkle(p *pen, x, y, t, phase float64) {
+	for i := range sparkleCount {
+		a := 2 * math.Pi * float64(i) / sparkleCount
+		sx := x + 7*math.Cos(a-math.Pi/2)
+		sy := y + 6*math.Sin(a-math.Pi/2)
+		size := math.Sin(sparklePace*t + phase + a)
+		if size <= 0 {
+			continue // this star is between twinkles
+		}
+		drawStar(p, sx, sy, 2.2*size, sparkle)
+	}
+}
+
+// drawStar draws a four-point star centred on x, y whose points are r from
+// its centre.
+func drawStar(p *pen, x, y, r float64, clr color.NRGBA) {
+	in := r * 0.3
+	p.polygon(clr,
+		x, y-r, x+in, y-in,
+		x+r, y, x+in, y+in,
+		x, y+r, x-in, y+in,
+		x-r, y, x-in, y-in,
+	)
 }
 
 // fillBubble fills a speech bubble with rounded corners of radius r. The
