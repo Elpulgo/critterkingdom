@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Speech icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A white speech bubble with its tail at the lower left and three cocoa
+     dots, the simplified redraw of speech_64.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the bubble 6 px lower -->
+  <g id="speech_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 22 9 H 42 Q 56 9 56 23 V 27 Q 56 41 42 41 H 31 L 18 51 L 21 41 Q 8 41 8 27 V 23 Q 8 9 22 9 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <!-- White bubble -->
+  <path id="speech_32_body" d="M 22 9 H 42 Q 56 9 56 23 V 27 Q 56 41 42 41 H 31 L 18 51 L 21 41 Q 8 41 8 27 V 23 Q 8 9 22 9 Z" fill="#ffffff" stroke="none"/>
+  <!-- Shade along the lower-right curve -->
+  <path id="speech_32_shade" d="M 51 26 Q 51 36 41 36 H 33" fill="none" stroke="#c0cbdc" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Pale slate outline on top -->
+  <path id="speech_32_outline" d="M 22 9 H 42 Q 56 9 56 23 V 27 Q 56 41 42 41 H 31 L 18 51 L 21 41 Q 8 41 8 27 V 23 Q 8 9 22 9 Z" fill="none" stroke="#8b9bb4" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Three talk dots -->
+  <circle id="speech_32_dot_1" cx="21" cy="25" r="4" fill="#3e2731" stroke="none"/>
+  <circle id="speech_32_dot_2" cx="32" cy="25" r="4" fill="#3e2731" stroke="none"/>
+  <circle id="speech_32_dot_3" cx="43" cy="25" r="4" fill="#3e2731" stroke="none"/>
+</svg>

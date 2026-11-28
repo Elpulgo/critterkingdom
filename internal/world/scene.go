@@ -2,8 +2,11 @@
 package world
 
 import (
+	"cmp"
 	"fmt"
 	"math"
+	"math/rand/v2"
+	"slices"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -31,6 +34,9 @@ const (
 	// may change, in world pixels per second, which lets it follow the swing
 	// and settle softly when the critter stops.
 	bobPace = math.Pi / (2 * stepTime)
+	// lanternRadius is how far the lantern the critter carries on dark maps
+	// reaches, in world pixels.
+	lanternRadius = 56
 )
 
 const (
@@ -48,9 +54,24 @@ const (
 	titleFade = 1.0
 )
 
+// The tap box of a villager, in world pixels from its feet: a press inside it
+// taps the villager rather than the ground behind it.
+const (
+	tapHalfWidth = 10
+	tapAbove     = 24
+	tapBelow     = 2
+)
+
+// Interaction is an interaction the critter started with a villager. NPC is
+// the villager's id.
+type Interaction struct {
+	NPC string
+}
+
 // Scene is the world scene: a Tiled map where the critter walks around,
-// collides with solid scenery, hops and says hello when the paw button is
-// pressed, and moves to another map when it walks into a warp.
+// collides with solid scenery, talks to the villager in front of it or hops
+// and says hello when the paw button is pressed, and moves to another map
+// when it walks into a warp.
 type Scene struct {
 	load     MapLoader
 	mapName  string // the name m was loaded under
@@ -58,14 +79,16 @@ type Scene struct {
 	bounds   geom.Rect // the whole map, in world pixels
 	walkable geom.Rect // where the critter's feet may go so its box stays inside bounds
 	player   *entity.Player
-	camera   geom.Vec // top-left corner of the view, in world pixels
-	viewSize geom.Vec // size of the view, in world pixels
+	npcs     []*entity.NPC // the villagers of m, in the order of m.NPCs
+	camera   geom.Vec      // top-left corner of the view, in world pixels
+	viewSize geom.Vec      // size of the view, in world pixels
 	pen      pen
 	bob      float64 // how far the walk bob lifts the critter, in world pixels
 	elapsed  float64 // total elapsed seconds, for tile animations
 
-	// awaitRelease ignores pointer walking after a warp until the pointer has
-	// been let go, so a held tap does not walk the critter straight back.
+	// awaitRelease ignores pointer walking until the pointer has been let go:
+	// after a warp, so a held tap does not walk the critter straight back, and
+	// after a press on a villager, which walks to the villager instead.
 	awaitRelease bool
 	// planned is true while plannedFor holds the cell the current pointer
 	// route was planned for, and toTap whether that route ends on the
@@ -73,6 +96,18 @@ type Scene struct {
 	planned    bool
 	plannedFor Cell
 	toTap      bool
+	// wasPointing is whether the pointer was held on the tick before, so a
+	// press can be told from a hold.
+	wasPointing bool
+	// tapTarget is the villager the critter walks to because it was tapped,
+	// or nil. Reaching it starts an interaction.
+	tapTarget *entity.NPC
+
+	// pending is the interaction started and not yet taken with
+	// TakeInteraction, or nil. lastNPC is the id of the villager last
+	// interacted with, for the debug overlay.
+	pending *Interaction
+	lastNPC string
 
 	walked     float64 // seconds the critter has spent walking
 	greet      float64 // seconds left of the greeting
@@ -80,6 +115,8 @@ type Scene struct {
 
 	titleFace  *text.GoTextFace
 	bubbleFace *text.GoTextFace
+
+	mask lightMask // darkness drawn over dark maps
 }
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
@@ -113,7 +150,8 @@ func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string) (*Sc
 }
 
 // setMap makes m, loaded as name, the scene's map: its size bounds the
-// critter and the camera, and its collision grid stops the critter.
+// critter and the camera, its collision grid stops the critter and the
+// villagers, and its npc objects replace the villagers of the map before.
 func (s *Scene) setMap(name string, m *Map) {
 	size := m.Size()
 	s.mapName = name
@@ -124,6 +162,18 @@ func (s *Scene) setMap(name string, m *Map) {
 		Max: geom.Vec{X: size.X - feetMarginX, Y: size.Y},
 	}
 	s.player.Walls = m.Collision
+	// A tapped villager belongs to the map before.
+	s.tapTarget = nil
+	spawns := m.NPCs()
+	s.npcs = make([]*entity.NPC, 0, len(spawns))
+	for _, sp := range spawns {
+		// Seeding from the object id gives each villager its own wander that
+		// is the same every time the map is entered.
+		rng := rand.New(rand.NewPCG(uint64(sp.ObjectID), 0))
+		n := entity.NewNPC(sp.ID, sp.Pos, sp.Area, rng)
+		n.Walls = m.Collision
+		s.npcs = append(s.npcs, n)
+	}
 }
 
 // followWarp moves the critter to the target spawn of the warp its feet are
@@ -145,12 +195,16 @@ func (s *Scene) followWarp() error {
 	return nil
 }
 
-// Update moves the critter and the camera by one tick, and moves the critter
-// to another map when its feet end the tick inside a warp. It returns an error
-// when that warp's target map or spawn does not exist.
+// Update moves the critter, the villagers and the camera by one tick, starts
+// an interaction when the critter reaches a villager it was tapped towards,
+// and moves the critter to another map when its feet end the tick inside a
+// warp.
+// It returns an error when that warp's target map or spawn does not exist.
 func (s *Scene) Update(f engine.Frame) error {
 	s.elapsed += f.DT
 	in := f.Input
+	pressed := in.Pointing && !s.wasPointing
+	s.wasPointing = in.Pointing
 	if !in.Pointing {
 		s.awaitRelease = false
 	}
@@ -159,10 +213,24 @@ func (s *Scene) Update(f engine.Frame) error {
 	}
 	if in.Paw && s.player.Hop() {
 		s.greet = greetTime
+  }
+	s.steer(in, pressed)
+	if in.Paw {
+		s.paw()
 	}
 	s.player.Update(f.DT, in.Move, s.walkable)
 	if err := s.followWarp(); err != nil {
 		return err
+	}
+	if s.tapTarget != nil && !s.reachTapTarget() {
+		if _, walking := s.player.Target(); !walking {
+			// The walk ended before getting there: a wall stopped it, or the
+			// stick or a warp ended it.
+			s.tapTarget = nil
+		}
+	}
+	for _, n := range s.npcs {
+		n.Update(f.DT, s.player.Pos)
 	}
 	if s.player.Moved() {
 		s.walked += f.DT
@@ -206,6 +274,109 @@ func (s *Scene) walkToPointer(p geom.Vec) {
 	s.player.WalkAlong(route)
 	s.planned, s.plannedFor, s.toTap = true, cell, toTap
 }
+// steer turns this tick's movement input into where the critter goes. The
+// stick or keys win and drop a tapped villager. A press on a villager makes
+// it the tap target, which the critter walks to until it is in reach; a
+// press anywhere else drops the target and, like a held pointer, walks the
+// critter to the point.
+func (s *Scene) steer(in engine.Input, pressed bool) {
+	if !in.Move.IsZero() {
+		s.tapTarget = nil
+		return
+	}
+	if pressed && !s.awaitRelease {
+		point := s.camera.Add(in.Point)
+		s.tapTarget = s.villagerAt(point)
+		if s.tapTarget != nil {
+			// The rest of this press walks to the villager, not the point.
+			s.awaitRelease = true
+		}
+	}
+	if s.tapTarget != nil {
+		if !s.reachTapTarget() {
+			s.player.WalkTo(s.tapTarget.Pos)
+		}
+		return
+	}
+	if in.Pointing && !s.awaitRelease {
+		s.player.WalkTo(s.camera.Add(in.Point))
+	}
+}
+
+// villagerAt returns the villager whose tap box holds the world point p, the
+// one standing lowest in the view when boxes overlap, as it is drawn on top,
+// or nil when there is none.
+func (s *Scene) villagerAt(p geom.Vec) *entity.NPC {
+	var hit *entity.NPC
+	for _, n := range s.npcs {
+		box := geom.Rect{
+			Min: geom.Vec{X: n.Pos.X - tapHalfWidth, Y: n.Pos.Y - tapAbove},
+			Max: geom.Vec{X: n.Pos.X + tapHalfWidth, Y: n.Pos.Y + tapBelow},
+		}
+		if box.Contains(p) && (hit == nil || n.Pos.Y >= hit.Pos.Y) {
+			hit = n
+		}
+	}
+	return hit
+}
+
+// reachTapTarget checks whether the critter's feet are within reach of the
+// tapped villager. If so, the critter stops, faces it and starts an
+// interaction with it, the target is dropped and it returns true.
+func (s *Scene) reachTapTarget() bool {
+	n := s.tapTarget
+	off := n.Pos.Sub(s.player.Pos)
+	if off.Len() > entity.InteractReach {
+		return false
+	}
+	s.player.Place(s.player.Pos)
+	s.player.Facing = s.player.Facing.Toward(off)
+	s.interact(n)
+	s.tapTarget = nil
+	return true
+}
+
+// paw starts an interaction with the villager the critter would pick, or
+// hops and greets when there is none.
+func (s *Scene) paw() {
+	if i, ok := s.pickVillager(); ok {
+		s.interact(s.npcs[i])
+		return
+	}
+	if s.player.Hop() {
+		s.greet = greetTime
+	}
+}
+
+// pickVillager returns the index in s.npcs of the villager the paw would
+// interact with now, and false when there is none.
+func (s *Scene) pickVillager() (int, bool) {
+	if len(s.npcs) == 0 {
+		return 0, false
+	}
+	feet := make([]geom.Vec, len(s.npcs))
+	for i, n := range s.npcs {
+		feet[i] = n.Pos
+	}
+	return entity.PickInteractable(s.player.Pos, s.player.Facing, feet)
+}
+
+// interact starts an interaction with n, replacing one not yet taken.
+func (s *Scene) interact(n *entity.NPC) {
+	s.pending = &Interaction{NPC: n.ID}
+	s.lastNPC = n.ID
+}
+
+// TakeInteraction returns the interaction the critter started since the last
+// call, and false when it started none.
+func (s *Scene) TakeInteraction() (Interaction, bool) {
+	if s.pending == nil {
+		return Interaction{}, false
+	}
+	in := *s.pending
+	s.pending = nil
+	return in, true
+}
 
 // updateBob swings the walk bob while the critter walks and lets it
 // settle back to the ground when it stops.
@@ -218,7 +389,18 @@ func (s *Scene) updateBob(dt float64) {
 	s.bob += math.Max(-bobPace*dt, math.Min(bobPace*dt, target-s.bob))
 }
 
-// DrawWorld draws the map layers and the critter.
+// Lights returns the light sources of the current map: on a dark map the
+// lantern the critter carries, centred on its body at the camera's focus and
+// unmoved by a hop; on any other map none.
+func (s *Scene) Lights() []Light {
+	if !s.m.Dark {
+		return nil
+	}
+	return []Light{{Pos: s.player.Pos.Sub(geom.Vec{Y: focusLift}), Radius: lanternRadius}}
+}
+
+// DrawWorld draws the map layers and the critter, and on a dark map covers
+// them with darkness except where the lights from Lights shine.
 func (s *Scene) DrawWorld(c engine.Canvas) {
 	c.Image.Fill(ink)
 	s.pen.begin(c, s.camera)
@@ -229,16 +411,49 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("ground"), c0, r0, c1, r1, elapsed)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("decor"), c0, r0, c1, r1, elapsed)
 	drawProps(&s.pen, s.m, s.m.ObjectLayer("props"), view, elapsed)
-	feet := s.player.Pos
-	drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	s.drawCharacters()
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
+	if s.m.Dark {
+		s.mask.draw(c, s.camera, s.viewSize, s.Lights())
+	}
 }
 
-// DrawUI draws the title and the greeting bubble at full screen resolution,
-// in the current language of i18n.
+// drawCharacters draws the villagers and the critter from the back of the
+// view to the front, by the Y of their feet, so whoever stands lower in the
+// view overlaps whoever stands behind. The critter is drawn last of those
+// with the same Y.
+func (s *Scene) drawCharacters() {
+	order := make([]int, len(s.npcs))
+	for i := range order {
+		order[i] = i
+	}
+	slices.SortStableFunc(order, func(a, b int) int {
+		return cmp.Compare(s.npcs[a].Pos.Y, s.npcs[b].Pos.Y)
+	})
+	feet := s.player.Pos
+	critterDrawn := false
+	for _, i := range order {
+		n := s.npcs[i]
+		if !critterDrawn && n.Pos.Y > feet.Y {
+			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+			critterDrawn = true
+		}
+		drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, i)
+	}
+	if !critterDrawn {
+		drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	}
+}
+
+// DrawUI draws the title, the "…" bubble over the villager the paw would
+// pick and the greeting bubble at full screen resolution, in the current
+// language of i18n.
 func (s *Scene) DrawUI(screen *ebiten.Image, ui engine.UI) {
 	if s.titleAlpha > 0 {
 		s.drawTitle(screen, ui)
+	}
+	if i, ok := s.pickVillager(); ok {
+		s.drawTalkBubble(screen, ui, s.npcs[i])
 	}
 	if s.greet > 0 {
 		s.drawGreeting(screen, ui)
@@ -275,19 +490,45 @@ func (s *Scene) drawGreeting(screen *ebiten.Image, ui engine.UI) {
 	engine.DrawText(screen, greeting, s.bubbleFace, x, bottom-h+padY, text.AlignCenter, fade(cocoa, alpha))
 }
 
+// drawTalkBubble draws a small bubble with three dots above n's head, kept
+// on the screen when n is near an edge. The dots are drawn rather than
+// written, so the bubble needs no glyph or text.
+func (s *Scene) drawTalkBubble(screen *ebiten.Image, ui engine.UI, n *entity.NPC) {
+	u := ui.Unit
+	w, h, tail, margin := 44*u, 22*u, 7*u, 8*u
+	dot, gap := 3*u, 10*u
+
+	head := n.Pos.Sub(s.camera).Sub(geom.Vec{Y: villagerHeight + 1})
+	hx, hy := ui.View.ViewToScreen(head)
+	sw := float64(screen.Bounds().Dx())
+	x := math.Max(w/2+margin, math.Min(hx, sw-w/2-margin))
+	bottom := math.Max(hy-tail, h+margin)
+
+	fillBubble(screen, float32(x), float32(bottom), float32(w), float32(h), float32(10*u), float32(hx), float32(tail), white)
+	cy := float32(bottom - h/2)
+	for k := -1.0; k <= 1; k++ {
+		vector.FillCircle(screen, float32(x+k*gap), cy, float32(dot), cocoa, true)
+	}
+}
+
 // feetInView returns where the critter's feet are in the view.
 func (s *Scene) feetInView() geom.Vec {
 	return s.player.Pos.Sub(s.camera)
 }
 
-// DebugLines adds the map's name, the critter's position, the camera and the
-// walk target to the debug overlay.
+// DebugLines adds the map's name, the critter's position, the camera, the
+// number of villagers, the villager last interacted with and the walk target
+// to the debug overlay.
 func (s *Scene) DebugLines() []string {
 	p := s.player
 	lines := []string{
 		"map " + s.mapName,
 		fmt.Sprintf("critter %.1f,%.1f facing %s", p.Pos.X, p.Pos.Y, p.Facing),
 		fmt.Sprintf("camera %.0f,%.0f", s.camera.X, s.camera.Y),
+		fmt.Sprintf("villagers %d", len(s.npcs)),
+	}
+	if s.lastNPC != "" {
+		lines = append(lines, "talked to "+s.lastNPC)
 	}
 	if t, ok := p.Target(); ok {
 		lines = append(lines, fmt.Sprintf("walk to %.0f,%.0f", t.X, t.Y))

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Swoosh arc, 256 by 256 px (32 by 32 world px at 8 px per world px), the
+     size of the player's box. The white trail of a stick swing to the right:
+     a crescent whose round side bulges right, thickest in the middle and
+     tapering to round tips at the top and the bottom. The engine turns it
+     for the other directions (or mirrors it for a swing to the left). The
+     crescent's box (72 to 184 px across, 20 to 236 px down, outline included)
+     is centred on the page so the engine can scale and turn it about the
+     centre. Pale slate shade inside the lower-right edge, cool grey 8 px
+     outline. No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="256" height="256" viewBox="0 0 256 256">
+  <!-- White crescent: the outer edge is a half circle of radius 104 around
+       (76, 128); the inner edge a flatter arc that bulges 56 px to the right -->
+  <path id="swoosh_arc_body" d="M 76 24 A 104 104 0 0 1 76 232 A 124.6 124.6 0 0 0 76 24 Z" fill="#ffffff" stroke="none"/>
+  <!-- Pale slate shade along the lower-right of the outer edge, under the outline -->
+  <path id="swoosh_arc_shade" d="M 170.1 141.2 A 95 95 0 0 1 120.6 211.9" fill="none" stroke="#c0cbdc" stroke-width="10" stroke-linecap="round"/>
+  <!-- Cool grey outline on top -->
+  <path id="swoosh_arc_outline" d="M 76 24 A 104 104 0 0 1 76 232 A 124.6 124.6 0 0 0 76 24 Z" fill="none" stroke="#8b9bb4" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

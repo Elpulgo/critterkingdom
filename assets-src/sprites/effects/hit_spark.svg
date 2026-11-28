@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hit spark, 128 by 128 px (16 by 16 world px at 8 px per world px), one
+     tile. A chubby four-point sunny yellow sparkle with curved sides and four
+     small round sparks on the diagonals, centred on the page so the engine can
+     scale, turn and fade it about the centre. Warm ochre 8 px outline like the
+     star icon, white highlight dab. No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Small sparks on the diagonals, 50 px from the centre, with a 4 px warm ochre outline -->
+  <g id="hit_spark_dots" fill="#fee761" stroke="#d77643" stroke-width="4">
+    <circle cx="99.4" cy="28.6" r="6"/>
+    <circle cx="99.4" cy="99.4" r="6"/>
+    <circle cx="28.6" cy="99.4" r="6"/>
+    <circle cx="28.6" cy="28.6" r="6"/>
+  </g>
+  <!-- Sparkle: tips 54 px from the centre, sides curving in towards it -->
+  <path id="hit_spark_body" d="M 64 10 Q 80 48 118 64 Q 80 80 64 118 Q 48 80 10 64 Q 48 48 64 10 Z" fill="#fee761" stroke="#d77643" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- White highlight dab up and left of the centre -->
+  <circle id="hit_spark_highlight" cx="56" cy="56" r="6" fill="#ffffff" stroke="none"/>
+</svg>

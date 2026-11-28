@@ -21,6 +21,7 @@ make run TAGS=debug   # with the debug overlay, F3 hides it
 make run ARGS=-pad    # with the touch pad instead of tap-to-walk
 make run ARGS=-lang=en # in English instead of Swedish
 make run ARGS='-map meadow'  # start on another map from assets/maps
+make run ARGS='-map dark_test'  # start on the dark test map, lit by the lantern
 make serve            # play in a browser at http://localhost:8080/web/
 make test             # run the tests
 make check            # what CI runs: gofmt, go mod tidy, vet and tests

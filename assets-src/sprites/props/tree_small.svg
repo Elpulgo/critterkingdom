@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Prop tree_small: a young round tree, 32 by 32 world px, trunk base at
+       bottom centre. The canopy is one puffy cloud of round bumps (circular
+       arcs between points on its edge) in leaf green, outlined in pine green,
+       with a pine green shade crescent on the lower right, a meadow green
+       highlight and a sunny yellow dab on the upper left. The trunk is wood
+       brown outlined in bark brown with a light tan highlight. A soft ink
+       shadow sits under the trunk. -->
+  <defs>
+    <clipPath id="canopy">
+      <path d="M 44 172 A 34 34 0 0 1 36 112 A 48 48 0 0 1 96 44 A 44 44 0 0 1 160 44 A 48 48 0 0 1 220 112 A 34 34 0 0 1 212 172 A 60 60 0 0 1 128 190 A 60 60 0 0 1 44 172 Z"/>
+    </clipPath>
+    <clipPath id="trunk">
+      <rect x="104" y="160" width="48" height="72" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <ellipse cx="128" cy="232" rx="72" ry="16" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <!-- Trunk: fill, highlight on the left, shade on the right, outline on top -->
+  <rect x="104" y="160" width="48" height="72" rx="16" fill="#b86f50" stroke="none"/>
+  <g clip-path="url(#trunk)" stroke="none">
+    <rect x="110" y="190" width="10" height="34" rx="5" fill="#e4a672"/>
+    <rect x="136" y="160" width="20" height="76" fill="#733e39"/>
+  </g>
+  <rect x="104" y="160" width="48" height="72" rx="16" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Canopy: the shade ellipse shows as a crescent on the lower right where
+       the offset fill ellipse does not cover it -->
+  <g clip-path="url(#canopy)" stroke="none">
+    <rect x="0" y="0" width="256" height="256" fill="#265c42"/>
+    <ellipse cx="116" cy="108" rx="104" ry="76" fill="#3e8948"/>
+    <ellipse cx="92" cy="78" rx="34" ry="20" transform="rotate(-20 92 78)" fill="#63c74d"/>
+    <ellipse cx="50" cy="132" rx="14" ry="10" transform="rotate(-30 50 132)" fill="#63c74d"/>
+    <circle cx="80" cy="70" r="10" fill="#fee761"/>
+  </g>
+  <!-- Two puff lines inside the canopy -->
+  <g fill="none" stroke="#265c42" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 84 138 Q 102 124 120 138"/>
+    <path d="M 140 98 Q 158 84 176 98"/>
+  </g>
+  <path d="M 44 172 A 34 34 0 0 1 36 112 A 48 48 0 0 1 96 44 A 44 44 0 0 1 160 44 A 48 48 0 0 1 220 112 A 34 34 0 0 1 212 172 A 60 60 0 0 1 128 190 A 60 60 0 0 1 44 172 Z"
+        fill="none" stroke="#265c42" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

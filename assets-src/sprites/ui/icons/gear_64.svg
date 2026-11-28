@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Gear icon (settings), 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A cool grey eight-tooth gear with a round hub. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, the gear 6 px lower -->
+  <g id="gear_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 57.1 26.7 L 59 14.3 L 69 14.3 L 70.9 26.7 L 84.1 32.2 L 94.2 24.7 L 101.3 31.8 L 93.8 41.9 L 99.3 55.1 L 111.7 57 L 111.7 67 L 99.3 68.9 L 93.8 82.1 L 101.3 92.2 L 94.2 99.3 L 84.1 91.8 L 70.9 97.3 L 69 109.7 L 59 109.7 L 57.1 97.3 L 43.9 91.8 L 33.8 99.3 L 26.7 92.2 L 34.2 82.1 L 28.7 68.9 L 16.3 67 L 16.3 57 L 28.7 55.1 L 34.2 41.9 L 26.7 31.8 L 33.8 24.7 L 43.9 32.2 Z" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <!-- Cool grey gear with slate blue outline -->
+  <path id="gear_64_body" d="M 57.1 26.7 L 59 14.3 L 69 14.3 L 70.9 26.7 L 84.1 32.2 L 94.2 24.7 L 101.3 31.8 L 93.8 41.9 L 99.3 55.1 L 111.7 57 L 111.7 67 L 99.3 68.9 L 93.8 82.1 L 101.3 92.2 L 94.2 99.3 L 84.1 91.8 L 70.9 97.3 L 69 109.7 L 59 109.7 L 57.1 97.3 L 43.9 91.8 L 33.8 99.3 L 26.7 92.2 L 34.2 82.1 L 28.7 68.9 L 16.3 67 L 16.3 57 L 28.7 55.1 L 34.2 41.9 L 26.7 31.8 L 33.8 24.7 L 43.9 32.2 Z" fill="#8b9bb4" stroke="#5a6988" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Pale slate highlight on the upper-left of the ring -->
+  <path id="gear_64_highlight" d="M 40 54 Q 46 38 62 34" fill="none" stroke="#c0cbdc" stroke-width="6" stroke-linecap="round"/>
+  <!-- Hub: slate blue hole with its own outline -->
+  <circle id="gear_64_hub" cx="64" cy="62" r="14" fill="#5a6988" stroke="#3a4466" stroke-width="6"/>
+</svg>

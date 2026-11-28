@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Prop rug: a flat rug lying on the floor, 32 by 32 world px. Poppy red
+       outlined in berry crimson, with a blossom pink highlight along its top
+       and left edges and a berry crimson shade along its bottom and right
+       edges, a cream border, four cream dots and a marigold flower outlined in
+       warm ochre with a sunny yellow heart in the middle. It lies flat, so it
+       casts no shadow. -->
+  <defs>
+    <clipPath id="rug"><rect x="20" y="28" width="216" height="200" rx="36"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#rug)" stroke="none">
+    <rect x="0" y="0" width="256" height="256" fill="#e43b44"/>
+    <rect x="20" y="28" width="216" height="14" fill="#f6757a"/>
+    <rect x="20" y="28" width="14" height="200" fill="#f6757a"/>
+    <rect x="20" y="214" width="216" height="14" fill="#a22633"/>
+    <rect x="222" y="28" width="14" height="200" fill="#a22633"/>
+  </g>
+  <rect x="20" y="28" width="216" height="200" rx="36" fill="none" stroke="#a22633" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Cream border and corner dots -->
+  <rect x="52" y="60" width="152" height="136" rx="20" fill="none" stroke="#ead4aa" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <g fill="#ead4aa" stroke="none">
+    <circle cx="76" cy="84" r="6"/>
+    <circle cx="180" cy="84" r="6"/>
+    <circle cx="76" cy="172" r="6"/>
+    <circle cx="180" cy="172" r="6"/>
+  </g>
+
+  <!-- Flower in the middle -->
+  <g fill="#feae34" stroke="#d77643" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <circle cx="128" cy="106" r="16"/>
+    <circle cx="150" cy="128" r="16"/>
+    <circle cx="128" cy="150" r="16"/>
+    <circle cx="106" cy="128" r="16"/>
+  </g>
+  <circle cx="128" cy="128" r="12" fill="#fee761" stroke="#d77643" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

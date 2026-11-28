@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Spore cloud, 192 by 192 px (24 by 24 world px at 8 px per world px), the
+     slow puff of the Grumpy Mushroom. A lumpy blossom pink cloud with orchid
+     shade and a plum 8 px outline (the grumpy enemy colours), with six round
+     orchid spores floating around it. Centred on the page so the engine can
+     scale, turn and fade it about the centre. No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Outline: each puff 8 px bigger, in #68386c -->
+  <g id="spore_cloud_outline" fill="#68386c" stroke="none">
+    <circle cx="96" cy="92" r="40"/>
+    <circle cx="66" cy="102" r="32"/>
+    <circle cx="126" cy="102" r="32"/>
+    <circle cx="80" cy="68" r="28"/>
+    <circle cx="114" cy="70" r="28"/>
+    <circle cx="96" cy="116" r="32"/>
+  </g>
+  <!-- Shade: the puffs in #b55088; the fill above leaves a 12 px crescent on each lower-right edge -->
+  <g id="spore_cloud_shade" fill="#b55088" stroke="none">
+    <circle cx="96" cy="92" r="32"/>
+    <circle cx="66" cy="102" r="24"/>
+    <circle cx="126" cy="102" r="24"/>
+    <circle cx="80" cy="68" r="20"/>
+    <circle cx="114" cy="70" r="20"/>
+    <circle cx="96" cy="116" r="24"/>
+  </g>
+  <!-- Fill: each puff 6 px smaller and 6 px towards the top-left -->
+  <g id="spore_cloud_fill" fill="#f6757a" stroke="none">
+    <circle cx="91.8" cy="87.8" r="26"/>
+    <circle cx="61.8" cy="97.8" r="18"/>
+    <circle cx="121.8" cy="97.8" r="18"/>
+    <circle cx="75.8" cy="63.8" r="14"/>
+    <circle cx="109.8" cy="65.8" r="14"/>
+    <circle cx="91.8" cy="111.8" r="18"/>
+  </g>
+  <!-- White highlight dab on the upper-left of the middle puff -->
+  <ellipse id="spore_cloud_highlight" cx="84" cy="80" rx="8" ry="5" transform="rotate(-40 84 80)" fill="#ffffff" stroke="none"/>
+  <!-- Spores: small orchid dots with a 4 px plum outline -->
+  <g id="spore_cloud_spores" fill="#b55088" stroke="#68386c" stroke-width="4">
+    <circle cx="34" cy="52" r="7"/>
+    <circle cx="158" cy="140" r="7"/>
+    <circle cx="154" cy="42" r="6"/>
+    <circle cx="38" cy="150" r="6"/>
+    <circle cx="22" cy="106" r="5"/>
+    <circle cx="170" cy="86" r="5"/>
+  </g>
+</svg>

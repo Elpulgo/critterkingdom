@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration pebble_1: one round pebble. 16 by 16 world px.
+       Cool grey with the 8 px round slate blue outline, a pale slate highlight
+       on its top-left and a soft ink shadow below to its lower right. -->
+  <ellipse cx="68" cy="80" rx="30" ry="12" fill="#181425" fill-opacity="0.2" stroke="none"/>
+  <ellipse cx="64" cy="68" rx="26" ry="18" fill="#8b9bb4" stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="55" cy="61" rx="9" ry="5" fill="#c0cbdc" stroke="none"/>
+</svg>

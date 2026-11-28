@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Heart icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A plump poppy red heart. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, the heart 6 px lower -->
+  <g id="heart_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 64 106 C 30 86 14 66 16 46 C 18 26 48 18 64 40 C 80 18 110 26 112 46 C 114 66 98 86 64 106 Z" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <!-- Poppy red heart with berry crimson outline -->
+  <path id="heart_64_body" d="M 64 106 C 30 86 14 66 16 46 C 18 26 48 18 64 40 C 80 18 110 26 112 46 C 114 66 98 86 64 106 Z" fill="#e43b44" stroke="#a22633" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Shade on the lower-right curve -->
+  <path id="heart_64_shade" d="M 103 56 Q 98 76 72 94" fill="none" stroke="#a22633" stroke-width="6" stroke-linecap="round"/>
+  <!-- Highlight on the upper-left lobe -->
+  <ellipse id="heart_64_highlight" cx="38" cy="44" rx="8" ry="12" transform="rotate(40 38 44)" fill="#f6757a" stroke="none"/>
+</svg>

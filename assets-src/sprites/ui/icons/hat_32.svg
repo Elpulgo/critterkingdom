@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hat icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A light tan sun hat with a poppy red band and a little white daisy, the
+     simplified redraw of hat_64.svg (the daisy has no marigold heart). -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, brim and crown 6 px lower -->
+  <g id="hat_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <ellipse cx="32" cy="43" rx="26" ry="9" fill="#181425" stroke="#181425" stroke-width="4"/>
+    <path d="M 17 42 V 31 Q 17 15 32 15 Q 47 15 47 31 V 42 Q 32 47 17 42 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <!-- Brim: light tan with wood brown outline -->
+  <ellipse id="hat_32_brim" cx="32" cy="43" rx="26" ry="9" fill="#e4a672" stroke="#b86f50" stroke-width="4"/>
+  <!-- Shade under the crown on the brim -->
+  <path id="hat_32_brim_shade" d="M 15 44 Q 32 51 49 44" fill="none" stroke="#b86f50" stroke-width="4" stroke-linecap="round"/>
+  <!-- Crown fill, band, then the crown outline on top -->
+  <path id="hat_32_crown" d="M 17 42 V 31 Q 17 15 32 15 Q 47 15 47 31 V 42 Q 32 47 17 42 Z" fill="#e4a672" stroke="none"/>
+  <path id="hat_32_band" d="M 17 34 Q 32 39 47 34 V 42 Q 32 47 17 42 Z" fill="#e43b44" stroke="none"/>
+  <path id="hat_32_crown_outline" d="M 17 42 V 31 Q 17 15 32 15 Q 47 15 47 31 V 42 Q 32 47 17 42 Z" fill="none" stroke="#b86f50" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Cream highlight on the upper-left of the crown -->
+  <ellipse id="hat_32_highlight" cx="24" cy="23" rx="3" ry="5" transform="rotate(30 24 23)" fill="#ead4aa" stroke="none"/>
+  <!-- Daisy on the band -->
+  <circle id="hat_32_daisy" cx="40" cy="39" r="4" fill="#ffffff" stroke="#c0cbdc" stroke-width="4"/>
+</svg>

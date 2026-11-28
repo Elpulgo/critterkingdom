@@ -25,6 +25,22 @@ func roomMap(cols, rows int, biome, objects, walls string) []byte {
 	}`, cols, rows, biome, walls, objects)
 }
 
+// darkRoomMap returns a cols by rows Tiled map like roomMap, without walls,
+// whose dark property is dark.
+func darkRoomMap(cols, rows int, biome string, dark bool, objects string) []byte {
+	return fmt.Appendf(nil, `{
+		"orientation": "orthogonal", "infinite": false,
+		"width": %d, "height": %d, "tilewidth": 128, "tileheight": 128,
+		"properties": [
+			{"name": "biome", "type": "string", "value": %q},
+			{"name": "dark", "type": "bool", "value": %t}],
+		"layers": [
+			{"name": "collision", "type": "objectgroup", "objects": []},
+			{"name": "objects", "type": "objectgroup", "objects": [%s]}
+		]
+	}`, cols, rows, biome, dark, objects)
+}
+
 // warpObject returns a warp over the tile at col, row to targetMap's spawn
 // targetSpawn.
 func warpObject(id, col, row int, targetMap, targetSpawn string) string {
@@ -50,14 +66,23 @@ const (
 	houseWall = `{"id": 3, "x": 512, "y": 256, "width": 128, "height": 128}`
 )
 
-// sceneLoader loads the inline village and house maps through the real
-// LoadMap. The village's warp leads to targetMap's spawn targetSpawn. Any
+// The cave is a dark 6x4-tile room, 96x64 world pixels, with its first spawn
+// from_village at (24,40) and a warp over the tile (64,32)-(80,48) back to the
+// village's start, so walking east from the spawn warps back. The meadow is
+// the same room with dark set to false and no warp.
+const caveObjects = `{"id": 1, "name": "from_village", "type": "player_spawn", "x": 192, "y": 320, "point": true}`
+
+// sceneLoader loads the inline village, house, dark_cave and lit_meadow maps
+// through the real LoadMap. The village's warp leads to targetMap's spawn targetSpawn. Any
 // other name fails with an error that does not mention the name.
 func sceneLoader(targetMap, targetSpawn string) MapLoader {
 	maps := map[string][]byte{
 		"village": roomMap(6, 4, "village", villageStart+`,`+warpObject(2, 4, 2, targetMap, targetSpawn), ``),
 		"house":   roomMap(5, 4, "house", houseObjects, houseWall),
 		"empty":   roomMap(5, 4, "empty", ``, ``),
+		"dark_cave": darkRoomMap(6, 4, "cave", true,
+			caveObjects+`,`+warpObject(2, 4, 2, "village", "start")),
+		"lit_meadow": darkRoomMap(6, 4, "meadow", false, caveObjects),
 	}
 	return func(name string) (*Map, error) {
 		data, ok := maps[name]
@@ -364,4 +389,68 @@ func TestScene_HoldingThePointerWhereTheCritterDoesNotFitStopsItAgainstTheWall(t
 			}
 		})
 	}
+}
+// lights returns the lights of s, failing the test unless there are want of
+// them.
+func lights(t *testing.T, s *Scene, want int) []Light {
+	t.Helper()
+	got := s.Lights()
+	if len(got) != want {
+		t.Fatalf("on %q with the critter at %v: Lights() = %v; want %d lights", s.mapName, s.player.Pos, got, want)
+	}
+	return got
+}
+
+func TestScene_OnADarkMapTheCritterCarriesALanternThatFollowsIt(t *testing.T) {
+	s, err := NewScene(nil, sceneLoader("house", "from_village"), "dark_cave")
+	if err != nil {
+		t.Fatalf("NewScene: %v", err)
+	}
+	// The spawn is at feet 24,40; the lantern sits 8 above the feet.
+	if got := lights(t, s, 1)[0]; got != (Light{Pos: geom.Vec{X: 24, Y: 32}, Radius: 56}) {
+		t.Errorf("at the spawn: lantern = %+v; want radius 56 at 24,32", got)
+	}
+
+	// A second of walking west stops the feet at the cave's west edge, 6,40.
+	for range 60 {
+		if err := s.Update(walkFrame(geom.Vec{X: -1})); err != nil {
+			t.Fatalf("Update: %v", err)
+		}
+	}
+	if got := lights(t, s, 1)[0]; got != (Light{Pos: geom.Vec{X: 6, Y: 32}, Radius: 56}) {
+		t.Errorf("after walking west: lantern = %+v; want radius 56 at 6,32", got)
+	}
+}
+
+func TestScene_ALitMapHasNoLights(t *testing.T) {
+	tests := []struct {
+		name     string
+		startMap string
+	}{
+		{"no dark property", "village"},
+		{"dark set to false", "lit_meadow"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := NewScene(nil, sceneLoader("house", "from_village"), tt.startMap)
+			if err != nil {
+				t.Fatalf("NewScene: %v", err)
+			}
+			lights(t, s, 0)
+		})
+	}
+}
+
+func TestScene_WarpingIntoADarkMapLightsTheLanternAndWarpingOutPutsItOut(t *testing.T) {
+	s := newVillageScene(t, sceneLoader("dark_cave", "from_village"))
+	east := geom.Vec{X: 1}
+
+	updateUntilMap(t, s, "dark_cave", walkFrame(east))
+	// Arriving on the cave's from_village spawn, feet at 24,40.
+	if got := lights(t, s, 1)[0]; got != (Light{Pos: geom.Vec{X: 24, Y: 32}, Radius: 56}) {
+		t.Errorf("in the cave: lantern = %+v; want radius 56 at 24,32", got)
+	}
+
+	updateUntilMap(t, s, "village", walkFrame(east))
+	lights(t, s, 0)
 }

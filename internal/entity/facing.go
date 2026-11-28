@@ -32,6 +32,12 @@ func (f Facing) Toward(v geom.Vec) Facing {
 	if v.IsZero() || f.allows(v) {
 		return f
 	}
+	return facingAlong(v)
+}
+
+// facingAlong returns the facing towards the larger part of a non-zero v,
+// sideways when both parts are equal.
+func facingAlong(v geom.Vec) Facing {
 	if math.Abs(v.X) >= math.Abs(v.Y) {
 		if v.X > 0 {
 			return FacingRight
@@ -42,6 +48,20 @@ func (f Facing) Toward(v geom.Vec) Facing {
 		return FacingDown
 	}
 	return FacingUp
+}
+
+// dir returns the unit vector f points along, with Y growing downwards.
+func (f Facing) dir() geom.Vec {
+	switch f {
+	case FacingUp:
+		return geom.Vec{Y: -1}
+	case FacingLeft:
+		return geom.Vec{X: -1}
+	case FacingRight:
+		return geom.Vec{X: 1}
+	default:
+		return geom.Vec{Y: 1}
+	}
 }
 
 // allows reports whether a character facing f can keep facing that way while

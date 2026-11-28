@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Poof cloud, 192 by 192 px (24 by 24 world px at 8 px per world px), the
+     size of the largest normal enemy. A round white cloud of seven puffs
+     that a defeated enemy poofs into, centred on the page so the engine can
+     scale and fade it about the centre. Pale slate shade on the lower-right
+     of each puff, cool grey 8 px outline. No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Outline: each puff 8 px bigger, in #8b9bb4 -->
+  <g id="poof_cloud_outline" fill="#8b9bb4" stroke="none">
+    <circle cx="96" cy="96" r="48"/>
+    <circle cx="96" cy="54" r="36"/>
+    <circle cx="132.4" cy="75" r="36"/>
+    <circle cx="132.4" cy="117" r="36"/>
+    <circle cx="96" cy="138" r="36"/>
+    <circle cx="59.6" cy="117" r="36"/>
+    <circle cx="59.6" cy="75" r="36"/>
+  </g>
+  <!-- Shade: the puffs in #c0cbdc; the fill above leaves a 12 px crescent on each lower-right edge -->
+  <g id="poof_cloud_shade" fill="#c0cbdc" stroke="none">
+    <circle cx="96" cy="96" r="40"/>
+    <circle cx="96" cy="54" r="28"/>
+    <circle cx="132.4" cy="75" r="28"/>
+    <circle cx="132.4" cy="117" r="28"/>
+    <circle cx="96" cy="138" r="28"/>
+    <circle cx="59.6" cy="117" r="28"/>
+    <circle cx="59.6" cy="75" r="28"/>
+  </g>
+  <!-- Fill: each puff 6 px smaller and 6 px towards the top-left -->
+  <g id="poof_cloud_fill" fill="#ffffff" stroke="none">
+    <circle cx="91.8" cy="91.8" r="34"/>
+    <circle cx="91.8" cy="49.8" r="22"/>
+    <circle cx="128.2" cy="70.8" r="22"/>
+    <circle cx="128.2" cy="112.8" r="22"/>
+    <circle cx="91.8" cy="133.8" r="22"/>
+    <circle cx="55.4" cy="112.8" r="22"/>
+    <circle cx="55.4" cy="70.8" r="22"/>
+  </g>
+</svg>

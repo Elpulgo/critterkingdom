@@ -77,16 +77,17 @@ func (m *Map) WarpAt(pos geom.Vec) (Warp, bool) {
 	return Warp{}, false
 }
 
-// loadMarkers reads the player_spawn and warp objects of the objects layer
-// into m. It returns an error naming the object id for a spawn without a name
-// or with a name already used, and for a warp without an area or without a
-// target map or spawn.
+// loadMarkers reads the player_spawn, warp and npc objects of the objects
+// layer into m. It returns an error naming the object id for a spawn without a
+// name or with a name already used, for a warp without an area or without a
+// target map or spawn, and for an npc without an id or with an id already used.
 func (m *Map) loadMarkers() error {
 	layer := m.ObjectLayer(objectsLayer)
 	if layer == nil {
 		return nil
 	}
 	seen := make(map[string]int)
+	seenNPC := make(map[string]int)
 	for _, o := range layer.Objects {
 		switch o.Type {
 		case spawnType:
@@ -115,6 +116,11 @@ func (m *Map) loadMarkers() error {
 				return fmt.Errorf("%s object %d: warp has no string property target_spawn", objectsLayer, o.ID)
 			}
 			m.warps = append(m.warps, w)
+
+		case npcType:
+			if err := m.loadNPC(o, seenNPC); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
