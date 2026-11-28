@@ -59,6 +59,33 @@ Every reload rebuilds the game, so edit, save and reload the tablet.
 Esc, Tab, Start and Y are the menu buttons. Nothing opens yet. In a debug
 build, F3 shows and hides the overlay.
 
+## Maps
+
+The maps are made in [Tiled](https://www.mapeditor.org/) and saved as JSON
+in `assets/maps/`, one `.tmj` file per map. Section 6 of
+[docs/PLAN.md](docs/PLAN.md) lists the layers they use.
+
+Wild critters appear in `spawn_zone` objects. A spawn zone is a rectangle in
+the `objects` layer with these custom properties:
+
+| Property | Type | Needed | Meaning |
+|---|---|---|---|
+| `habitat` | string | yes | Which critters appear here: those in `assets/critters.json` with the same `habitat`, for example `pond` or `meadow` |
+| `max` | int | no, 3 | How many critters the zone holds at once, at least 1 |
+| `respawn_s` | float | no, 60 | Seconds a freed place waits before a new critter fills it, at least 0 |
+
+The object's name is the zone's id. A zone without a name is called
+`zone-<object id>`, and two zones on one map may not share a name. Critters
+appear on open ground inside the zone and stay in it as they hop about. A
+zone without area or without `habitat`, or with a bad `max` or `respawn_s`,
+stops the map from loading. `make test` also checks the zones on the real
+maps: each zone has to lie inside its map, keep clear of warps and player
+spawns, and have open ground you can walk to.
+
+In a debug build (`make run TAGS=debug`) the overlay outlines every spawn
+zone of the current map in red, next to the outline of where you may walk,
+and counts the wild critters present.
+
 ## Art
 
 The placeholder art is drawn in code with smooth shapes at full screen
