@@ -1,0 +1,21 @@
+{
+  "npc": "grandma_hedgehog",
+  "nodes": {
+    "start": {
+      "if": [{"quest": "missing_hat", "is": "not_started"}],
+      "lines": [
+        {"text": "grandma.hat.1", "face": "sad"},
+        {"text": "grandma.hat.2", "face": "neutral"}
+      ],
+      "choices": [
+        {"text": "ui.yes",   "icon": "check", "do": [{"startQuest": "missing_hat"}], "goto": "thanks"},
+        {"text": "ui.later", "icon": "cross", "goto": "end"}
+      ]
+    },
+    "thanks": {
+      "lines": [
+        {"text": "grandma.hat.thanks", "face": "happy"}
+      ]
+    }
+  }
+}
