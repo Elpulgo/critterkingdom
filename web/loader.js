@@ -1,7 +1,7 @@
 // Downloads and compiles main.wasm behind a progress bar, then waits for a
 // tap on the play button before the game starts. Starting from a tap lets the
-// page go fullscreen and, later on, play sound, which browsers only allow in
-// response to a user gesture.
+// page go fullscreen and play the game's music and sounds, which browsers only
+// allow in response to a user gesture.
 'use strict';
 
 (() => {
