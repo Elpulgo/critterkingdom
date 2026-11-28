@@ -74,3 +74,29 @@ func TestTouch_TheLeftHalfSteersWithAPadOnlyWhenThePadIsEnabled(t *testing.T) {
 		})
 	}
 }
+
+func TestTouch_AFingerLandingAnywhereTapsOnceWhereItLanded(t *testing.T) {
+	tests := []struct {
+		name string
+		pad  bool
+		at   touchPoint
+	}{
+		{"on the world", false, touchAt(2, 600, 200)},
+		{"on the paw button", false, touchAt(2, 924, 524)},
+		{"on the pad half with the pad enabled", true, touchAt(2, 100, 500)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tc := touchControls{padEnabled: tt.pad}
+			tc.step([]touchPoint{touchAt(1, 700, 100)}, screen) // the first touch shows the buttons
+			tc.step(nil, screen)
+
+			if in := tc.step([]touchPoint{tt.at}, screen); !in.tap || in.tapAt != tt.at.pos {
+				t.Fatalf("finger lands: tap %v at %v, want a tap at %v", in.tap, in.tapAt, tt.at.pos)
+			}
+			if in := tc.step([]touchPoint{tt.at}, screen); in.tap {
+				t.Fatalf("finger held: tapped again, want one tap per touch")
+			}
+		})
+	}
+}

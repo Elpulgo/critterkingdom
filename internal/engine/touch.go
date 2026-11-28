@@ -86,6 +86,11 @@ type touchInput struct {
 	pointing bool
 	point    geom.Vec // screen pixels
 	paw      bool
+	// tap is true on the tick a finger lands anywhere on the screen, whatever
+	// role it gets, and tapAt is where, in screen pixels. When several fingers
+	// land on the same tick, tapAt is the first of them.
+	tap   bool
+	tapAt geom.Vec
 }
 
 // touchControls turns fingers into input: a finger on the world walks the
@@ -135,6 +140,10 @@ func (t *touchControls) step(points []touchPoint, l touchLayout) touchInput {
 			f = t.touchDown(p.pos, l)
 			t.fingers[p.id] = f
 			in.paw = in.paw || f.role == pawFinger
+			if !in.tap {
+				in.tap = true
+				in.tapAt = p.pos
+			}
 		}
 		f.pos = p.pos
 		switch f.role {

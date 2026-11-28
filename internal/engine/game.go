@@ -31,6 +31,11 @@ type Frame struct {
 	View  View
 	// DT is the length of a tick, in seconds.
 	DT float64
+	// ScreenW and ScreenH are the size of the screen, in screen pixels, and
+	// Unit is the number of screen pixels per CSS pixel, as in UI. They let a
+	// scene hit-test its interface in Update, before it is drawn.
+	ScreenW, ScreenH float64
+	Unit             float64
 }
 
 // Canvas is the part of the screen that shows the world. Scenes draw on it
@@ -123,7 +128,8 @@ func (g *Game) LayoutF(outsideWidth, outsideHeight float64) (float64, float64) {
 
 // Update reads the input and advances the scene by one tick.
 func (g *Game) Update() error {
-	in := g.input.read(g.view, g.touchLayout())
+	l := g.touchLayout()
+	in := g.input.read(g.view, l)
 	if debugEnabled {
 		g.debug.update(in, g.input.touch.count())
 	}
@@ -131,7 +137,14 @@ func (g *Game) Update() error {
 	if tps <= 0 {
 		tps = ebiten.DefaultTPS
 	}
-	return g.scene.Update(Frame{Input: in, View: g.view, DT: 1 / float64(tps)})
+	return g.scene.Update(Frame{
+		Input:   in,
+		View:    g.view,
+		DT:      1 / float64(tps),
+		ScreenW: l.screenW,
+		ScreenH: l.screenH,
+		Unit:    l.unit,
+	})
 }
 
 // Draw draws the world and then the interface on top, both at full screen
