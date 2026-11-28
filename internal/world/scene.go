@@ -14,6 +14,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
+	"github.com/Elpulgo/critterkingdom/internal/anim"
 	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/critter"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
@@ -30,13 +31,9 @@ const (
 	// focusLift raises the camera's focus from the critter's feet to the
 	// middle of its body.
 	focusLift = 8
-	// stepTime is how long each step of the walk bob lasts, in seconds.
-	stepTime = 0.15
-	// bobPace is how fast the walk bob swings, in radians per second, so it
-	// rises and falls once every two steps. It is also the fastest the bob
-	// may change, in world pixels per second, which lets it follow the swing
-	// and settle softly when the critter stops.
-	bobPace = math.Pi / (2 * stepTime)
+	// playerCharacter is the id of the critter's character data, loaded
+	// with the scene's CharacterLoader.
+	playerCharacter = "fox"
 	// lanternRadius is how far the lantern the critter carries on dark maps
 	// reaches, in world pixels.
 	lanternRadius = 56
@@ -88,8 +85,12 @@ type Scene struct {
 	camera   geom.Vec      // top-left corner of the view, in world pixels
 	viewSize geom.Vec      // size of the view, in world pixels
 	pen      pen
-	bob      float64 // how far the walk bob lifts the critter, in world pixels
 	elapsed  float64 // total elapsed seconds, for tile animations and the clock
+
+	// loadCharacter loads the critter's character in NewScene, and animator
+	// plays its idle and walk.
+	loadCharacter CharacterLoader
+	animator      *anim.Animator
 
 	// clock returns elapsed as game time; health and every enemy read it.
 	clock     combat.Clock
@@ -149,9 +150,11 @@ type Scene struct {
 
 // NewScene returns a world scene on the map startMap, loaded with load, with
 // the critter placed at the map's first player_spawn. Warps load their target
-// maps with load too. opts add enemy definitions and a defeat sink. It
-// returns an error when startMap cannot be loaded, has no player_spawn object,
-// or has an enemy object naming an enemy without a definition.
+// maps with load too. opts add enemy definitions, a defeat sink and the
+// loader of the critter's character. It returns an error when the critter's
+// character cannot be loaded, when startMap cannot be loaded, has no
+// player_spawn object, or has an enemy object naming an enemy without a
+// definition.
 func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string, opts ...Option) (*Scene, error) {
 	if load == nil {
 		return nil, fmt.Errorf("map loader is nil")
@@ -181,6 +184,13 @@ func NewScene(font *text.GoTextFaceSource, load MapLoader, startMap string, opts
 	for _, opt := range opts {
 		opt(s)
 	}
+	var character anim.Character
+	if s.loadCharacter != nil {
+		if character, err = s.loadCharacter(playerCharacter); err != nil {
+			return nil, fmt.Errorf("critter character %q: %w", playerCharacter, err)
+		}
+	}
+	s.animator = anim.NewAnimator(character)
 	enemies, err := s.spawnEnemies(m)
 	if err != nil {
 		return nil, fmt.Errorf("start map %q: %w", startMap, err)
@@ -318,7 +328,7 @@ func (s *Scene) Update(f engine.Frame) error {
 	if s.walked >= titleWalk {
 		s.titleAlpha = math.Max(0, s.titleAlpha-f.DT/titleFade)
 	}
-	s.updateBob(f.DT)
+	s.animator.Update(f.DT, s.player.Moved())
 
 	s.viewSize = geom.Vec{X: float64(f.View.W), Y: float64(f.View.H)}
 	focus := s.player.Pos.Sub(geom.Vec{Y: focusLift})
@@ -496,17 +506,6 @@ func (s *Scene) nap() error {
 	return nil
 }
 
-// updateBob swings the walk bob while the critter walks and lets it
-// settle back to the ground when it stops.
-func (s *Scene) updateBob(dt float64) {
-	target := 0.0
-	if s.player.Moved() {
-		swing := math.Sin(bobPace * s.walked)
-		target = swing * swing
-	}
-	s.bob += math.Max(-bobPace*dt, math.Min(bobPace*dt, target-s.bob))
-}
-
 // Lights returns the light sources of the current map: on a dark map the
 // lantern the critter carries, centred on its body at the camera's focus and
 // unmoved by a hop; on any other map none.
@@ -586,8 +585,7 @@ func (s *Scene) drawActors(view geom.Rect) {
 	for _, a := range s.actors {
 		switch a.kind {
 		case actorPlayer:
-			feet := s.player.Pos
-			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+			s.drawPlayer()
 		case actorVillager:
 			n := s.npcs[a.i]
 			drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, a.i)
@@ -607,6 +605,17 @@ func (s *Scene) drawActors(view geom.Rect) {
 			}
 		}
 	}
+}
+
+// drawPlayer draws the critter from the parts of the view it faces, posed by
+// its animator, mirrored for the side view facing left, and lifted by its hop.
+func (s *Scene) drawPlayer() {
+	view, mirrored := s.player.Facing.View()
+	poses := s.animator.Pose(view)
+	for i := range poses {
+		poses[i].Mirrored = mirrored
+	}
+	drawCritter(&s.pen, s.player.Pos, s.player.HopHeight(), poses)
 }
 
 // drawWild draws one wild critter, with twinkling stars around it if it is

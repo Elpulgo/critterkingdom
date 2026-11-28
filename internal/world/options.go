@@ -1,6 +1,9 @@
 package world
 
-import "github.com/Elpulgo/critterkingdom/internal/combat"
+import (
+	"github.com/Elpulgo/critterkingdom/internal/anim"
+	"github.com/Elpulgo/critterkingdom/internal/combat"
+)
 
 // Option changes how NewScene sets up a scene.
 type Option func(*Scene)
@@ -20,5 +23,18 @@ func WithEnemies(defs []combat.EnemyDef) Option {
 func WithEnemyDefeated(sink func(combat.EnemyDefeated)) Option {
 	return func(s *Scene) {
 		s.onDefeat = sink
+	}
+}
+
+// CharacterLoader loads the character with the given id, such as "fox": its
+// part layout and the motions that animate it.
+type CharacterLoader func(id string) (anim.Character, error)
+
+// WithCharacters gives the scene the loader for the critter's character,
+// which NewScene loads and animates. Without it, the critter has no parts and
+// only its shadow is drawn.
+func WithCharacters(load CharacterLoader) Option {
+	return func(s *Scene) {
+		s.loadCharacter = load
 	}
 }
