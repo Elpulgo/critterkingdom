@@ -447,7 +447,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 ### M4 Wild critters: "New friends" (2 to 3 weeks)
 
 - [ ] Spawn zones with weights, conditions (night, flag, companion), respawn timers, daily visitor
-- [x] Critter AI: idle, hop, notice the player
+- [x] Critter AI: idle, hop, notice the player (no critter shows in the game until there are species for the day and the meadow, #29, or night, #50)
 - [ ] Snack Time mini-game
 - [ ] Sticker Book UI; companion follows (trail) and can be petted
 - [ ] Five critters with their parts and stickers; the "Scared Little Mouse" quest

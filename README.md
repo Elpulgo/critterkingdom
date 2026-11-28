@@ -82,6 +82,12 @@ stops the map from loading. `make test` also checks the zones on the real
 maps: each zone has to lie inside its map, keep clear of warps and player
 spawns, and have open ground you can walk to.
 
+For now no wild critter shows in the game. `assets/critters.json` holds only
+the firefly, which lives by the `pond` but comes out only at night. The game
+is always day until sleeping arrives (#50), and no species lives in the
+`meadow` zones yet. The real critters come with #29. Until then, the
+idling, hopping, noticing and sparkling are only seen in the tests.
+
 In a debug build (`make run TAGS=debug`) the overlay outlines every spawn
 zone of the current map in red, next to the outline of where you may walk,
 and counts the wild critters present.
