@@ -416,7 +416,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 ### M1 A place to walk: "Acorn Hollow" (2 to 3 weeks)
 
 - [x] Tiled JSON loading, layers, collision grid, animated tiles (water)
-- [ ] Camera follow and clamp; y-sorted props; "above" layer
+- [x] Camera follow and clamp; y-sorted props; "above" layer
 - [x] Warps: village to meadow, village to house interior
 - [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
 - [x] A* tap-to-walk, joystick alternative

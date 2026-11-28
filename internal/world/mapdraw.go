@@ -30,30 +30,20 @@ func drawTileLayer(p *pen, m *Map, layer *TileLayer, c0, r0, c1, r1 int, elapsed
 	}
 }
 
-// drawProps draws every object in layer whose rectangle (grown by reach)
-// overlaps view.
-func drawProps(p *pen, m *Map, layer *ObjectLayer, view geom.Rect, elapsed time.Duration) {
-	if layer == nil {
-		return
-	}
-	near := view.Inset(-reach)
-	for _, obj := range layer.Objects {
-		r := obj.Rect()
-		if !rectsOverlap(r, near) {
-			continue
+// drawProp draws the prop object obj, picking its animated frame for elapsed.
+func drawProp(p *pen, m *Map, obj Object, elapsed time.Duration) {
+	r := obj.Rect()
+	kind := obj.Type
+	if obj.GID != 0 {
+		frameGID := m.FrameGID(obj.GID, elapsed)
+		if tile, ok := m.Tile(frameGID); ok && tile.Type != "" {
+			kind = tile.Type
 		}
-		kind := obj.Type
-		if obj.GID != 0 {
-			frameGID := m.FrameGID(obj.GID, elapsed)
-			if tile, ok := m.Tile(frameGID); ok && tile.Type != "" {
-				kind = tile.Type
-			}
-		}
-		w, h := r.Max.X-r.Min.X, r.Max.Y-r.Min.Y
-		col := int(r.Min.X / m.TileSize)
-		row := int(r.Min.Y / m.TileSize)
-		drawTileArt(p, kind, r.Min.X, r.Min.Y, w, h, col, row)
 	}
+	w, h := r.Max.X-r.Min.X, r.Max.Y-r.Min.Y
+	col := int(r.Min.X / m.TileSize)
+	row := int(r.Min.Y / m.TileSize)
+	drawTileArt(p, kind, r.Min.X, r.Min.Y, w, h, col, row)
 }
 
 // rectsOverlap reports whether a and b share an area larger than zero.
