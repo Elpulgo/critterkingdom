@@ -5,9 +5,9 @@ A cosy top-down adventure for children aged 5 to 9, written in Go with
 a desktop game. The plan, the roadmap and the reasons behind them are in
 [docs/PLAN.md](docs/PLAN.md).
 
-Status: milestone M1, "A place to walk", in progress. A placeholder critter
-starts in a small village, walks into a house and out to the meadow, hops and
-says hello.
+Status: milestone M1, "A place to walk", in progress. A placeholder critter,
+built from parts animated in code, starts in a small village, walks into a
+house and out to the meadow, hops and says hello.
 
 ## Getting started
 
@@ -109,9 +109,40 @@ since its last export:
   `assets/sprites/critters/fox/`, next to `fox.json`, which says where each
   part sits and turns. Only give whole parts a `<view>_` id: a named object
   inside a part, such as `down_head_shine`, is exported as a part of its own.
+  Draw the `side` view facing right; the game mirrors it about the feet for
+  a character facing left.
 - Every other drawing under `assets-src/sprites/` (props, effects, ui,
   emotes) and `assets-src/tiles/` is exported whole, as one PNG of its page at
   the same path under `assets/`.
+
+Characters are built from parts that the game moves in code, not from drawn
+frames. The player critter is the fox: its part sheet
+`assets/sprites/critters/fox/fox.json` is hand-written in the format `make art`
+writes, with placeholder boxes and pivots, until `fox.svg` is drawn and
+exported over it. The game reads where each part sits and turns from that
+file but still draws every part as a shape in code; the exported part PNGs are
+not loaded yet.
+
+A character's own data file, `assets/data/rigs/<id>.json`, picks its motions,
+sizes and speeds, so a new critter is two data files and no code. Its
+`sprite` names the part sheet (`"critters/fox"` reads
+`sprites/critters/fox/fox.json`), and its `animations` have an `idle` and a
+`walk` list. Each entry is a shared motion with `parts` (the part names it
+moves, in every view that has them; none means the whole character),
+`period` (seconds), `phase` (a fraction of a period) and:
+
+- `breathe`: squashes its parts about their pivots, taller and thinner, then
+  shorter and wider; `size` is the scale fraction.
+- `blink`: closes its parts for the last `duration` seconds of each period.
+- `bob`: lifts its parts smoothly by up to `size` world pixels once per
+  period.
+- `patter`: lifts its parts by up to `size` world pixels for the first half
+  of each period and rests them for the second half.
+- `wiggle`: turns its parts about their pivots by up to `size` degrees each
+  way.
+
+The game plays idle while the critter stands and walk while it moves, and
+blends between the two over a tenth of a second.
 
 A drawing is exported again when its SVG is newer than its JSON or PNG;
 `make art ART_ARGS=-force` exports everything. If Inkscape is not on your
