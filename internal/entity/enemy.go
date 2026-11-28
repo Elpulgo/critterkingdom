@@ -36,6 +36,7 @@ type Enemy struct {
 	hp       int
 	action   combat.Action // what the enemy did in the last Update
 	defeated bool
+	asleep   bool
 	runFrom  time.Duration // clock time up to which the run-off has been moved
 	goneAt   time.Duration // clock time the run-off ends
 }
@@ -61,14 +62,28 @@ func (e *Enemy) HP() int {
 	return e.hp
 }
 
+// Sleep puts the enemy to sleep for good: from now on it stands still, Idle,
+// with no hazards, however close the critter comes. It can still be hit and
+// defeated, and then runs off like an awake enemy.
+func (e *Enemy) Sleep() {
+	e.asleep = true
+	e.action = combat.Action{}
+}
+
+// Asleep reports whether the enemy has been put to sleep and not yet
+// defeated: a defeated enemy runs off awake.
+func (e *Enemy) Asleep() bool {
+	return e.asleep && !e.defeated
+}
+
 // Phase returns the phase of the enemy's behaviour in the last Update. A
-// defeated enemy is Idle.
+// defeated or sleeping enemy is Idle.
 func (e *Enemy) Phase() combat.Phase {
 	return e.action.Phase
 }
 
 // Hazards returns the boxes that hurt the critter after the last Update. A
-// defeated enemy has none.
+// defeated or sleeping enemy has none.
 func (e *Enemy) Hazards() []geom.Rect {
 	return e.action.Hazards
 }
@@ -128,12 +143,16 @@ func (e *Enemy) Hit(damage int) bool {
 
 // Update moves the enemy one step toward or away from the critter at target.
 // A live enemy steps its behaviour; a defeated one runs straight away from
-// target at RunOffSpeed until RunOffTime has passed since the defeat. Either
-// way the move slides along Walls and the enemy's feet never leave area. When
+// target at RunOffSpeed until RunOffTime has passed since the defeat. A
+// sleeping enemy that is not defeated does not step its behaviour and stays
+// where it is. Otherwise the move slides along Walls and the enemy's feet never leave area. When
 // a wall or area cuts a live enemy's move short and its behaviour is
 // combat.Blockable, the behaviour is told, so a charge stops at the wall and
 // recovers.
 func (e *Enemy) Update(target geom.Vec, area geom.Rect) {
+	if e.Asleep() {
+		return
+	}
 	var move geom.Vec
 	if e.defeated {
 		move = e.runOff(target)

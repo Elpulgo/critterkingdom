@@ -32,3 +32,20 @@ func WithInteraction(sink func(Interaction)) Option {
 		s.onInteract = sink
 	}
 }
+
+// WithPreset spawns every enemy with the stats of the age preset p, as
+// combat.EnemyDef.ForPreset gives them. Without it enemies have their
+// Explorer, base, stats.
+func WithPreset(p combat.Preset) Option {
+	return func(s *Scene) {
+		s.preset = p
+	}
+}
+
+// WithPeaceful puts every enemy the scene spawns to sleep, so none of them
+// ever moves or hurts the critter. They can still be defeated.
+func WithPeaceful() Option {
+	return func(s *Scene) {
+		s.peaceful = true
+	}
+}

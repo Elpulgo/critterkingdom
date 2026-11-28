@@ -2,6 +2,7 @@ package combat_test
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -101,6 +102,80 @@ func TestParseEnemies_AcceptsValuesOnTheEdgeOfTheRules(t *testing.T) {
 			}
 			if len(defs) != 2 || defs[1].ID != "thistle_beast" {
 				t.Errorf("ParseEnemies = %+v; want sulky_slime and thistle_beast", defs)
+			}
+		})
+	}
+}
+
+func TestEnemyDef_ForPreset_LittleExplorerAppliesOnlyTheHPDamageAndSpeedOverrides(t *testing.T) {
+	intp := func(v int) *int { return &v }
+	floatp := func(v float64) *float64 { return &v }
+	base := func(o *combat.EnemyOverrides) combat.EnemyDef {
+		return combat.EnemyDef{
+			ID:               "thistle_beast",
+			Name:             combat.EnemyName{EN: "Thistle Beast", SV: "Tistelbest"},
+			Sprite:           "enemies/thistle_beast",
+			Behaviour:        combat.BehaviourCharge,
+			HP:               3,
+			Damage:           2,
+			Speed:            60,
+			TelegraphSeconds: 0.8,
+			Drops:            []combat.Drop{{Item: "heart", Chance: 0.5}, {Item: "berry", Chance: 0.3}},
+			LittleExplorer:   o,
+		}
+	}
+	full := &combat.EnemyOverrides{HP: intp(1), Damage: intp(1), Speed: floatp(40)}
+	tests := []struct {
+		name      string
+		overrides *combat.EnemyOverrides
+		preset    combat.Preset
+		// wantHP, wantDamage and wantSpeed are the stats the result must have.
+		wantHP, wantDamage int
+		wantSpeed          float64
+	}{
+		{"explorer keeps the base values even with overrides", full, combat.PresetExplorer, 3, 2, 60},
+		{"explorer keeps the base values without overrides", nil, combat.PresetExplorer, 3, 2, 60},
+		{"little explorer applies every override", full, combat.PresetLittleExplorer, 1, 1, 40},
+		{"little explorer applies only the hp override", &combat.EnemyOverrides{HP: intp(1)}, combat.PresetLittleExplorer, 1, 2, 60},
+		{"little explorer applies only the damage override", &combat.EnemyOverrides{Damage: intp(1)}, combat.PresetLittleExplorer, 3, 1, 60},
+		{"little explorer applies only the speed override", &combat.EnemyOverrides{Speed: floatp(40)}, combat.PresetLittleExplorer, 3, 2, 40},
+		{"little explorer with an empty override block keeps the base values", &combat.EnemyOverrides{}, combat.PresetLittleExplorer, 3, 2, 60},
+		{"little explorer without an override block keeps the base values", nil, combat.PresetLittleExplorer, 3, 2, 60},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			d := base(tc.overrides)
+
+			got := d.ForPreset(tc.preset)
+
+			want := base(tc.overrides)
+			want.HP, want.Damage, want.Speed = tc.wantHP, tc.wantDamage, tc.wantSpeed
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("ForPreset = %+v;\nwant %+v", got, want)
+			}
+			if !reflect.DeepEqual(d, base(tc.overrides)) {
+				t.Errorf("ForPreset changed its receiver to %+v", d)
+			}
+		})
+	}
+}
+
+func TestParsePreset_AcceptsTheTwoPresetNamesAndRejectsOthers(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    combat.Preset
+		wantErr bool
+	}{
+		{"explorer", combat.PresetExplorer, false},
+		{"little-explorer", combat.PresetLittleExplorer, false},
+		{"Little Explorer", combat.PresetExplorer, true},
+		{"", combat.PresetExplorer, true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := combat.ParsePreset(tc.name)
+			if got != tc.want || (err != nil) != tc.wantErr {
+				t.Errorf("ParsePreset(%q) = %v, %v; want %v, error %v", tc.name, got, err, tc.want, tc.wantErr)
 			}
 		})
 	}

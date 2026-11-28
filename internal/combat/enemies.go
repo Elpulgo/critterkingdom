@@ -119,18 +119,9 @@ func (d EnemyDef) validate() error {
 			return fmt.Errorf("drop %d %q: chance %v is outside (0, 1]", i, dr.Item, dr.Chance)
 		}
 	}
-	if o := d.LittleExplorer; o != nil {
-		hp, damage, speed := d.HP, d.Damage, d.Speed
-		if o.HP != nil {
-			hp = *o.HP
-		}
-		if o.Damage != nil {
-			damage = *o.Damage
-		}
-		if o.Speed != nil {
-			speed = *o.Speed
-		}
-		if err := d.validateStats("littleExplorer ", hp, damage, speed); err != nil {
+	if d.LittleExplorer != nil {
+		le := d.ForPreset(PresetLittleExplorer)
+		if err := d.validateStats("littleExplorer ", le.HP, le.Damage, le.Speed); err != nil {
 			return err
 		}
 	}
@@ -147,4 +138,50 @@ func (d EnemyDef) validateStats(prefix string, hp, damage int, speed float64) er
 		return fmt.Errorf("%sspeed %v is not positive", prefix, speed)
 	}
 	return nil
+}
+
+// Preset is the age preset chosen for a game, which scales enemy stats
+// (docs/PLAN.md §2.7). The zero value is PresetExplorer.
+type Preset int
+
+const (
+	// PresetExplorer uses every enemy's base values.
+	PresetExplorer Preset = iota
+	// PresetLittleExplorer applies each enemy's littleExplorer overrides.
+	PresetLittleExplorer
+)
+
+// ParsePreset returns the preset a start option names: "explorer" or
+// "little-explorer". Any other name is an error, returned with
+// PresetExplorer.
+func ParsePreset(name string) (Preset, error) {
+	switch name {
+	case "explorer":
+		return PresetExplorer, nil
+	case "little-explorer":
+		return PresetLittleExplorer, nil
+	}
+	return PresetExplorer, fmt.Errorf("unknown preset %q: want explorer or little-explorer", name)
+}
+
+// ForPreset returns a copy of d as it plays on preset p. On
+// PresetLittleExplorer each hp, damage and speed value with an override in
+// d.LittleExplorer is replaced by it; every other field, and every value
+// without an override, keeps the base value. On PresetExplorer it returns d
+// unchanged.
+func (d EnemyDef) ForPreset(p Preset) EnemyDef {
+	o := d.LittleExplorer
+	if p != PresetLittleExplorer || o == nil {
+		return d
+	}
+	if o.HP != nil {
+		d.HP = *o.HP
+	}
+	if o.Damage != nil {
+		d.Damage = *o.Damage
+	}
+	if o.Speed != nil {
+		d.Speed = *o.Speed
+	}
+	return d
 }
