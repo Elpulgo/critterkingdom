@@ -31,6 +31,9 @@ type Stack struct {
 	awaitRelease bool
 }
 
+// A Stack is itself a Scene, so the Game runs it like any other.
+var _ Scene = (*Stack)(nil)
+
 // NewStack returns a stack with base at the bottom and no overlays.
 func NewStack(base Scene) *Stack {
 	return &Stack{base: base}
