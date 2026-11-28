@@ -74,3 +74,68 @@ func TestTouch_TheLeftHalfSteersWithAPadOnlyWhenThePadIsEnabled(t *testing.T) {
 		})
 	}
 }
+
+func TestTouch_AFingerLandingAnywhereTapsOnceWhereItLanded(t *testing.T) {
+	tests := []struct {
+		name string
+		pad  bool
+		at   touchPoint
+	}{
+		{"on the world", false, touchAt(2, 600, 200)},
+		{"on the paw button", false, touchAt(2, 924, 524)},
+		{"on the pad half with the pad enabled", true, touchAt(2, 100, 500)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tc := touchControls{padEnabled: tt.pad}
+			tc.step([]touchPoint{touchAt(1, 700, 100)}, screen) // the first touch shows the buttons
+			tc.step(nil, screen)
+
+			if in := tc.step([]touchPoint{tt.at}, screen); !in.tap || in.tapAt != tt.at.pos {
+				t.Fatalf("finger lands: tap %v at %v, want a tap at %v", in.tap, in.tapAt, tt.at.pos)
+			}
+			if in := tc.step([]touchPoint{tt.at}, screen); in.tap {
+				t.Fatalf("finger held: tapped again, want one tap per touch")
+			}
+		})
+	}
+}
+
+func TestTouch_UnderAnOverlayANewFingerOnlyTaps(t *testing.T) {
+	// The pad finger touches down at 100,500 and slides right by 0.9 of the
+	// pad's radius of 64.
+	tests := []struct {
+		name       string
+		down, slid touchPoint
+	}{
+		{"on the paw button", touchAt(2, 924, 524), touchAt(2, 924, 524)},
+		{"on the pad half", touchAt(2, 100, 500), touchAt(2, 157.6, 500)},
+		{"on the world", touchAt(2, 600, 200), touchAt(2, 620, 200)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tc := touchControls{padEnabled: true}
+			tc.step([]touchPoint{touchAt(1, 700, 100)}, screen) // the first touch shows the buttons
+			tc.step(nil, screen)
+			tc.modal = true
+
+			in := tc.step([]touchPoint{tt.down}, screen)
+			if !in.tap || in.tapAt != tt.down.pos {
+				t.Fatalf("finger lands: tap %v at %v, want a tap at %v", in.tap, in.tapAt, tt.down.pos)
+			}
+			if in.paw || in.pointing || !in.move.IsZero() {
+				t.Fatalf("finger lands: paw %v, pointing %v, move %v; want none", in.paw, in.pointing, in.move)
+			}
+			if in := tc.step([]touchPoint{tt.slid}, screen); in.paw || in.pointing || !in.move.IsZero() {
+				t.Fatalf("finger slides: paw %v, pointing %v, move %v; want none", in.paw, in.pointing, in.move)
+			}
+
+			// The overlay closes while the finger is still down: it keeps
+			// doing nothing until it lifts.
+			tc.modal = false
+			if in := tc.step([]touchPoint{tt.slid}, screen); in.paw || in.pointing || !in.move.IsZero() {
+				t.Fatalf("finger held after the overlay closed: paw %v, pointing %v, move %v; want none", in.paw, in.pointing, in.move)
+			}
+		})
+	}
+}

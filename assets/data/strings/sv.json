@@ -1,4 +1,18 @@
 {
   "ui.title": "Critter Kingdom",
-  "ui.greeting": "Hej!"
+  "ui.greeting": "Hej!",
+  "ui.yes": "Ja!",
+  "ui.no": "Nej",
+  "npc.baker_badger.name": "Bagare Grävling",
+  "npc.mayor_owl.name": "Borgmästare Uggla",
+  "npc.grandma_hedgehog.name": "Mormor Igelkott",
+  "baker.chat.1": "Hej! Jag har bakat bullar hela morgonen.",
+  "baker.chat.2": "Vill du känna hur gott de luktar?",
+  "baker.yes.1": "Mmm, kanel och socker! Kom tillbaka snart.",
+  "baker.no.1": "Åh, okej. Bullarna väntar här på dig.",
+  "mayor.chat.1": "Hoo! Välkommen till Ekollonhålan.",
+  "mayor.chat.2": "Här tar alla hand om varandra.",
+  "grandma.chat.1": "Hej, lilla vän! Så fint att du kom förbi.",
+  "grandma.chat.2": "Blommorna på ängen blommar i dag.",
+  "grandma.chat.3": "Kom ihåg att vila när du blir trött."
 }

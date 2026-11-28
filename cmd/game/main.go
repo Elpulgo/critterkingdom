@@ -59,13 +59,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	dialogues, err := assets.LoadDialogues()
+	if err != nil {
+		log.Fatal(err)
+	}
 	preset := combat.PresetExplorer
 	if opts.preset != "" {
 		if preset, err = combat.ParsePreset(opts.preset); err != nil {
 			log.Printf("preset: %v; starting on explorer", err)
 		}
 	}
-	sceneOpts := []world.Option{world.WithEnemies(enemies), world.WithPreset(preset)}
+	// The talker needs the stack, which needs the scene, which needs the
+	// talker's sink: the stack is filled in once the scene exists.
+	talk := &talker{font: font, dialogues: dialogues}
+	sceneOpts := []world.Option{world.WithEnemies(enemies), world.WithPreset(preset), world.WithInteraction(talk.interact)}
 	if opts.peaceful {
 		sceneOpts = append(sceneOpts, world.WithPeaceful())
 	}
@@ -76,7 +83,8 @@ func main() {
 	// One generator, seeded once from the runtime's random source, drives
 	// every wild critter for the whole run.
 	scene.AddWildCritters(species, rand.New(rand.NewPCG(rand.Uint64(), rand.Uint64())))
-	game := engine.NewGame(scene, engine.Options{
+	talk.stack = engine.NewStack(scene)
+	game := engine.NewGame(talk.stack, engine.Options{
 		Font:     font,
 		TouchPad: opts.touchPad,
 	})
