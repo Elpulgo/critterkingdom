@@ -6716,6 +6716,11 @@
               "name": "enemy",
               "type": "string",
               "value": "thistle_beast"
+            },
+            {
+              "name": "explorer_only",
+              "type": "bool",
+              "value": true
             }
           ]
         },
@@ -6734,6 +6739,11 @@
               "name": "enemy",
               "type": "string",
               "value": "grumpy_mushroom"
+            },
+            {
+              "name": "explorer_only",
+              "type": "bool",
+              "value": true
             }
           ]
         }

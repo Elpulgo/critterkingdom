@@ -1,0 +1,12 @@
+{
+  "npc": "mayor_owl",
+  "nodes": {
+    "start": {
+      "if": [],
+      "lines": [
+        {"text": "mayor.chat.1", "face": "neutral"},
+        {"text": "mayor.chat.2", "face": "happy"}
+      ]
+    }
+  }
+}

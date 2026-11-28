@@ -419,8 +419,8 @@ func drawVillager(p *pen, x, y float64, facing entity.Facing, index int) {
 
 // drawEnemy draws the placeholder art of e, with its feet at e.Pos: a grumpy
 // face while it fights, its telegraph (the slime squashes, the beast shakes,
-// the mushroom puffs up), and a smiling face among flowers once defeated.
-// elapsed is the scene's game time in seconds, which drives the shake. An
+// the mushroom puffs up), a smiling face among flowers once defeated, and a
+// sleep mark above it while it sleeps. elapsed is the scene's game time in seconds, which drives the shake. An
 // enemy without a drawing is a magenta square, so it stands out.
 func drawEnemy(p *pen, e *entity.Enemy, elapsed float64) {
 	x, y := e.Pos.X, e.Pos.Y
@@ -444,6 +444,24 @@ func drawEnemy(p *pen, e *entity.Enemy, elapsed float64) {
 	if happy {
 		drawPoofFlowers(p, x, y-combat.EnemySize/2)
 	}
+	if e.Asleep() {
+		drawSleepMark(p, x+5, y-combat.EnemySize-1)
+	}
+}
+
+// drawSleepMark draws the placeholder sleep mark, a big and a small "z"
+// rising to the upper right of x, y, the bottom left corner of the big one.
+func drawSleepMark(p *pen, x, y float64) {
+	drawZ(p, x, y, 4, ink)
+	drawZ(p, x+4.5, y-4.5, 2.5, ink)
+}
+
+// drawZ draws a "z" of size s with its bottom left corner at x, y.
+func drawZ(p *pen, x, y, s float64, clr color.NRGBA) {
+	const thick = 0.7
+	p.rect(x, y-s, s, thick, clr)
+	p.rect(x, y-thick, s, thick, clr)
+	p.polygon(clr, x+s-thick, y-s+thick, x+s, y-s+thick, x+thick, y-thick, x, y-thick)
 }
 
 // drawSlime draws the Sulky Slime, an orchid blob: wide and flat while it

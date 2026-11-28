@@ -416,7 +416,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 ### M1 A place to walk: "Acorn Hollow" (2 to 3 weeks)
 
 - [x] Tiled JSON loading, layers, collision grid, animated tiles (water)
-- [ ] Camera follow and clamp; y-sorted props; "above" layer
+- [x] Camera follow and clamp; y-sorted props; "above" layer
 - [x] Warps: village to meadow, village to house interior
 - [x] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
 - [x] A* tap-to-walk, joystick alternative
@@ -427,7 +427,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 ### M2 Talking: "Hello, neighbour" (2 weeks)
 
 - [x] NPC entities: idle and wander, face the player, "…" bubble
-- [ ] Dialogue box: portrait, name, typewriter text, at most two big choice buttons
+- [x] Dialogue box: portrait, name, typewriter text, at most two big choice buttons
 - [x] Dialogue data format, runner and tests
 - [x] i18n with sv and en string tables; a font with å, ä and ö
 - [ ] Read-aloud via speechSynthesis with a toggle

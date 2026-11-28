@@ -36,5 +36,31 @@ type CharacterLoader func(id string) (anim.Character, error)
 func WithCharacters(load CharacterLoader) Option {
 	return func(s *Scene) {
 		s.loadCharacter = load
+  }
+}
+// WithInteraction gives the scene a sink that is called once for each
+// interaction the critter starts with a villager, on the tick it starts:
+// by paw, or when a tapped walk reaches the villager. TakeInteraction still
+// reports the same interactions.
+func WithInteraction(sink func(Interaction)) Option {
+	return func(s *Scene) {
+		s.onInteract = sink
+	}
+}
+
+// WithPreset spawns every enemy with the stats of the age preset p, as
+// combat.EnemyDef.ForPreset gives them. Without it enemies have their
+// Explorer, base, stats.
+func WithPreset(p combat.Preset) Option {
+	return func(s *Scene) {
+		s.preset = p
+	}
+}
+
+// WithPeaceful puts every enemy the scene spawns to sleep, so none of them
+// ever moves or hurts the critter. They can still be defeated.
+func WithPeaceful() Option {
+	return func(s *Scene) {
+		s.peaceful = true
 	}
 }

@@ -12,6 +12,9 @@ const (
 	// enemyProperty is the string property of an enemy object that holds the
 	// enemy definition id, for example "sulky_slime".
 	enemyProperty = "enemy"
+	// explorerOnlyProperty is the bool property of an enemy object that
+	// leaves the enemy out on Little Explorer, for fewer enemies per room.
+	explorerOnlyProperty = "explorer_only"
 )
 
 // EnemyMarker is an enemy object of the objects layer: which enemy stands
@@ -23,6 +26,9 @@ type EnemyMarker struct {
 	EnemyID string
 	// Pos is the object's position in world pixels.
 	Pos geom.Vec
+	// ExplorerOnly is the bool property explorer_only, false when absent: the
+	// enemy is left out on Little Explorer.
+	ExplorerOnly bool
 }
 
 // Enemies returns every enemy object of the objects layer, in layer order.
@@ -38,5 +44,10 @@ func readEnemy(o Object) (EnemyMarker, error) {
 	if id == "" {
 		return EnemyMarker{}, fmt.Errorf("%s object %d: enemy has no string property %s", objectsLayer, o.ID, enemyProperty)
 	}
-	return EnemyMarker{ObjectID: o.ID, EnemyID: id, Pos: geom.Vec{X: o.X, Y: o.Y}}, nil
+	return EnemyMarker{
+		ObjectID:     o.ID,
+		EnemyID:      id,
+		Pos:          geom.Vec{X: o.X, Y: o.Y},
+		ExplorerOnly: o.Properties.Bool(explorerOnlyProperty),
+	}, nil
 }
