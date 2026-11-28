@@ -1,5 +1,5 @@
-// Package entity holds the things that live in the world. For now that is the
-// player's critter; villagers, wild critters, enemies and items join later.
+// Package entity holds the things that live in the world: the player's critter
+// and the villagers; wild critters, enemies and items join later.
 package entity
 
 import (
@@ -51,9 +51,15 @@ func NewPlayer(pos geom.Vec) *Player {
 // Box returns the critter's 12 by 10 collision rectangle in world pixels, with
 // its bottom centre at Pos.
 func (p *Player) Box() geom.Rect {
+	return feetBox(p.Pos)
+}
+
+// feetBox returns a character's 12 by 10 collision rectangle with its bottom
+// centre at the feet position pos.
+func feetBox(pos geom.Vec) geom.Rect {
 	return geom.Rect{
-		Min: geom.Vec{X: p.Pos.X - boxHalfWidth, Y: p.Pos.Y - boxHeight},
-		Max: geom.Vec{X: p.Pos.X + boxHalfWidth, Y: p.Pos.Y},
+		Min: geom.Vec{X: pos.X - boxHalfWidth, Y: pos.Y - boxHeight},
+		Max: geom.Vec{X: pos.X + boxHalfWidth, Y: pos.Y},
 	}
 }
 

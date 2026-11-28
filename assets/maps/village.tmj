@@ -10,7 +10,7 @@
   "tilewidth": 128,
   "tileheight": 128,
   "nextlayerid": 7,
-  "nextobjectid": 152,
+  "nextobjectid": 155,
   "properties": [
     {
       "name": "biome",
@@ -6678,6 +6678,57 @@
               "name": "target_spawn",
               "type": "string",
               "value": "from_village"
+            }
+          ]
+        },
+        {
+          "id": 152,
+          "name": "grandma_hedgehog",
+          "type": "npc",
+          "x": 512,
+          "y": 1664,
+          "width": 384,
+          "height": 384,
+          "visible": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "string",
+              "value": "grandma_hedgehog"
+            }
+          ]
+        },
+        {
+          "id": 153,
+          "name": "baker_badger",
+          "type": "npc",
+          "x": 2688,
+          "y": 1664,
+          "width": 384,
+          "height": 384,
+          "visible": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "string",
+              "value": "baker_badger"
+            }
+          ]
+        },
+        {
+          "id": 154,
+          "name": "mayor_owl",
+          "type": "npc",
+          "x": 2048,
+          "y": 2688,
+          "width": 384,
+          "height": 384,
+          "visible": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "string",
+              "value": "mayor_owl"
             }
           ]
         }

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration tuft_3: a short, sparse tuft of two blades and one blade
+       curling over to the right, standing on y 100. 16 by 16 world px, no
+       outline, as for all ground tufts. The curled blade takes the shade. -->
+  <g stroke="none">
+    <path d="M 66 100 C 66 78 76 64 92 62 C 100 62 104 68 102 76 C 98 70 92 70 86 72 C 78 76 76 88 78 100 Z" fill="#265c42"/>
+    <path d="M 46 100 C 44 86 38 76 30 70 C 42 72 52 82 56 100 Z" fill="#3e8948"/>
+    <path d="M 54 100 C 54 82 58 66 62 58 C 66 66 68 82 66 100 Z" fill="#3e8948"/>
+    <path d="M 58 98 C 58 84 60 72 62 66 C 63 74 63 86 62 98 Z" fill="#63c74d"/>
+  </g>
+</svg>

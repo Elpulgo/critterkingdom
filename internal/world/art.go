@@ -34,10 +34,22 @@ var (
 	missingTile = color.NRGBA{0xff, 0x00, 0xff, 0xff}
 )
 
+// villagerCoats are the coat colours of placeholder villagers, picked by the
+// villager's place among the map's villagers so neighbours look different.
+var villagerCoats = []color.NRGBA{
+	{0x5a, 0x69, 0x88, 0xff}, // slate blue
+	{0xb8, 0x6f, 0x50, 0xff}, // clay
+	{0x68, 0x38, 0x6c, 0xff}, // plum
+	{0x26, 0x5c, 0x42, 0xff}, // pine
+}
+
 const (
 	// critterHeight is how far the tips of the critter's ears are above its
 	// feet, in world pixels.
 	critterHeight = 17
+	// villagerHeight is how far the tips of a villager's ears are above its
+	// feet, in world pixels.
+	villagerHeight = 20
 	// bodyRadius is the radius of the critter's round body.
 	bodyRadius = 7
 	// reach is how far a prop shape can extend beyond its object rectangle, in
@@ -231,6 +243,40 @@ func drawCritter(p *pen, x, y, lift float64, facing entity.Facing) {
 		p.ellipse(x-2.5, by-1, 0.6, 1.05, ink)
 		p.ellipse(x+2.5, by-1, 0.6, 1.05, ink)
 		p.ellipse(x, by+0.5, 1.1, 0.6, cocoa)
+	}
+}
+
+// drawVillager draws a placeholder villager, a round animal in a coat, with
+// its feet at the world point x, y. index picks the coat colour.
+func drawVillager(p *pen, x, y float64, facing entity.Facing, index int) {
+	coat := villagerCoats[index%len(villagerCoats)]
+	p.ellipse(x, y, 5, 2, shadow)
+
+	// A coat for a body and a round head with two round ears on top.
+	p.ellipse(x, y-5, 5, 5, coat)
+	hy := y - 13 // centre of the head
+	p.circle(x-3.5, hy-4.5, 1.8, stoneGrey)
+	p.circle(x+3.5, hy-4.5, 1.8, stoneGrey)
+	p.circle(x, hy, 5, stoneGrey)
+
+	switch facing {
+	case entity.FacingUp:
+		// The back of the head, and the bow of the coat's belt.
+		p.circle(x, y-5, 1.5, cream)
+	case entity.FacingLeft:
+		p.ellipse(x-2, hy+1, 2.6, 2.4, cream)
+		p.ellipse(x-2.5, hy-0.5, 0.6, 1.05, ink)
+		p.circle(x-4.6, hy+1.2, 0.7, cocoa)
+	case entity.FacingRight:
+		p.ellipse(x+2, hy+1, 2.6, 2.4, cream)
+		p.ellipse(x+2.5, hy-0.5, 0.6, 1.05, ink)
+		p.circle(x+4.6, hy+1.2, 0.7, cocoa)
+	default:
+		p.ellipse(x, hy+1, 3.2, 2.6, cream)
+		p.ellipse(x-1.8, hy-0.5, 0.6, 1.05, ink)
+		p.ellipse(x+1.8, hy-0.5, 0.6, 1.05, ink)
+		p.ellipse(x, hy+1.2, 1.1, 0.6, cocoa)
+		p.rect(x-0.5, y-8, 1, 6, fade(cream, 0.6))
 	}
 }
 

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="384" viewBox="0 0 256 384">
+  <!-- Prop tree: the big round tree, 32 by 48 world px. The same shapes as
+       the tree on assets-src/style/style_sheet.svg: canopy in the upper two
+       thirds, trunk base at bottom centre. Leaf green canopy outlined in pine
+       green, wood brown trunk outlined in bark brown, light from the top-left
+       and a soft ink shadow under the trunk. -->
+  <!-- Soft ground shadow at trunk base -->
+  <ellipse cx="128" cy="364" rx="88" ry="20" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <!-- Trunk (base at bottom centre of the 256 by 384 box) -->
+  <rect x="92" y="236" width="72" height="128" rx="24" fill="#b86f50" stroke="none"/>
+  <!-- Trunk top-left highlight and right/top shade -->
+  <rect x="98" y="256" width="16" height="92" rx="8" fill="#e4a672" stroke="none"/>
+  <path d="M 140 240 L 164 240 L 164 344 C 164 356 154 364 140 364 Z" fill="#733e39" stroke="none"/>
+  <!-- Under-canopy cast shadow across the top of the trunk -->
+  <rect x="92" y="236" width="72" height="28" rx="10" fill="#733e39" stroke="none"/>
+  <!-- Trunk 8 px darker outline (#733e39) -->
+  <rect x="92" y="236" width="72" height="128" rx="24" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Canopy base silhouette (within x: 4..252, y: 24..268 including the 8 px outline) -->
+  <circle cx="72" cy="184" r="64" fill="#3e8948" stroke="none"/>
+  <circle cx="184" cy="184" r="64" fill="#3e8948" stroke="none"/>
+  <circle cx="128" cy="116" r="88" fill="#3e8948" stroke="none"/>
+  <ellipse cx="128" cy="204" rx="104" ry="60" fill="#3e8948" stroke="none"/>
+
+  <!-- Canopy bottom-right shade (#265c42) -->
+  <path d="M 44 224 C 76 256 184 256 224 216 C 240 200 244 176 236 156 C 244 196 220 248 168 258 C 112 268 64 252 44 224 Z" fill="#265c42" stroke="none"/>
+  <ellipse cx="192" cy="204" rx="44" ry="30" fill="#265c42" stroke="none"/>
+
+  <!-- Canopy top-left highlight (#63c74d) and warm sun dab (#fee761) -->
+  <ellipse cx="104" cy="76" rx="52" ry="32" transform="rotate(-15 104 76)" fill="#63c74d" stroke="none"/>
+  <ellipse cx="56" cy="156" rx="26" ry="18" transform="rotate(-20 56 156)" fill="#63c74d" stroke="none"/>
+  <circle cx="88" cy="68" r="14" fill="#fee761" stroke="none"/>
+
+  <!-- Canopy 8 px darker outline (#265c42) tracing the union of the three puff circles
+       (cx=128 cy=116 r=88, cx=184 cy=184 r=64, cx=72 cy=184 r=64) and the bottom ellipse
+       (cx=128 cy=204 rx=104 ry=60), transitioning at their true intersection points -->
+  <path d="M 41.2 130.7
+           A 88 88 0 1 1 214.8 130.7
+           A 64 64 0 0 1 200.4 245.9
+           A 104 60 0 0 1 55.6 245.9
+           A 64 64 0 0 1 41.2 130.7 Z"
+        fill="none" stroke="#265c42" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -400,3 +400,122 @@ below is for that.
 - [ ] Show the icons, petals, stars, pad, logo, effects and emotes on the
       tablet to the kids and ask what each one means. Redraw any they can't
       name, keeping `go test ./assets-src/...` green.
+## World art set
+
+The terrain tiles, ground decorations, props and interior pieces of PLAN §6.4
+and §6.7 are drawn as SVG sources under `assets-src/`, following every rule
+above. Sizes below are in world pixels; the drawings are 8 times larger.
+
+### Tilesets
+
+Each tileset is one SVG sheet, 8 tiles wide, of 16 by 16 world px tiles
+(128 by 128 px). Each tile is a `<g>` whose `id` is the tile name, placed in
+its own grid cell, and its Tiled tile id is `row * 8 + column`.
+
+| Sheet | Size (px) | Tiles |
+|---|---|---|
+| `assets-src/tiles/tileset_outdoor.svg` | 1024 by 1024 (8 by 8) | 60: `grass`, `grass_2`, `grass_3`, `grass_4`, `path`, `sand`, `water_1`, `water_2`, `water_3`; 14 transition tiles each for grass/path (`grass_path_XXXX`), grass/water (`grass_water_XXXX`) and sand/water (`sand_water_XXXX`); cliffs `cliff_nw`, `cliff_n`, `cliff_ne`, `cliff_w`, `cliff_e`, `cliff_sw`, `cliff_s`, `cliff_se`, `cliff_face` |
+| `assets-src/tiles/tileset_cave.svg` | 1024 by 128 (8 by 1) | `cave_floor`, `cave_floor_2`, `cave_floor_3`, `cave_wall` |
+| `assets-src/tiles/tileset_indoor.svg` | 1024 by 128 (8 by 1) | `floor`, `floor_2`, `wall`, `wall_top`, `window` |
+
+**Transition naming**: a transition tile is named `<a>_<b>_<nw><ne><sw><se>`,
+with one digit per corner in the order north-west, north-east, south-west,
+south-east: `0` for terrain `a` and `1` for terrain `b`. For example
+`grass_path_0111` is grass in the north-west corner and path in the other
+three. Each pair has the 14 mixed codes `0001` to `1110`; the all-`0` and
+all-`1` tiles are the shared plain tiles (`grass`, `path`, `sand`, `water_1`).
+All 14 are drawn out in the sheet, from one edge and one corner shape per pair
+placed with `<use>`, so the light stays top-left; never use Tiled's flip or
+rotate on them.
+
+### Ground decorations
+
+15 decorations, each 16 by 16 world px (128 by 128 px), one SVG each in
+`assets-src/sprites/decor/`: `tuft_1`, `tuft_2`, `tuft_3`, `flower_white`,
+`flower_pink`, `flower_yellow`, `flower_red`, `pebble_1`, `pebble_2`,
+`pebble_3`, `leaf_1`, `leaf_2`, `leaf_3`, `clover`, `twig`.
+
+### Props
+
+30 props, one SVG each in `assets-src/sprites/props/`, every one with the 8 px
+outline:
+
+| Group | Prop | World pixels | Drawing pixels (px) |
+|---|---|---|---|
+| Outdoor | `tree` | 32 by 48 | 256 by 384 |
+| Outdoor | `tree_small` | 32 by 32 | 256 by 256 |
+| Outdoor | `bush`, `berry_bush_full`, `berry_bush_empty`, `rock`, `rock_small`, `fence_h`, `fence_v`, `fence_post`, `fence_gate`, `sign` | 16 by 16 | 128 by 128 |
+| Outdoor | `house` (door drawn in) | 64 by 64 | 512 by 512 |
+| Puzzle | `chest_closed`, `chest_open`, `pot`, `push_block`, `flower_switch_off`, `flower_switch_on`, `mushroom_off`, `mushroom_on`, `bramble`, `room_door_open`, `room_door_locked` | 16 by 16 | 128 by 128 |
+| Puzzle | `plank_bridge` | 32 by 16 | 256 by 128 |
+| Puzzle | `sunflower_checkpoint` | 16 by 32 | 128 by 256 |
+| Interior | `bed` | 16 by 32 | 128 by 256 |
+| Interior | `table` | 32 by 16 | 256 by 128 |
+| Interior | `rug` | 32 by 32 | 256 by 256 |
+| Interior | `shelf` | 16 by 32 | 128 by 256 |
+
+The interior floor, walls and window are tiles in `tileset_indoor.svg`, not
+props.
+
+### Tiled tilesets
+
+The `.tsx` files sit next to their drawings and point at the PNGs that
+`make art` writes under `assets/`:
+
+- `assets-src/tiles/tileset_outdoor.tsx`, `tileset_cave.tsx` and
+  `tileset_indoor.tsx`: regular tilesets on `assets/tiles/<sheet>.png`, with a
+  `type` on every drawn tile. The outdoor one also animates `water_1` through
+  `water_1`, `water_2`, `water_3` at 300 ms each, and holds the corner
+  terrain set `ground` (colours grass, path, water and sand) that paints all
+  three transitions with one brush.
+- `assets-src/sprites/decor/decor.tsx` and
+  `assets-src/sprites/props/props.tsx`: image-collection tilesets, one tile per
+  drawing, with the drawing's name as its `type` and its own image
+  `assets/sprites/decor/<name>.png` or `assets/sprites/props/<name>.png` at
+  the drawing's page size.
+
+### Export, tests and the game
+
+- **The PNGs are not committed.** Only the SVG and `.tsx` sources are in the
+  repo. A human with Inkscape 1.x produces the PNGs with `make art`
+  (`make art ART_ARGS=-force` to export everything again), which writes
+  `assets/tiles/*.png`, `assets/sprites/decor/*.png` and
+  `assets/sprites/props/*.png`.
+- **The game still draws placeholders.** `internal/world/art.go` keeps drawing
+  the shapes in code until the follow-up item "Load exported tiles and props
+  in the world scene" loads the exported PNGs. That item comes after issue #2
+  (maps) and issue #16 (y-sorting and the `above` layer), and after the PNGs
+  are exported and committed.
+- **`go test ./assets-src/...` checks the rules a machine can check** (it runs
+  as part of `make test`): every colour is in Endesga 32; no gradients,
+  filters, `<image>` or `<text>`; every drawing has its listed page size and
+  every file is listed in the test's manifest; tilesets have no strokes;
+  nothing is thinner than 4 px; every prop has an 8 px outline with round
+  joins and caps, never in ink or black; every `.tsx` tile matches its
+  drawing's grid cell or image size; the `ground` terrain set covers all 16
+  corner combinations of each pair, matching the tile names; and the water
+  animation runs through its three frames. A new drawing needs a row in the
+  manifest in `assets-src/art_test.go`.
+
+### Human sign-off checklist
+
+How the art looks is not tested. Before the follow-up item loads it into the
+game, a human checks:
+
+- [ ] Open each sheet in Inkscape (`tileset_outdoor.svg`, `tileset_cave.svg`,
+      `tileset_indoor.svg`) and each decoration and prop SVG, and check the
+      shapes, colours, outlines and top-left light look right and feel
+      sunny, soft, round, friendly and storybook.
+- [ ] Run `make art`, open `tileset_outdoor.tsx` in Tiled, and paint a test
+      map with the `ground` terrain brush: check that grass/path, grass/water
+      and sand/water edges join without seams, that plain tiles wrap
+      seamlessly, and that the water animates.
+- [ ] Look at the props and decorations on the tablet: serve the repository
+      root as in "Viewing the style sheet on the tablet" and open
+      `http://<computer-ip>:8080/assets-src/sprites/props/<name>.svg` (and
+      `.../decor/<name>.svg`), or place them from `decor.tsx` and `props.tsx`
+      on the Tiled test map and view a screenshot of it there. Check that
+      they pop against the ground, read clearly at arm's length, and look
+      right at the sizes in the tables above.
+- [ ] Fix anything that looks wrong in the SVG sources, keeping
+      `go test ./assets-src/...` green, and run `make art` again.
