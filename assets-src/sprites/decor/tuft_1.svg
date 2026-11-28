@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration tuft_1: a tuft of three grass blades standing on y 100.
+       16 by 16 world px. Grass tufts lie flat on the ground, so they get no
+       outline (Art Bible: leaf green tufts, none on ground tufts). The blade on
+       the right turns away from the top-left light and takes the shade. -->
+  <g stroke="none">
+    <path d="M 70 100 C 76 80 86 70 98 66 C 90 74 84 86 82 100 Z" fill="#265c42"/>
+    <path d="M 50 100 C 48 82 40 70 30 62 C 44 66 56 78 62 100 Z" fill="#3e8948"/>
+    <path d="M 58 100 C 58 74 62 54 66 44 C 70 54 74 74 74 100 Z" fill="#3e8948"/>
+    <path d="M 62 98 C 62 78 64 62 66 54 C 67 64 67 80 66 98 Z" fill="#63c74d"/>
+  </g>
+</svg>

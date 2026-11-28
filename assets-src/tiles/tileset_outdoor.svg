@@ -1,0 +1,650 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Outdoor tileset: 128 by 128 px tiles (16 by 16 world px) on an 8 by 8 grid.
+       Each tile is a <g> whose id is its tile type, translated to its grid cell
+       (column*128, row*128) and clipped to its own 128 px cell by tile_cell.
+       Ground tiles get no outline. A shape crossing a tile edge is repeated
+       128 px over on the opposite side so the tile wraps seamlessly.
+       Light comes from the top-left.
+       Transition tiles are named <a>_<b>_<nw><ne><sw><se>, one digit per corner,
+       0 for terrain a and 1 for terrain b (grass_path_0111 is path but for a grass
+       top-left corner). Each pair's 14 mixed tiles follow the base tiles in
+       ascending code order, starting at row 1, column 1. They are all drawn out,
+       so no Tiled flip or rotate flags are needed.
+       The nine cliff tiles follow at row 6, column 3 to row 7, column 3, in the
+       order cliff_nw, cliff_n, cliff_ne, cliff_w, cliff_e, cliff_sw, cliff_s,
+       cliff_se, cliff_face. They are a nine-slice of a rock cliff wall standing
+       on meadow grass, with the grass plateau overhanging its top edge:
+       cliff_nw cliff_n cliff_ne / cliff_w cliff_face cliff_e /
+       cliff_sw cliff_s cliff_se. The middle row and column repeat, so a cliff
+       can be any width and height from two tiles up. -->
+  <defs>
+    <clipPath id="tile_cell">
+      <rect x="0" y="0" width="128" height="128"/>
+    </clipPath>
+
+    <!-- Transition shapes. Each pair has one corner shape, the terrain filling the
+         top-left corner up to the middle of the top and left edges, and one edge
+         shape, the terrain filling the top half. Both cross a tile edge only at its
+         middle (x or y 64) and at a right angle, so neighbouring tiles join. Tiles
+         place them through <use> with turns and mirrors and set the fill there.
+         Light-dependent details are placed upright in each tile, never turned. -->
+    <path id="grass_path_corner" d="M 0 0 H 64 C 64 36 36 64 0 64 Z"/>
+    <path id="grass_path_edge" d="M 0 0 H 128 V 64 C 108 64 92 70 64 70 C 36 70 20 64 0 64 Z"/>
+    <path id="grass_water_corner" d="M 0 0 H 64 C 64 24 52 36 44 44 C 36 52 24 64 0 64 Z"/>
+    <path id="grass_water_edge" d="M 0 0 H 128 V 64 C 116 64 108 72 96 72 C 84 72 76 60 64 60 C 52 60 44 72 32 72 C 20 72 12 64 0 64 Z"/>
+    <path id="sand_water_corner" d="M 0 0 H 64 C 64 40 40 64 0 64 Z"/>
+    <path id="sand_water_edge" d="M 0 0 H 128 V 64 C 96 64 96 76 64 76 C 32 76 32 64 0 64 Z"/>
+
+    <!-- Details for transition tiles, drawn around (0,0): the grass tuft stands on
+         (0,0); the others are centred on it. -->
+    <g id="detail_tuft" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g id="detail_path_dent" stroke="none">
+      <ellipse cx="0" cy="0" rx="10" ry="6" fill="#d77643"/>
+      <ellipse cx="-4" cy="-3" rx="4" ry="2" fill="#ead4aa"/>
+    </g>
+    <ellipse id="detail_path_dent_small" cx="0" cy="0" rx="6" ry="4" fill="#d77643" stroke="none"/>
+    <g id="detail_ripple" stroke="none">
+      <ellipse cx="4" cy="6" rx="12" ry="3" fill="#124e89"/>
+      <ellipse cx="0" cy="0" rx="14" ry="4" fill="#2ce8f5"/>
+    </g>
+    <ellipse id="detail_ripple_small" cx="0" cy="0" rx="8" ry="3" fill="#2ce8f5" stroke="none"/>
+    <g id="detail_sand_ripple" stroke="none">
+      <rect x="-16" y="-3" width="32" height="6" rx="3" fill="#e4a672"/>
+      <circle cx="12" cy="-14" r="3" fill="#ead4aa"/>
+    </g>
+    <!-- Cliff pieces, in tile coordinates. cliff_rock_<part> is the rock wall's
+         outline in each tile: 24 px in from the grass on an open west or east
+         side, starting at y 40 under the plateau lip on top and ending at y 92 at
+         the base, with 16 px rounded corners. Where the wall goes on into the next
+         tile the outline runs 24 px past the tile edge, so the drop shadow (the
+         outline moved 12 px right and down) also runs on without a gap. -->
+    <path id="cliff_rock_nw" d="M 24 152 V 56 A 16 16 0 0 1 40 40 H 152 V 152 Z"/>
+    <path id="cliff_rock_n" d="M -24 40 H 152 V 152 H -24 Z"/>
+    <path id="cliff_rock_ne" d="M -24 40 H 88 A 16 16 0 0 1 104 56 V 152 H -24 Z"/>
+    <path id="cliff_rock_w" d="M 24 -24 H 152 V 152 H 24 Z"/>
+    <path id="cliff_rock_e" d="M -24 -24 H 104 V 152 H -24 Z"/>
+    <path id="cliff_rock_sw" d="M 24 -24 H 152 V 92 H 40 A 16 16 0 0 1 24 76 Z"/>
+    <path id="cliff_rock_s" d="M -24 -24 H 152 V 92 H -24 Z"/>
+    <path id="cliff_rock_se" d="M -24 -24 H 104 V 76 A 16 16 0 0 1 88 92 H -24 Z"/>
+    <clipPath id="cliff_clip_nw"><use xlink:href="#cliff_rock_nw"/></clipPath>
+    <clipPath id="cliff_clip_n"><use xlink:href="#cliff_rock_n"/></clipPath>
+    <clipPath id="cliff_clip_ne"><use xlink:href="#cliff_rock_ne"/></clipPath>
+    <clipPath id="cliff_clip_w"><use xlink:href="#cliff_rock_w"/></clipPath>
+    <clipPath id="cliff_clip_e"><use xlink:href="#cliff_rock_e"/></clipPath>
+    <clipPath id="cliff_clip_sw"><use xlink:href="#cliff_rock_sw"/></clipPath>
+    <clipPath id="cliff_clip_s"><use xlink:href="#cliff_rock_s"/></clipPath>
+    <clipPath id="cliff_clip_se"><use xlink:href="#cliff_rock_se"/></clipPath>
+
+    <!-- The rock face, a seamless 128 px pattern: cool grey #8b9bb4 stone in two
+         staggered courses split by slate blue #5a6988 grooves at y 36..44 and
+         100..108 and joints, with a pale slate #c0cbdc highlight on the upper-left
+         of each stone. The course between y 108 and the next tile's y 36 runs
+         across the tile edge, so its joints are drawn on both sides of it, and the
+         stone crossing the right edge has its highlight repeated 128 px left.
+         Nothing else crosses an edge. -->
+    <g id="cliff_rock" stroke="none">
+      <rect x="-24" y="-24" width="176" height="176" fill="#8b9bb4"/>
+      <g fill="#5a6988">
+        <rect x="-24" y="36" width="176" height="8"/>
+        <rect x="-24" y="100" width="176" height="8"/>
+        <rect x="12" y="-24" width="8" height="64" rx="4"/>
+        <rect x="76" y="-24" width="8" height="64" rx="4"/>
+        <rect x="44" y="40" width="8" height="64" rx="4"/>
+        <rect x="108" y="40" width="8" height="64" rx="4"/>
+        <rect x="12" y="104" width="8" height="48" rx="4"/>
+        <rect x="76" y="104" width="8" height="48" rx="4"/>
+      </g>
+      <g fill="#c0cbdc">
+        <rect x="56" y="50" width="22" height="6" rx="3"/>
+        <rect x="120" y="50" width="20" height="6" rx="3"/>
+        <rect x="-8" y="50" width="20" height="6" rx="3"/>
+        <rect x="24" y="114" width="22" height="6" rx="3"/>
+        <rect x="88" y="114" width="22" height="6" rx="3"/>
+      </g>
+    </g>
+    <!-- Wall edges, drawn inside a tile's cliff_clip_<part>: the lit west side,
+         the shaded east side and the shaded base, each 8 or 12 px wide. -->
+    <rect id="cliff_side_light" x="24" y="-24" width="8" height="176" fill="#c0cbdc" stroke="none"/>
+    <rect id="cliff_side_shade" x="96" y="-24" width="8" height="176" fill="#5a6988" stroke="none"/>
+    <rect id="cliff_base_shade" x="-24" y="80" width="176" height="12" fill="#5a6988" stroke="none"/>
+    <!-- The plateau lip: meadow green #63c74d scallops hanging over the top of the
+         rock at y 40, with a slate blue #5a6988 shade 8 px below each. The
+         scallops sit every 32 px from x 0 to 128, so the lip repeats seamlessly. -->
+    <g id="cliff_lip" stroke="none">
+      <g fill="#5a6988">
+        <circle cx="0" cy="48" r="18"/>
+        <circle cx="32" cy="48" r="18"/>
+        <circle cx="64" cy="48" r="18"/>
+        <circle cx="96" cy="48" r="18"/>
+        <circle cx="128" cy="48" r="18"/>
+      </g>
+      <g fill="#63c74d">
+        <circle cx="0" cy="40" r="18"/>
+        <circle cx="32" cy="40" r="18"/>
+        <circle cx="64" cy="40" r="18"/>
+        <circle cx="96" cy="40" r="18"/>
+        <circle cx="128" cy="40" r="18"/>
+      </g>
+    </g>
+  </defs>
+
+  <!-- Row 0, column 0: grass. Meadow green #63c74d with two leaf green #3e8948 tufts,
+       the same tile as grass_tile in the style sheet. -->
+  <g id="grass" transform="translate(0,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(32,44)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(90,102)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 1: grass_2. One tuft in the upper right, a small one lower left. -->
+  <g id="grass_2" transform="translate(128,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(88,52)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(30,100)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 2: grass_3. Plain meadow with three small two-blade tufts. -->
+  <g id="grass_3" transform="translate(256,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(26,36)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+    <g transform="translate(96,72)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+    <g transform="translate(48,112)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 3: grass_4. A tuft crossing the right edge (x 108..139),
+       repeated 128 px to the left so the tile wraps, and a small tuft in the middle. -->
+  <g id="grass_4" transform="translate(384,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <g transform="translate(124,70)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(-4,70)" fill="#3e8948" stroke="none">
+      <path d="M -8 0 C -10 -12 -14 -18 -16 -20 C -11 -18 -6 -12 -4 0 Z"/>
+      <path d="M -4 0 C -4 -15 -2 -24 0 -26 C 2 -24 4 -15 4 0 Z"/>
+      <path d="M 4 0 C 6 -11 11 -17 15 -19 C 13 -15 10 -8 8 0 Z"/>
+    </g>
+    <g transform="translate(56,32)" fill="#3e8948" stroke="none">
+      <path d="M -2 0 C -4 -10 -7 -15 -10 -17 C -5 -15 -1 -10 2 0 Z"/>
+      <path d="M 2 0 C 3 -12 5 -19 7 -21 C 9 -19 10 -12 10 0 Z"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 4: path. Light tan #e4a672 dirt with warm ochre #d77643 dents
+       and cream #ead4aa highlight dabs on their upper-left. The dent crossing the
+       bottom edge (y 121..131) is repeated 128 px up. -->
+  <g id="path" transform="translate(512,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e4a672" stroke="none"/>
+    <g fill="#d77643" stroke="none">
+      <ellipse cx="34" cy="40" rx="10" ry="6"/>
+      <ellipse cx="94" cy="28" rx="7" ry="5"/>
+      <ellipse cx="62" cy="88" rx="12" ry="7"/>
+      <ellipse cx="108" cy="102" rx="6" ry="4"/>
+      <ellipse cx="20" cy="126" rx="8" ry="5"/>
+      <ellipse cx="20" cy="-2" rx="8" ry="5"/>
+    </g>
+    <g fill="#ead4aa" stroke="none">
+      <ellipse cx="30" cy="37" rx="4" ry="2"/>
+      <ellipse cx="57" cy="84" rx="5" ry="2"/>
+      <circle cx="80" cy="56" r="3"/>
+      <circle cx="16" cy="76" r="2"/>
+    </g>
+  </g>
+
+  <!-- Row 0, column 5: sand. Peach #e8b796 with light tan #e4a672 wind ripples
+       and cream #ead4aa sparkle dots. -->
+  <g id="sand" transform="translate(640,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <g fill="#e4a672" stroke="none">
+      <rect x="18" y="30" width="36" height="6" rx="3"/>
+      <rect x="74" y="60" width="32" height="6" rx="3"/>
+      <rect x="30" y="98" width="40" height="6" rx="3"/>
+    </g>
+    <g fill="#ead4aa" stroke="none">
+      <circle cx="90" cy="24" r="3"/>
+      <circle cx="16" cy="70" r="2"/>
+      <circle cx="104" cy="108" r="3"/>
+      <circle cx="56" cy="62" r="2"/>
+    </g>
+  </g>
+
+  <!-- Rows 0 and 1: water_1..water_3, the three animation frames. Pond blue #0099db
+       with sky cyan #2ce8f5 ripples and one deep water blue #124e89 shade dimple
+       under the lower ripple. The ripples drift right a little each frame; in
+       water_3 the middle ripple crosses the right edge (x 110..138) and is
+       repeated 128 px to the left. -->
+  <g id="water_1" transform="translate(768,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <ellipse cx="80" cy="102" rx="16" ry="4" fill="#124e89" stroke="none"/>
+    <g fill="#2ce8f5" stroke="none">
+      <ellipse cx="36" cy="36" rx="18" ry="4"/>
+      <ellipse cx="76" cy="96" rx="14" ry="4"/>
+      <circle cx="96" cy="44" r="3"/>
+    </g>
+  </g>
+
+  <g id="water_2" transform="translate(896,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <ellipse cx="88" cy="100" rx="18" ry="4" fill="#124e89" stroke="none"/>
+    <g fill="#2ce8f5" stroke="none">
+      <ellipse cx="44" cy="38" rx="20" ry="4"/>
+      <ellipse cx="84" cy="94" rx="16" ry="4"/>
+      <circle cx="104" cy="52" r="3"/>
+    </g>
+  </g>
+
+  <g id="water_3" transform="translate(0,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <ellipse cx="96" cy="104" rx="14" ry="4" fill="#124e89" stroke="none"/>
+    <g fill="#2ce8f5" stroke="none">
+      <ellipse cx="52" cy="40" rx="16" ry="4"/>
+      <ellipse cx="92" cy="98" rx="12" ry="4"/>
+      <ellipse cx="124" cy="68" rx="14" ry="4"/>
+      <ellipse cx="-4" cy="68" rx="14" ry="4"/>
+    </g>
+  </g>
+
+  <!-- grass/path transition set: grass_path_<nw><ne><sw><se>, 0 = grass, 1 = path. -->
+  <!-- Row 1, column 1: grass_path_0001, grass with a path corner at the bottom-right. -->
+  <g id="grass_path_0001" transform="translate(128,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_corner" transform="rotate(180 64 64)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(32,44)"/>
+    <use xlink:href="#detail_path_dent_small" transform="translate(108,108)"/>
+  </g>
+  <!-- Row 1, column 2: grass_path_0010, grass with a path corner at the bottom-left. -->
+  <g id="grass_path_0010" transform="translate(256,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_corner" transform="translate(0,128) scale(1,-1)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_path_dent_small" transform="translate(20,108)"/>
+  </g>
+  <!-- Row 1, column 3: grass_path_0011, grass with a path edge along the bottom. -->
+  <g id="grass_path_0011" transform="translate(384,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_edge" transform="rotate(180 64 64)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(32,44)"/>
+    <use xlink:href="#detail_path_dent" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 1, column 4: grass_path_0100, grass with a path corner at the top-right. -->
+  <g id="grass_path_0100" transform="translate(512,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_corner" transform="translate(128,0) scale(-1,1)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_path_dent_small" transform="translate(108,20)"/>
+  </g>
+  <!-- Row 1, column 5: grass_path_0101, grass with a path edge along the right. -->
+  <g id="grass_path_0101" transform="translate(640,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_edge" transform="rotate(90 64 64)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(32,44)"/>
+    <use xlink:href="#detail_path_dent" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 1, column 6: grass_path_0110, grass with a path corner at the top-right and bottom-left. -->
+  <g id="grass_path_0110" transform="translate(768,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_corner" transform="translate(128,0) scale(-1,1)" fill="#e4a672"/>
+    <use xlink:href="#grass_path_corner" transform="translate(0,128) scale(1,-1)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_path_dent_small" transform="translate(108,20)"/>
+  </g>
+  <!-- Row 1, column 7: grass_path_0111, path everywhere but a grass corner at the top-left. -->
+  <g id="grass_path_0111" transform="translate(896,128)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e4a672" stroke="none"/>
+    <use xlink:href="#grass_path_corner" fill="#63c74d"/>
+    <use xlink:href="#detail_path_dent" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 2, column 0: grass_path_1000, grass with a path corner at the top-left. -->
+  <g id="grass_path_1000" transform="translate(0,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_corner" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_path_dent_small" transform="translate(20,20)"/>
+  </g>
+  <!-- Row 2, column 1: grass_path_1001, grass with a path corner at the top-left and bottom-right. -->
+  <g id="grass_path_1001" transform="translate(128,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_corner" fill="#e4a672"/>
+    <use xlink:href="#grass_path_corner" transform="rotate(180 64 64)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,44)"/>
+    <use xlink:href="#detail_path_dent_small" transform="translate(108,108)"/>
+  </g>
+  <!-- Row 2, column 2: grass_path_1010, grass with a path edge along the left. -->
+  <g id="grass_path_1010" transform="translate(256,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_edge" transform="rotate(270 64 64)" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_path_dent" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 2, column 3: grass_path_1011, path everywhere but a grass corner at the top-right. -->
+  <g id="grass_path_1011" transform="translate(384,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e4a672" stroke="none"/>
+    <use xlink:href="#grass_path_corner" transform="translate(128,0) scale(-1,1)" fill="#63c74d"/>
+    <use xlink:href="#detail_path_dent" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 2, column 4: grass_path_1100, grass with a path edge along the top. -->
+  <g id="grass_path_1100" transform="translate(512,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_path_edge" fill="#e4a672"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_path_dent" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 2, column 5: grass_path_1101, path everywhere but a grass corner at the bottom-left. -->
+  <g id="grass_path_1101" transform="translate(640,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e4a672" stroke="none"/>
+    <use xlink:href="#grass_path_corner" transform="translate(0,128) scale(1,-1)" fill="#63c74d"/>
+    <use xlink:href="#detail_path_dent" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 2, column 6: grass_path_1110, path everywhere but a grass corner at the bottom-right. -->
+  <g id="grass_path_1110" transform="translate(768,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e4a672" stroke="none"/>
+    <use xlink:href="#grass_path_corner" transform="rotate(180 64 64)" fill="#63c74d"/>
+    <use xlink:href="#detail_path_dent" transform="translate(32,32)"/>
+  </g>
+  <!-- grass/water transition set: grass_water_<nw><ne><sw><se>, 0 = grass, 1 = water. -->
+  <!-- Row 2, column 7: grass_water_0001, grass with a water corner at the bottom-right. -->
+  <g id="grass_water_0001" transform="translate(896,256)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_corner" transform="rotate(180 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(32,44)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,108)"/>
+  </g>
+  <!-- Row 3, column 0: grass_water_0010, grass with a water corner at the bottom-left. -->
+  <g id="grass_water_0010" transform="translate(0,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_corner" transform="translate(0,128) scale(1,-1)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(20,108)"/>
+  </g>
+  <!-- Row 3, column 1: grass_water_0011, grass with a water edge along the bottom. -->
+  <g id="grass_water_0011" transform="translate(128,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_edge" transform="rotate(180 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(32,44)"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 3, column 2: grass_water_0100, grass with a water corner at the top-right. -->
+  <g id="grass_water_0100" transform="translate(256,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_corner" transform="translate(128,0) scale(-1,1)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,20)"/>
+  </g>
+  <!-- Row 3, column 3: grass_water_0101, grass with a water edge along the right. -->
+  <g id="grass_water_0101" transform="translate(384,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_edge" transform="rotate(90 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(32,44)"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 3, column 4: grass_water_0110, grass with a water corner at the top-right and bottom-left. -->
+  <g id="grass_water_0110" transform="translate(512,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_corner" transform="translate(128,0) scale(-1,1)" fill="#0099db"/>
+    <use xlink:href="#grass_water_corner" transform="translate(0,128) scale(1,-1)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,20)"/>
+  </g>
+  <!-- Row 3, column 5: grass_water_0111, water everywhere but a grass corner at the top-left. -->
+  <g id="grass_water_0111" transform="translate(640,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#grass_water_corner" fill="#63c74d"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 3, column 6: grass_water_1000, grass with a water corner at the top-left. -->
+  <g id="grass_water_1000" transform="translate(768,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_corner" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(20,20)"/>
+  </g>
+  <!-- Row 3, column 7: grass_water_1001, grass with a water corner at the top-left and bottom-right. -->
+  <g id="grass_water_1001" transform="translate(896,384)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_corner" fill="#0099db"/>
+    <use xlink:href="#grass_water_corner" transform="rotate(180 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,44)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,108)"/>
+  </g>
+  <!-- Row 4, column 0: grass_water_1010, grass with a water edge along the left. -->
+  <g id="grass_water_1010" transform="translate(0,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_edge" transform="rotate(270 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_ripple" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 4, column 1: grass_water_1011, water everywhere but a grass corner at the top-right. -->
+  <g id="grass_water_1011" transform="translate(128,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#grass_water_corner" transform="translate(128,0) scale(-1,1)" fill="#63c74d"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 4, column 2: grass_water_1100, grass with a water edge along the top. -->
+  <g id="grass_water_1100" transform="translate(256,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#grass_water_edge" fill="#0099db"/>
+    <use xlink:href="#detail_tuft" transform="translate(96,108)"/>
+    <use xlink:href="#detail_ripple" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 4, column 3: grass_water_1101, water everywhere but a grass corner at the bottom-left. -->
+  <g id="grass_water_1101" transform="translate(384,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#grass_water_corner" transform="translate(0,128) scale(1,-1)" fill="#63c74d"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 4, column 4: grass_water_1110, water everywhere but a grass corner at the bottom-right. -->
+  <g id="grass_water_1110" transform="translate(512,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#grass_water_corner" transform="rotate(180 64 64)" fill="#63c74d"/>
+    <use xlink:href="#detail_ripple" transform="translate(32,32)"/>
+  </g>
+  <!-- sand/water transition set: sand_water_<nw><ne><sw><se>, 0 = sand, 1 = water. -->
+  <!-- Row 4, column 5: sand_water_0001, sand with a water corner at the bottom-right. -->
+  <g id="sand_water_0001" transform="translate(640,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_corner" transform="rotate(180 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(32,32)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,108)"/>
+  </g>
+  <!-- Row 4, column 6: sand_water_0010, sand with a water corner at the bottom-left. -->
+  <g id="sand_water_0010" transform="translate(768,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_corner" transform="translate(0,128) scale(1,-1)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(96,96)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(20,108)"/>
+  </g>
+  <!-- Row 4, column 7: sand_water_0011, sand with a water edge along the bottom. -->
+  <g id="sand_water_0011" transform="translate(896,512)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_edge" transform="rotate(180 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(32,32)"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 5, column 0: sand_water_0100, sand with a water corner at the top-right. -->
+  <g id="sand_water_0100" transform="translate(0,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_corner" transform="translate(128,0) scale(-1,1)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(96,96)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,20)"/>
+  </g>
+  <!-- Row 5, column 1: sand_water_0101, sand with a water edge along the right. -->
+  <g id="sand_water_0101" transform="translate(128,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_edge" transform="rotate(90 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(32,32)"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 5, column 2: sand_water_0110, sand with a water corner at the top-right and bottom-left. -->
+  <g id="sand_water_0110" transform="translate(256,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_corner" transform="translate(128,0) scale(-1,1)" fill="#0099db"/>
+    <use xlink:href="#sand_water_corner" transform="translate(0,128) scale(1,-1)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(96,96)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,20)"/>
+  </g>
+  <!-- Row 5, column 3: sand_water_0111, water everywhere but a sand corner at the top-left. -->
+  <g id="sand_water_0111" transform="translate(384,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#sand_water_corner" fill="#e8b796"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 5, column 4: sand_water_1000, sand with a water corner at the top-left. -->
+  <g id="sand_water_1000" transform="translate(512,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_corner" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(96,96)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(20,20)"/>
+  </g>
+  <!-- Row 5, column 5: sand_water_1001, sand with a water corner at the top-left and bottom-right. -->
+  <g id="sand_water_1001" transform="translate(640,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_corner" fill="#0099db"/>
+    <use xlink:href="#sand_water_corner" transform="rotate(180 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(96,32)"/>
+    <use xlink:href="#detail_ripple_small" transform="translate(108,108)"/>
+  </g>
+  <!-- Row 5, column 6: sand_water_1010, sand with a water edge along the left. -->
+  <g id="sand_water_1010" transform="translate(768,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_edge" transform="rotate(270 64 64)" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(96,96)"/>
+    <use xlink:href="#detail_ripple" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 5, column 7: sand_water_1011, water everywhere but a sand corner at the top-right. -->
+  <g id="sand_water_1011" transform="translate(896,640)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#sand_water_corner" transform="translate(128,0) scale(-1,1)" fill="#e8b796"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 6, column 0: sand_water_1100, sand with a water edge along the top. -->
+  <g id="sand_water_1100" transform="translate(0,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#e8b796" stroke="none"/>
+    <use xlink:href="#sand_water_edge" fill="#0099db"/>
+    <use xlink:href="#detail_sand_ripple" transform="translate(96,96)"/>
+    <use xlink:href="#detail_ripple" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 6, column 1: sand_water_1101, water everywhere but a sand corner at the bottom-left. -->
+  <g id="sand_water_1101" transform="translate(128,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#sand_water_corner" transform="translate(0,128) scale(1,-1)" fill="#e8b796"/>
+    <use xlink:href="#detail_ripple" transform="translate(96,96)"/>
+  </g>
+  <!-- Row 6, column 2: sand_water_1110, water everywhere but a sand corner at the bottom-right. -->
+  <g id="sand_water_1110" transform="translate(256,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#0099db" stroke="none"/>
+    <use xlink:href="#sand_water_corner" transform="rotate(180 64 64)" fill="#e8b796"/>
+    <use xlink:href="#detail_ripple" transform="translate(32,32)"/>
+  </g>
+  <!-- Row 6, column 3: cliff_nw, the top-left corner: plateau grass above, the wall's rounded top-left corner below, lit on its west side. -->
+  <g id="cliff_nw" transform="translate(384,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#detail_tuft" transform="translate(88,30)"/>
+    <use xlink:href="#cliff_rock_nw" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_nw)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_light"/>
+      <use xlink:href="#cliff_lip"/>
+    </g>
+  </g>
+  <!-- Row 6, column 4: cliff_n, the top edge: plateau grass above the lip, rock face below. -->
+  <g id="cliff_n" transform="translate(512,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#detail_tuft" transform="translate(40,30)"/>
+    <use xlink:href="#cliff_rock_n" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_n)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_lip"/>
+    </g>
+  </g>
+  <!-- Row 6, column 5: cliff_ne, the top-right corner: plateau grass above, the wall's rounded top-right corner below, shaded on its east side. -->
+  <g id="cliff_ne" transform="translate(640,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#detail_tuft" transform="translate(40,30)"/>
+    <use xlink:href="#cliff_rock_ne" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_ne)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_shade"/>
+      <use xlink:href="#cliff_lip"/>
+    </g>
+  </g>
+  <!-- Row 6, column 6: cliff_w, the west side: grass on the left, rock face lit along its west side. -->
+  <g id="cliff_w" transform="translate(768,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_w" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_w)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_light"/>
+    </g>
+  </g>
+  <!-- Row 6, column 7: cliff_e, the east side: rock face shaded along its east side, grass on the right with the wall's shadow. -->
+  <g id="cliff_e" transform="translate(896,768)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_e" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_e)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 0: cliff_sw, the bottom-left corner: rock face with a rounded bottom-left corner and a shaded base on grass. -->
+  <g id="cliff_sw" transform="translate(0,896)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_sw" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_sw)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_light"/>
+      <use xlink:href="#cliff_base_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 1: cliff_s, the base: rock face with a shaded base, grass below with the wall's shadow. -->
+  <g id="cliff_s" transform="translate(128,896)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_s" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_s)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_base_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 2: cliff_se, the bottom-right corner: rock face with a rounded bottom-right corner, shaded base and east side, shadow on the grass. -->
+  <g id="cliff_se" transform="translate(256,896)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#63c74d" stroke="none"/>
+    <use xlink:href="#cliff_rock_se" transform="translate(12,12)" fill="#181425" fill-opacity="0.25" stroke="none"/>
+    <g clip-path="url(#cliff_clip_se)">
+      <use xlink:href="#cliff_rock"/>
+      <use xlink:href="#cliff_side_shade"/>
+      <use xlink:href="#cliff_base_shade"/>
+    </g>
+  </g>
+  <!-- Row 7, column 3: cliff_face, the middle of the wall: rock face only. It
+       wraps on all four edges, so it repeats for wider and taller cliffs. -->
+  <g id="cliff_face" transform="translate(384,896)" clip-path="url(#tile_cell)">
+    <use xlink:href="#cliff_rock"/>
+  </g>
+</svg>

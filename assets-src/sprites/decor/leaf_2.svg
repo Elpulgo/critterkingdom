@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration leaf_2: a fallen autumn leaf lying diagonally the other
+       way, its stalk at the bottom right. 16 by 16 world px. The leaf and its
+       stalk get the 8 px round outline in the paired darker colour, which also
+       draws the 4 px vein; the highlight sits on the upper side near the tip,
+       facing the top-left light. -->
+  <g fill="#f77622" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 92 88 L 104 100" fill="none"/>
+    <path d="M 92 88 C 92 56 68 36 32 34 C 32 70 56 92 92 88 Z"/>
+  </g>
+  <path d="M 86 82 C 72 70 56 56 40 42" fill="none" stroke="#be4a2f" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="56" cy="47" rx="7" ry="4" transform="rotate(40 56 47)" fill="#feae34" stroke="none"/>
+</svg>

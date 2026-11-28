@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Prop house: a village cottage seen from the front and a little above,
+       64 by 64 world px, with its door drawn in at bottom centre.
+       - Roof: warm ochre terracotta outlined in rust red, three rows of
+         scalloped tiles in rust red, a rust red shade along the eave and a
+         light tan highlight along the ridge.
+       - Chimney: cool grey stone outlined in slate blue, pale slate highlight
+         on the left, slate blue shade on the right.
+       - Walls: cream outlined in warm taupe, warm taupe shade under the eave
+         and down the right side.
+       - Windows: wood brown frames outlined in bark brown around pond blue
+         glass, deep water blue shade in the lower-right corner, a sky cyan
+         glint; the right window is the left one moved 220 px.
+       - Door: wood brown, outlined in bark brown, with two plank lines, a
+         light tan highlight on the left, a bark brown shade on the right and a
+         marigold knob outlined in warm ochre, on a cool grey stone step.
+       A soft ink shadow sits under the house, a little to the right since the
+       light comes from the top-left. -->
+  <defs>
+    <clipPath id="wall"><rect x="72" y="240" width="368" height="224" rx="16"/></clipPath>
+    <clipPath id="roof"><path d="M 40 284 L 96 72 Q 100 56 116 56 L 396 56 Q 412 56 416 72 L 472 284 Q 476 300 460 300 L 52 300 Q 36 300 40 284 Z"/></clipPath>
+    <clipPath id="chimney"><rect x="340" y="24" width="44" height="80" rx="8"/></clipPath>
+    <clipPath id="door"><path d="M 216 464 L 216 372 A 40 40 0 0 1 296 372 L 296 464 Z"/></clipPath>
+    <clipPath id="glass"><rect x="120" y="332" width="56" height="48" rx="6"/></clipPath>
+  </defs>
+
+  <ellipse cx="262" cy="472" rx="214" ry="22" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <!-- Walls -->
+  <rect x="72" y="240" width="368" height="224" rx="16" fill="#ead4aa" stroke="none"/>
+  <g clip-path="url(#wall)" fill="#c28569" stroke="none">
+    <rect x="404" y="240" width="40" height="228"/>
+    <rect x="72" y="296" width="368" height="20"/>
+  </g>
+  <rect x="72" y="240" width="368" height="224" rx="16" fill="none" stroke="#c28569" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Windows -->
+  <g id="window">
+    <rect x="108" y="320" width="80" height="72" rx="10" fill="#b86f50" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="120" y="332" width="56" height="48" rx="6" fill="#0099db" stroke="none"/>
+    <path d="M 180 340 L 180 384 L 136 384 Z" clip-path="url(#glass)" fill="#124e89" stroke="none"/>
+    <path d="M 128 368 L 140 352" fill="none" stroke="#2ce8f5" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <g fill="none" stroke="#b86f50" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M 148 332 L 148 380"/>
+      <path d="M 120 356 L 176 356"/>
+    </g>
+  </g>
+  <use xlink:href="#window" x="220" y="0"/>
+
+  <!-- Door on its step -->
+  <rect x="200" y="456" width="112" height="20" rx="8" fill="#8b9bb4" stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 216 464 L 216 372 A 40 40 0 0 1 296 372 L 296 464 Z" fill="#b86f50" stroke="none"/>
+  <g clip-path="url(#door)" stroke="none">
+    <rect x="280" y="320" width="20" height="148" fill="#733e39"/>
+    <rect x="224" y="372" width="8" height="84" rx="4" fill="#e4a672"/>
+  </g>
+  <g fill="none" stroke="#733e39" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 242 348 L 242 456"/>
+    <path d="M 268 348 L 268 456"/>
+  </g>
+  <circle cx="284" cy="414" r="6" fill="#feae34" stroke="#d77643" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 216 464 L 216 372 A 40 40 0 0 1 296 372 L 296 464 Z" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Roof -->
+  <path d="M 40 284 L 96 72 Q 100 56 116 56 L 396 56 Q 412 56 416 72 L 472 284 Q 476 300 460 300 L 52 300 Q 36 300 40 284 Z" fill="#d77643" stroke="none"/>
+  <g clip-path="url(#roof)" stroke="none">
+    <rect x="0" y="272" width="512" height="32" fill="#be4a2f"/>
+    <rect x="0" y="56" width="240" height="18" fill="#e4a672"/>
+  </g>
+  <g fill="none" stroke="#be4a2f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 116 120 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0"/>
+    <path d="M 96 176 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0"/>
+    <path d="M 76 232 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0 a 20 16 0 0 0 40 0"/>
+  </g>
+  <path d="M 40 284 L 96 72 Q 100 56 116 56 L 396 56 Q 412 56 416 72 L 472 284 Q 476 300 460 300 L 52 300 Q 36 300 40 284 Z" fill="none" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Chimney, standing on the roof -->
+  <rect x="340" y="24" width="44" height="80" rx="8" fill="#8b9bb4" stroke="none"/>
+  <g clip-path="url(#chimney)" stroke="none">
+    <rect x="370" y="24" width="14" height="80" fill="#5a6988"/>
+    <rect x="346" y="34" width="8" height="62" rx="4" fill="#c0cbdc"/>
+  </g>
+  <rect x="340" y="24" width="44" height="80" rx="8" fill="none" stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

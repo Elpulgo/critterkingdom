@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop chest_closed: a wooden treasure chest with its lid shut, 16 by 16
+       world px. Wood brown outlined in bark brown, a light tan highlight
+       along the lid's top, bark brown shades along the bottom of the lid and
+       the body, two marigold bands (shaded warm ochre) and a marigold latch
+       with a cocoa keyhole. chest_open is the same chest on the same page
+       with the lid up. -->
+  <defs>
+    <clipPath id="body"><rect x="18" y="58" width="92" height="46" rx="10"/></clipPath>
+    <clipPath id="lid"><rect x="14" y="22" width="100" height="42" rx="18"/></clipPath>
+  </defs>
+
+  <ellipse cx="66" cy="106" rx="52" ry="9" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <!-- Body -->
+  <g clip-path="url(#body)" stroke="none">
+    <rect x="0" y="0" width="128" height="128" fill="#b86f50"/>
+    <rect x="30" y="58" width="12" height="46" fill="#feae34"/>
+    <rect x="86" y="58" width="12" height="46" fill="#feae34"/>
+    <rect x="18" y="92" width="92" height="12" fill="#733e39"/>
+    <rect x="30" y="92" width="12" height="12" fill="#d77643"/>
+    <rect x="86" y="92" width="12" height="12" fill="#d77643"/>
+  </g>
+  <rect x="18" y="58" width="92" height="46" rx="10" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Lid -->
+  <g clip-path="url(#lid)" stroke="none">
+    <rect x="0" y="0" width="128" height="128" fill="#b86f50"/>
+    <rect x="14" y="22" width="100" height="12" fill="#e4a672"/>
+    <rect x="30" y="22" width="12" height="42" fill="#feae34"/>
+    <rect x="86" y="22" width="12" height="42" fill="#feae34"/>
+    <rect x="14" y="54" width="100" height="10" fill="#733e39"/>
+    <rect x="30" y="54" width="12" height="10" fill="#d77643"/>
+    <rect x="86" y="54" width="12" height="10" fill="#d77643"/>
+  </g>
+  <rect x="14" y="22" width="100" height="42" rx="18" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Latch across the seam, with a keyhole -->
+  <rect x="52" y="50" width="24" height="28" rx="6" fill="#feae34" stroke="#d77643" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <g fill="#3e2731" stroke="none">
+    <circle cx="64" cy="61" r="4"/>
+    <rect x="62" y="61" width="4" height="10" rx="2"/>
+  </g>
+</svg>

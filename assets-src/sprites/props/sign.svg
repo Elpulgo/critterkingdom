@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop sign: a wooden signboard on a post, 16 by 16 world px. Wood brown
+       outlined in bark brown, a light tan highlight along the board's top, a
+       bark brown shade along its bottom and down the post's right side, two
+       cocoa lines of "writing" and a soft ink shadow under the post. -->
+  <defs>
+    <clipPath id="board"><rect x="16" y="20" width="96" height="56" rx="12"/></clipPath>
+    <clipPath id="post"><rect x="56" y="64" width="16" height="46" rx="6"/></clipPath>
+  </defs>
+
+  <ellipse cx="68" cy="110" rx="26" ry="7" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <rect x="56" y="64" width="16" height="46" rx="6" fill="#b86f50" stroke="none"/>
+  <rect x="64" y="64" width="8" height="46" clip-path="url(#post)" fill="#733e39" stroke="none"/>
+  <rect x="56" y="64" width="16" height="46" rx="6" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <rect x="16" y="20" width="96" height="56" rx="12" fill="#b86f50" stroke="none"/>
+  <g clip-path="url(#board)" stroke="none">
+    <rect x="16" y="20" width="96" height="12" fill="#e4a672"/>
+    <rect x="16" y="64" width="96" height="12" fill="#733e39"/>
+  </g>
+  <g fill="none" stroke="#3e2731" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 34 42 L 82 42"/>
+    <path d="M 34 54 L 94 54"/>
+  </g>
+  <rect x="16" y="20" width="96" height="56" rx="12" fill="none" stroke="#733e39" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
