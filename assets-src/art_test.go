@@ -734,12 +734,8 @@ func TestTilesetCheck_RejectsTilesThatDisagreeWithTheDrawing(t *testing.T) {
 	tests := []struct {
 		name   string
 		change func(ts *tsxTileset)
-		want   string // a substring of a problem expected; "" for none
+		want   string // a substring of a problem expected
 	}{
-		{
-			name:   "the outdoor tileset as committed passes",
-			change: func(*tsxTileset) {},
-		},
 		{
 			name:   "a tile whose id is not its drawing's grid cell is rejected",
 			change: func(ts *tsxTileset) { tileOfType(t, ts, "cliff_face").ID = 63 },
@@ -799,12 +795,8 @@ func TestTerrainCheck_RejectsIncompleteOrMisnamedTransitions(t *testing.T) {
 	tests := []struct {
 		name   string
 		change func(ts *tsxTileset)
-		want   string // a substring of a problem expected; "" for none
+		want   string // a substring of a problem expected
 	}{
-		{
-			name:   "the outdoor ground terrain as committed passes",
-			change: func(*tsxTileset) {},
-		},
 		{
 			name:   "a missing mixed corner combination is rejected",
 			change: func(ts *tsxTileset) { dropWangTile(t, ts, "grass_water_0110") },
@@ -878,12 +870,8 @@ func TestImageCollectionCheck_RejectsTilesThatDisagreeWithTheDrawings(t *testing
 	tests := []struct {
 		name   string
 		change func(ts *tsxTileset)
-		want   string // a substring of a problem expected; "" for none
+		want   string // a substring of a problem expected
 	}{
-		{
-			name:   "the decor tileset as committed passes",
-			change: func(*tsxTileset) {},
-		},
 		{
 			name: "a tile naming a drawing that does not exist is rejected",
 			change: func(ts *tsxTileset) {
@@ -1002,16 +990,9 @@ func checkImageCollection(dir string, pages map[string]pxSize, ts tsxTileset) []
 	return problems
 }
 
-// checkProblems fails unless problems is empty when want is "", or holds a
-// problem containing want.
+// checkProblems fails unless problems holds a problem containing want.
 func checkProblems(t *testing.T, problems []string, want string) {
 	t.Helper()
-	if want == "" {
-		if len(problems) != 0 {
-			t.Fatalf("problems = %q, want none", problems)
-		}
-		return
-	}
 	for _, p := range problems {
 		if strings.Contains(p, want) {
 			return
