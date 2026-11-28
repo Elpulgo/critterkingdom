@@ -139,8 +139,8 @@ type Scene struct {
 	// zones, and wild holds the entity of each, in zone order.
 	spawner *critter.Spawner
 	wild    []*wildCritter
-	// inView is reused by DrawWorld for the wild critters it draws.
-	inView []*wildCritter
+	// actors is reused by drawActors for the things it draws.
+	actors []actor
 	// timeOfDay decides which species are about; it stays critter.Day until
 	// day and night exist.
 	timeOfDay critter.TimeOfDay
@@ -517,8 +517,9 @@ func (s *Scene) Lights() []Light {
 	return []Light{{Pos: s.player.Pos.Sub(geom.Vec{Y: focusLift}), Radius: lanternRadius}}
 }
 
-// DrawWorld draws the map layers and the critter, and on a dark map covers
-// them with darkness except where the lights from Lights shine.
+// DrawWorld draws the map layers, the critter, the villagers, the wild
+// critters, the enemies and their spores, and on a dark map covers them with
+// darkness except where the lights from Lights shine.
 func (s *Scene) DrawWorld(c engine.Canvas) {
 	c.Image.Fill(ink)
 	s.pen.begin(c, s.camera)
@@ -529,68 +530,82 @@ func (s *Scene) DrawWorld(c engine.Canvas) {
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("ground"), c0, r0, c1, r1, elapsed)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("decor"), c0, r0, c1, r1, elapsed)
 	drawProps(&s.pen, s.m, s.m.ObjectLayer("props"), view, elapsed)
-	s.drawCritters(view)
-	s.drawCharacters()
+	s.drawActors(view)
 	drawTileLayer(&s.pen, s.m, s.m.TileLayer("above"), c0, r0, c1, r1, elapsed)
 	if s.m.Dark {
 		s.mask.draw(c, s.camera, s.viewSize, s.Lights())
 	}
 }
 
-// drawCharacters draws the villagers and the critter from the back of the
-// view to the front, by the Y of their feet, so whoever stands lower in the
-// view overlaps whoever stands behind. The critter is drawn last of those
-// with the same Y.
-func (s *Scene) drawCharacters() {
-	order := make([]int, len(s.npcs))
-	for i := range order {
-		order[i] = i
-	}
-	slices.SortStableFunc(order, func(a, b int) int {
-		return cmp.Compare(s.npcs[a].Pos.Y, s.npcs[b].Pos.Y)
-	})
-	feet := s.player.Pos
-	critterDrawn := false
-	for _, i := range order {
-		n := s.npcs[i]
-		if !critterDrawn && n.Pos.Y > feet.Y {
-			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
-			critterDrawn = true
-		}
-		drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, i)
-	}
-	if !critterDrawn {
-		drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
-	}
+// actorKind is the kind of thing drawActors draws.
+type actorKind int
+
+const (
+	actorVillager actorKind = iota
+	actorWild
+	actorEnemy
+	actorPlayer
+)
+
+// actor is one thing drawActors draws: its kind, its index in s.npcs, s.wild
+// or s.enemies, and the Y of its feet.
+type actor struct {
+	kind actorKind
+	i    int
+	y    float64
 }
 
-// drawCritters draws the player and the wild critters in view, the ones
-// whose feet are higher up the map first, so a critter in front of another
-// is drawn over it. The player is drawn over a wild critter with its feet at
-// the same height.
-func (s *Scene) drawCritters(view geom.Rect) {
-	near := view.Inset(-wildReach)
-	s.inView = s.inView[:0]
-	for _, w := range s.wild {
-		if near.Contains(w.Pos) {
-			s.inView = append(s.inView, w)
+// drawActors draws the critter, the villagers, and the wild critters and
+// enemies near view from the back of the view to the front, by the Y of their
+// feet, so whoever stands lower in the view overlaps whoever stands behind.
+// The critter is drawn last of those with the same Y. Spores are drawn on top
+// of everyone.
+func (s *Scene) drawActors(view geom.Rect) {
+	s.actors = s.actors[:0]
+	for i, n := range s.npcs {
+		s.actors = append(s.actors, actor{kind: actorVillager, i: i, y: n.Pos.Y})
+	}
+	nearWild := view.Inset(-wildReach)
+	for i, w := range s.wild {
+		if nearWild.Contains(w.Pos) {
+			s.actors = append(s.actors, actor{kind: actorWild, i: i, y: w.Pos.Y})
 		}
 	}
-	slices.SortStableFunc(s.inView, func(a, b *wildCritter) int {
-		return cmp.Compare(a.Pos.Y, b.Pos.Y)
+	nearEnemy := view.Inset(-enemyReach)
+	for i, e := range s.enemies {
+		if rectsOverlap(e.Box(), nearEnemy) {
+			s.actors = append(s.actors, actor{kind: actorEnemy, i: i, y: e.Pos.Y})
+		}
+	}
+	// The critter goes in last, so the stable sort draws it over the others
+	// at its Y.
+	s.actors = append(s.actors, actor{kind: actorPlayer, y: s.player.Pos.Y})
+	slices.SortStableFunc(s.actors, func(a, b actor) int {
+		return cmp.Compare(a.y, b.y)
 	})
-
-	feet := s.player.Pos
-	playerDrawn := false
-	for _, w := range s.inView {
-		if !playerDrawn && w.Pos.Y > feet.Y {
+	for _, a := range s.actors {
+		switch a.kind {
+		case actorPlayer:
+			feet := s.player.Pos
 			drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
-			playerDrawn = true
+		case actorVillager:
+			n := s.npcs[a.i]
+			drawVillager(&s.pen, n.Pos.X, n.Pos.Y, n.Facing, a.i)
+		case actorWild:
+			s.drawWild(s.wild[a.i])
+		case actorEnemy:
+			drawEnemy(&s.pen, s.enemies[a.i], s.elapsed)
 		}
-		s.drawWild(w)
 	}
-	if !playerDrawn {
-		drawCritter(&s.pen, feet.X, feet.Y, s.player.HopHeight()+s.bob, s.player.Facing)
+	for _, e := range s.enemies {
+		if e.Def().Behaviour != combat.BehaviourPuff {
+			continue // only a puff's hazards are spores; the others are bodies
+		}
+		for _, h := range e.Hazards() {
+			if rectsOverlap(h, nearEnemy) {
+				drawSpore(&s.pen, h)
+			}
+		}
 	}
 }
 
