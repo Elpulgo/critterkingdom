@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 9-slice button, pressed state, 96 by 96 px (48 by 48 CSS px at 2 px per CSS px).
+     Insets: 32 px (16 CSS px) on every side, the same as button.svg.
+     The same shape as button.svg moved 4 px down onto where its shadow was,
+     with no drop shadow and the shade colour (warm ochre) as the fill. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="96" height="96" viewBox="0 0 96 96">
+  <!-- Warm ochre body (the button's shade colour) -->
+  <rect id="button_pressed_body" x="4" y="8" width="88" height="80" rx="20" fill="#d77643" stroke="none"/>
+  <!-- Top highlight strip, one step darker than the normal button's -->
+  <rect id="button_pressed_highlight" x="16" y="14" width="64" height="6" rx="3" fill="#feae34" stroke="none"/>
+  <!-- Rust red outline -->
+  <rect id="button_pressed_outline" x="4" y="8" width="88" height="80" rx="20" fill="none" stroke="#be4a2f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

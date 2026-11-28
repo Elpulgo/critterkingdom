@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Star icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A chubby five-point sunny yellow star with rounded points. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, the star 6 px lower -->
+  <g id="star_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 64 18 L 78.7 47.8 L 111.6 52.5 L 87.8 75.7 L 93.4 108.5 L 64 93 L 34.6 108.5 L 40.2 75.7 L 16.4 52.5 L 49.3 47.8 Z" fill="#181425" stroke="#181425" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <!-- Sunny yellow star with warm ochre outline -->
+  <path id="star_64_body" d="M 64 18 L 78.7 47.8 L 111.6 52.5 L 87.8 75.7 L 93.4 108.5 L 64 93 L 34.6 108.5 L 40.2 75.7 L 16.4 52.5 L 49.3 47.8 Z" fill="#fee761" stroke="#d77643" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Marigold shade on the lower-right arm -->
+  <path id="star_64_shade" d="M 82 78 L 86 100 L 70 92 Z" fill="#feae34" stroke="#feae34" stroke-width="4" stroke-linejoin="round"/>
+  <!-- White highlight dab near the top-left -->
+  <ellipse id="star_64_highlight" cx="54" cy="56" rx="5" ry="7" transform="rotate(30 54 56)" fill="#ffffff" stroke="none"/>
+</svg>

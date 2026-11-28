@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Zzz emote (sleep), 128 by 128 px (16 by 16 world px at 8 px per world px).
+     Three sky cyan Z letters, big to small, rising to the upper right, in the
+     colours of the zzz icon. Each letter is a 24 px deep water blue stroke
+     under an 8 px sky cyan stroke, which gives an 8 px outline; the letters'
+     outlines stay at least 5 px apart. The drawing is centred on the page.
+     No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <g id="zzz_big" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 16 90 H 42 L 16 114 H 42" stroke="#124e89" stroke-width="24"/>
+    <path d="M 16 90 H 42 L 16 114 H 42" stroke="#2ce8f5" stroke-width="8"/>
+  </g>
+  <g id="zzz_middle" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 60 49 H 80 L 60 67 H 80" stroke="#124e89" stroke-width="24"/>
+    <path d="M 60 49 H 80 L 60 67 H 80" stroke="#2ce8f5" stroke-width="8"/>
+  </g>
+  <g id="zzz_small" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 98 14 H 112 L 98 26 H 112" stroke="#124e89" stroke-width="24"/>
+    <path d="M 98 14 H 112 L 98 26 H 112" stroke="#2ce8f5" stroke-width="8"/>
+  </g>
+</svg>

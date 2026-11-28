@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Lantern icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A wooden lantern with a glowing sunny yellow glass and a marigold flame,
+     the simplified redraw of lantern_64.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the lantern 6 px lower -->
+  <g id="lantern_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 23 15 Q 23 5 32 5 Q 41 5 41 15" fill="none" stroke="#181425" stroke-width="4" stroke-linecap="round"/>
+    <rect x="19" y="18" width="26" height="31" rx="6" fill="#181425" stroke="#181425" stroke-width="4"/>
+    <rect x="16" y="13" width="32" height="8" rx="4" fill="#181425" stroke="#181425" stroke-width="4"/>
+    <rect x="16" y="46" width="32" height="8" rx="4" fill="#181425" stroke="#181425" stroke-width="4"/>
+  </g>
+  <!-- Bark brown handle -->
+  <path id="lantern_32_handle" d="M 23 15 Q 23 5 32 5 Q 41 5 41 15" fill="none" stroke="#733e39" stroke-width="4" stroke-linecap="round"/>
+  <!-- Glowing glass -->
+  <rect id="lantern_32_glass" x="19" y="18" width="26" height="31" rx="6" fill="#fee761" stroke="#733e39" stroke-width="4"/>
+  <!-- Flame: marigold with fox orange outline -->
+  <path id="lantern_32_flame" d="M 33 24 Q 40 33 37 38 Q 33 43 29 38 Q 26 33 33 24 Z" fill="#feae34" stroke="#f77622" stroke-width="4" stroke-linejoin="round"/>
+  <!-- White glint on the glass, upper left -->
+  <rect id="lantern_32_highlight" x="22" y="23" width="4" height="10" rx="2" fill="#ffffff" stroke="none"/>
+  <!-- Wood brown cap and base -->
+  <rect id="lantern_32_cap" x="16" y="13" width="32" height="8" rx="4" fill="#b86f50" stroke="#733e39" stroke-width="4"/>
+  <rect id="lantern_32_base" x="16" y="46" width="32" height="8" rx="4" fill="#b86f50" stroke="#733e39" stroke-width="4"/>
+</svg>

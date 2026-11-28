@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sticker icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A round critter sticker with a thick white (#ffffff) sticker border and
+     its lower-right edge peeling up. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, the sticker 6 px lower -->
+  <g id="sticker_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <circle cx="64" cy="62" r="48" fill="#181425" stroke="#181425" stroke-width="6"/>
+  </g>
+  <!-- White sticker border with pale slate outline -->
+  <circle id="sticker_64_border" cx="64" cy="62" r="48" fill="#ffffff" stroke="#c0cbdc" stroke-width="6"/>
+  <!-- Meadow green picture inside the border -->
+  <circle id="sticker_64_picture" cx="64" cy="62" r="34" fill="#63c74d" stroke="none"/>
+  <!-- A little fox face: ears, head, muzzle, eyes and nose -->
+  <path id="sticker_64_ear_left" d="M 50 60 L 46 38 L 62 50 Z" fill="#f77622" stroke="#be4a2f" stroke-width="4" stroke-linejoin="round"/>
+  <path id="sticker_64_ear_right" d="M 78 60 L 82 38 L 66 50 Z" fill="#f77622" stroke="#be4a2f" stroke-width="4" stroke-linejoin="round"/>
+  <circle id="sticker_64_head" cx="64" cy="68" r="20" fill="#f77622" stroke="#be4a2f" stroke-width="4"/>
+  <ellipse id="sticker_64_muzzle" cx="64" cy="77" rx="10" ry="7" fill="#ead4aa" stroke="none"/>
+  <circle id="sticker_64_eye_left" cx="56" cy="65" r="4" fill="#181425" stroke="none"/>
+  <circle id="sticker_64_eye_right" cx="72" cy="65" r="4" fill="#181425" stroke="none"/>
+  <circle id="sticker_64_eye_left_shine" cx="55" cy="64" r="2" fill="#ffffff" stroke="none"/>
+  <circle id="sticker_64_eye_right_shine" cx="71" cy="64" r="2" fill="#ffffff" stroke="none"/>
+  <circle id="sticker_64_nose" cx="64" cy="73" r="3" fill="#3e2731" stroke="none"/>
+  <!-- Peeled-up flap at the lower right, showing the pale back of the sticker -->
+  <path id="sticker_64_peel" d="M 84 104 Q 92 90 108 84 Q 106 100 84 104 Z" fill="#c0cbdc" stroke="#8b9bb4" stroke-width="4" stroke-linejoin="round"/>
+</svg>

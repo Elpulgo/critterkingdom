@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Stick icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A thin, slightly bent wood brown stick with one small twig and a leaf.
+     The stick is a 22 px bark brown stroke under a 10 px wood brown stroke,
+     which gives a 6 px outline. sturdy_stick_64.svg is the thick one. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, stick, twig and leaf 6 px lower -->
+  <g id="stick_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 28 102 Q 52 70 98 26" fill="none" stroke="#181425" stroke-width="22" stroke-linecap="round"/>
+    <path d="M 55 70 Q 48 58 50 46" fill="none" stroke="#181425" stroke-width="14" stroke-linecap="round"/>
+    <ellipse cx="48" cy="36" rx="8" ry="12" transform="rotate(-25 48 36)" fill="#181425" stroke="#181425" stroke-width="4"/>
+  </g>
+  <!-- Twig -->
+  <path id="stick_64_twig_outline" d="M 55 70 Q 48 58 50 46" fill="none" stroke="#733e39" stroke-width="14" stroke-linecap="round"/>
+  <path id="stick_64_twig" d="M 55 70 Q 48 58 50 46" fill="none" stroke="#b86f50" stroke-width="4" stroke-linecap="round"/>
+  <!-- Leaf green leaf with pine green outline -->
+  <ellipse id="stick_64_leaf" cx="48" cy="36" rx="8" ry="12" transform="rotate(-25 48 36)" fill="#3e8948" stroke="#265c42" stroke-width="4"/>
+  <!-- Stick -->
+  <path id="stick_64_outline" d="M 28 102 Q 52 70 98 26" fill="none" stroke="#733e39" stroke-width="22" stroke-linecap="round"/>
+  <path id="stick_64_body" d="M 28 102 Q 52 70 98 26" fill="none" stroke="#b86f50" stroke-width="10" stroke-linecap="round"/>
+  <!-- Light tan highlight on the upper-left edge -->
+  <path id="stick_64_highlight" d="M 40 82 Q 52 66 70 50" fill="none" stroke="#e4a672" stroke-width="4" stroke-linecap="round"/>
+</svg>

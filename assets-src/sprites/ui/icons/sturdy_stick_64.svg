@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sturdy stick icon, 128 by 128 px (64 by 64 CSS px menu size at 2 px per CSS px).
+     A thick, straight wood brown club with a cream cloth wrap on the grip and
+     a round knob at the top. The stick is a 32 px bark brown stroke under a
+     20 px wood brown stroke, twice as thick as stick_64.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Soft drop shadow, stick and knob 6 px lower -->
+  <g id="sturdy_stick_64_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 30 100 L 88 40" fill="none" stroke="#181425" stroke-width="32" stroke-linecap="round"/>
+    <circle cx="92" cy="36" r="20" fill="#181425" stroke="#181425" stroke-width="6"/>
+  </g>
+  <!-- Stick -->
+  <path id="sturdy_stick_64_outline" d="M 30 100 L 88 40" fill="none" stroke="#733e39" stroke-width="32" stroke-linecap="round"/>
+  <path id="sturdy_stick_64_body" d="M 30 100 L 88 40" fill="none" stroke="#b86f50" stroke-width="20" stroke-linecap="round"/>
+  <!-- Light tan highlight on the upper-left edge -->
+  <path id="sturdy_stick_64_highlight" d="M 52 70 L 72 49" fill="none" stroke="#e4a672" stroke-width="6" stroke-linecap="round"/>
+  <!-- Cream cloth wrap round the grip, warm taupe outline and turns -->
+  <path id="sturdy_stick_64_wrap_outline" d="M 34 96 L 50 79" fill="none" stroke="#c28569" stroke-width="34" stroke-linecap="round"/>
+  <path id="sturdy_stick_64_wrap" d="M 34 96 L 50 79" fill="none" stroke="#ead4aa" stroke-width="22" stroke-linecap="round"/>
+  <path id="sturdy_stick_64_wrap_turn_1" d="M 33 84 L 43 94" fill="none" stroke="#c28569" stroke-width="4" stroke-linecap="round"/>
+  <path id="sturdy_stick_64_wrap_turn_2" d="M 41 76 L 51 86" fill="none" stroke="#c28569" stroke-width="4" stroke-linecap="round"/>
+  <!-- Round knob at the top -->
+  <circle id="sturdy_stick_64_knob" cx="92" cy="36" r="20" fill="#b86f50" stroke="#733e39" stroke-width="6"/>
+  <ellipse id="sturdy_stick_64_knob_highlight" cx="84" cy="28" rx="6" ry="4" transform="rotate(-35 84 28)" fill="#e4a672" stroke="none"/>
+</svg>

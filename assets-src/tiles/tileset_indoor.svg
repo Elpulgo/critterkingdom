@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="128" viewBox="0 0 1024 128">
+  <!-- Indoor tileset: 128 by 128 px tiles (16 by 16 world px) on an 8 by 1 grid.
+       Each tile is a <g> whose id is its tile type, translated to its grid cell
+       (column*128, 0) and clipped to its own 128 px cell by tile_cell.
+       Ground tiles get no outline. A shape crossing a tile edge is repeated
+       128 px over on the opposite side so the tile wraps seamlessly.
+       Light comes from the top-left.
+       Column 0: floor, 1: floor_2, 2: wall, 3: wall_top, 4: window; columns 5 to
+       7 are empty.
+       A room is built like this: a row of wall (or window) tiles is the back wall
+       seen from the front, standing on the floor below it; wall_top is the top of
+       the walls seen from above, one row of it above the back wall and one column
+       of it down each side and along the front of the room. floor and floor_2
+       wrap on all four edges and mix freely; wall and window wrap left to right
+       and join each other; wall_top wraps on all four edges. -->
+  <defs>
+    <clipPath id="tile_cell">
+      <rect x="0" y="0" width="128" height="128"/>
+    </clipPath>
+
+    <!-- The plank floor without its board ends: light tan #e4a672 boards running
+         left to right, each 28 px from seam to seam, split by wood brown #b86f50
+         seams 4 px high at y 28, 60, 92 and 124. The bottom seam meets the next
+         tile's top board. -->
+    <g id="floor_boards" stroke="none">
+      <rect x="0" y="0" width="128" height="128" fill="#e4a672"/>
+      <g fill="#b86f50">
+        <rect x="0" y="28" width="128" height="4"/>
+        <rect x="0" y="60" width="128" height="4"/>
+        <rect x="0" y="92" width="128" height="4"/>
+        <rect x="0" y="124" width="128" height="4"/>
+      </g>
+    </g>
+
+    <!-- The back wall seen from the front, in tile coordinates:
+         - y 0..64: peach #e8b796 plaster with a warm taupe #c28569 shade band at
+           the top under the wall top and cream #ead4aa wallpaper dots; the dots
+           on x 0 and 128 are the same dot across the tile edge.
+         - y 64..76: a wood brown #b86f50 rail with a light tan #e4a672 top.
+         - y 76..116: wood brown wainscot panels with a bark brown #733e39 shade
+           under the rail and between the panels, and a light tan highlight on
+           each panel's upper-left; the groove at the tile edge is 4 px on each
+           side, 8 px across the join.
+         - y 116..128: a bark brown baseboard. -->
+    <g id="indoor_wall" stroke="none">
+      <rect x="0" y="0" width="128" height="64" fill="#e8b796"/>
+      <rect x="0" y="0" width="128" height="8" fill="#c28569"/>
+      <g fill="#ead4aa">
+        <circle cx="32" cy="24" r="4"/>
+        <circle cx="96" cy="24" r="4"/>
+        <circle cx="0" cy="44" r="4"/>
+        <circle cx="64" cy="44" r="4"/>
+        <circle cx="128" cy="44" r="4"/>
+      </g>
+      <rect x="0" y="64" width="128" height="52" fill="#b86f50"/>
+      <rect x="0" y="64" width="128" height="4" fill="#e4a672"/>
+      <g fill="#733e39">
+        <rect x="0" y="76" width="128" height="4"/>
+        <rect x="0" y="80" width="4" height="36"/>
+        <rect x="60" y="80" width="8" height="36"/>
+        <rect x="124" y="80" width="4" height="36"/>
+        <rect x="0" y="116" width="128" height="12"/>
+      </g>
+      <g fill="#e4a672">
+        <rect x="10" y="86" width="6" height="22" rx="3"/>
+        <rect x="74" y="86" width="6" height="22" rx="3"/>
+      </g>
+    </g>
+  </defs>
+
+  <!-- Column 0: floor. The plank floor with one board end per row, staggered,
+       and a cream #ead4aa highlight at the start of the board after each end. -->
+  <g id="floor" transform="translate(0,0)" clip-path="url(#tile_cell)">
+    <use xlink:href="#floor_boards"/>
+    <g fill="#b86f50" stroke="none">
+      <rect x="80" y="0" width="4" height="28"/>
+      <rect x="24" y="32" width="4" height="28"/>
+      <rect x="104" y="64" width="4" height="28"/>
+      <rect x="48" y="96" width="4" height="28"/>
+    </g>
+    <g fill="#ead4aa" stroke="none">
+      <rect x="90" y="6" width="16" height="4" rx="2"/>
+      <rect x="34" y="38" width="16" height="4" rx="2"/>
+      <rect x="112" y="70" width="12" height="4" rx="2"/>
+      <rect x="58" y="102" width="16" height="4" rx="2"/>
+    </g>
+  </g>
+
+  <!-- Column 1: floor_2. The same boards with their ends in other places and two
+       wood brown #b86f50 knots. -->
+  <g id="floor_2" transform="translate(128,0)" clip-path="url(#tile_cell)">
+    <use xlink:href="#floor_boards"/>
+    <g fill="#b86f50" stroke="none">
+      <rect x="32" y="0" width="4" height="28"/>
+      <rect x="88" y="32" width="4" height="28"/>
+      <rect x="56" y="64" width="4" height="28"/>
+      <rect x="112" y="96" width="4" height="28"/>
+      <ellipse cx="80" cy="14" rx="8" ry="4"/>
+      <ellipse cx="26" cy="110" rx="6" ry="3"/>
+    </g>
+    <g fill="#ead4aa" stroke="none">
+      <rect x="42" y="6" width="16" height="4" rx="2"/>
+      <rect x="98" y="38" width="16" height="4" rx="2"/>
+      <rect x="66" y="70" width="16" height="4" rx="2"/>
+      <rect x="6" y="102" width="16" height="4" rx="2"/>
+    </g>
+  </g>
+
+  <!-- Column 2: wall. The back wall seen from the front. -->
+  <g id="wall" transform="translate(256,0)" clip-path="url(#tile_cell)">
+    <use xlink:href="#indoor_wall"/>
+  </g>
+
+  <!-- Column 3: wall_top. The top of a wall seen from above: bark brown #733e39
+       with wood brown #b86f50 grain highlights and two cocoa #3e2731 knots, all
+       kept clear of the edges so it wraps on all four sides. -->
+  <g id="wall_top" transform="translate(384,0)" clip-path="url(#tile_cell)">
+    <rect x="0" y="0" width="128" height="128" fill="#733e39" stroke="none"/>
+    <g fill="#b86f50" stroke="none">
+      <rect x="16" y="20" width="28" height="6" rx="3"/>
+      <rect x="72" y="50" width="36" height="6" rx="3"/>
+      <rect x="22" y="86" width="20" height="6" rx="3"/>
+      <rect x="80" y="106" width="24" height="6" rx="3"/>
+    </g>
+    <g fill="#3e2731" stroke="none">
+      <ellipse cx="58" cy="30" rx="5" ry="3"/>
+      <ellipse cx="62" cy="94" rx="5" ry="3"/>
+    </g>
+  </g>
+
+  <!-- Column 4: window. The wall with a four-pane window in the plaster: a wood
+       brown #b86f50 frame lit light tan #e4a672 on its top and left and shaded
+       bark brown #733e39 on its bottom and right, pond blue #0099db glass with
+       sky cyan #2ce8f5 glints and a white #ffffff sparkle, and a light tan sill
+       resting on the rail. The rail, wainscot and baseboard are the wall's own,
+       so the window sits in a row of wall tiles. -->
+  <g id="window" transform="translate(512,0)" clip-path="url(#tile_cell)">
+    <use xlink:href="#indoor_wall"/>
+    <g stroke="none">
+      <rect x="28" y="10" width="72" height="52" rx="6" fill="#b86f50"/>
+      <rect x="28" y="10" width="72" height="6" rx="3" fill="#e4a672"/>
+      <rect x="28" y="10" width="6" height="52" rx="3" fill="#e4a672"/>
+      <rect x="94" y="10" width="6" height="52" rx="3" fill="#733e39"/>
+      <rect x="28" y="56" width="72" height="6" rx="3" fill="#733e39"/>
+      <rect x="36" y="18" width="56" height="36" rx="2" fill="#0099db"/>
+      <g fill="#b86f50">
+        <rect x="60" y="18" width="8" height="36"/>
+        <rect x="36" y="32" width="56" height="8"/>
+      </g>
+      <g fill="#2ce8f5">
+        <path d="M 40 30 L 50 20 L 56 20 L 46 30 Z"/>
+        <path d="M 72 52 L 84 40 L 89 40 L 77 52 Z"/>
+      </g>
+      <circle cx="42" cy="23" r="3" fill="#ffffff"/>
+      <rect x="22" y="58" width="84" height="8" rx="4" fill="#e4a672"/>
+    </g>
+  </g>
+</svg>

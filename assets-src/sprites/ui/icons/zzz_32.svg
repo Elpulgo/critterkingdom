@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Zzz icon (sleep), 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     Two sky cyan Z letters, big then small, rising to the upper right: the
+     simplified redraw of zzz_64.svg, which has three, because a third letter
+     would be too small to keep a 4 px outline. Each letter is a 12 px deep
+     water blue stroke under a 4 px sky cyan stroke, a 4 px outline. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the letters 6 px lower -->
+  <g id="zzz_32_shadow" transform="translate(0 6)" opacity="0.22" fill="none" stroke="#181425" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 8 32 H 28 L 8 50 H 28"/>
+    <path d="M 38 8 H 56 L 38 24 H 56"/>
+  </g>
+  <g id="zzz_32_big" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 8 32 H 28 L 8 50 H 28" stroke="#124e89" stroke-width="12"/>
+    <path d="M 8 32 H 28 L 8 50 H 28" stroke="#2ce8f5" stroke-width="4"/>
+  </g>
+  <g id="zzz_32_small" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 38 8 H 56 L 38 24 H 56" stroke="#124e89" stroke-width="12"/>
+    <path d="M 38 8 H 56 L 38 24 H 56" stroke="#2ce8f5" stroke-width="4"/>
+  </g>
+</svg>

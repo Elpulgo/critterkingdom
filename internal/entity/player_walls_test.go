@@ -121,6 +121,23 @@ func TestPlayer_GivesUpWalkTargetBlockedByWall(t *testing.T) {
 	}
 }
 
+func TestPlayer_ARouteBlockedByAWallIsDroppedWhole(t *testing.T) {
+	p := entity.NewPlayer(geom.Vec{X: 9, Y: 24})
+	p.Walls = loadTestGrid(t)
+	// The first point lies behind the solid middle tile; the second is open
+	// ground the critter could reach.
+	p.WalkAlong([]geom.Vec{{X: 40, Y: 24}, {X: 9, Y: 44}})
+
+	// Tick 1 moves 1.0 px to flush with the wall, tick 2 moves nothing and
+	// gives up; the rest show the critter does not go on to the second point.
+	for range 30 {
+		p.Update(tick, geom.Vec{}, mapArea)
+	}
+	if _, walking := p.Target(); walking || !near(p.Pos, geom.Vec{X: 10, Y: 24}) {
+		t.Errorf("at %v, walking %v; want stopped against the wall at 10,24", p.Pos, walking)
+	}
+}
+
 func near(a, b geom.Vec) bool {
 	return math.Abs(a.X-b.X) < 1e-9 && math.Abs(a.Y-b.Y) < 1e-9
 }

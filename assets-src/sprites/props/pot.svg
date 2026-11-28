@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop pot: a round terracotta pot that can be lifted and broken, 16 by
+       16 world px. Warm ochre outlined in rust red, a rust red shade crescent
+       on the lower right of the belly and down the neck, a light tan
+       highlight on the upper left, a rust red band round the belly, a bark
+       brown mouth and a soft ink shadow below. -->
+  <defs>
+    <clipPath id="belly"><ellipse cx="64" cy="74" rx="38" ry="32"/></clipPath>
+    <clipPath id="neck"><rect x="46" y="32" width="36" height="22" rx="6"/></clipPath>
+  </defs>
+
+  <ellipse cx="68" cy="106" rx="40" ry="9" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <!-- Belly -->
+  <g clip-path="url(#belly)" stroke="none">
+    <rect x="0" y="0" width="128" height="128" fill="#be4a2f"/>
+    <ellipse cx="52" cy="62" rx="38" ry="32" fill="#d77643"/>
+    <ellipse cx="46" cy="60" rx="12" ry="7" transform="rotate(-35 46 60)" fill="#e4a672"/>
+  </g>
+  <path d="M 30 80 Q 64 92 98 80" fill="none" stroke="#be4a2f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="64" cy="74" rx="38" ry="32" fill="none" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Neck -->
+  <g clip-path="url(#neck)" stroke="none">
+    <rect x="0" y="0" width="128" height="128" fill="#d77643"/>
+    <rect x="72" y="32" width="10" height="22" fill="#be4a2f"/>
+  </g>
+  <rect x="46" y="32" width="36" height="22" rx="6" fill="none" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Rim and mouth -->
+  <ellipse cx="64" cy="30" rx="28" ry="12" fill="#d77643" stroke="#be4a2f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="64" cy="30" rx="16" ry="5" fill="#733e39" stroke="none"/>
+</svg>

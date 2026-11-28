@@ -37,10 +37,9 @@ type Player struct {
 	// Walls, when non-nil, constrains movement against solid scenery.
 	Walls Walls
 
-	target  geom.Vec
-	walking bool    // walking to target
-	moved   bool    // moved during the last update
-	hop     float64 // seconds left of the current hop
+	route []geom.Vec // points still to walk to, in order; empty when not walking
+	moved bool       // moved during the last update
+	hop   float64    // seconds left of the current hop
 }
 
 // NewPlayer returns a critter standing at pos, facing the player.
@@ -54,8 +53,8 @@ func (p *Player) Box() geom.Rect {
 	return feetBox(p.Pos)
 }
 
-// feetBox returns the 12 by 10 feet rectangle of a critter whose feet are at
-// pos, with its bottom centre at pos.
+// feetBox returns a character's 12 by 10 collision rectangle with its bottom
+// centre at the feet position pos.
 func feetBox(pos geom.Vec) geom.Rect {
 	return geom.Rect{
 		Min: geom.Vec{X: pos.X - boxHalfWidth, Y: pos.Y - boxHeight},
@@ -65,8 +64,23 @@ func feetBox(pos geom.Vec) geom.Rect {
 
 // WalkTo makes the critter walk in a straight line to target and stop there.
 func (p *Player) WalkTo(target geom.Vec) {
-	p.target = target
-	p.walking = true
+	p.WalkAlong([]geom.Vec{target})
+}
+
+// WalkAlong makes the critter walk in a straight line to each point in turn,
+// passing through every one, and stop on the last. An empty route stops the
+// walk. The points are copied, so the caller may reuse the slice.
+func (p *Player) WalkAlong(points []geom.Vec) {
+	p.route = append(p.route[:0:0], points...)
+}
+
+// Retarget moves the last point of the walk route to target, keeping the
+// points before it, as when a held pointer moves within the spot it was
+// pointing at. It does nothing when the critter is not walking.
+func (p *Player) Retarget(target geom.Vec) {
+	if n := len(p.route); n > 0 {
+		p.route[n-1] = target
+	}
 }
 
 // Place puts the critter's feet at pos, as when it arrives on another map. It
@@ -74,13 +88,16 @@ func (p *Player) WalkTo(target geom.Vec) {
 // facing and a hop under way are kept.
 func (p *Player) Place(pos geom.Vec) {
 	p.Pos = pos
-	p.walking = false
+	p.route = nil
 }
 
-// Target returns the spot the critter is walking to, and false when it is not
-// walking anywhere.
+// Target returns the spot the critter is walking to, the last point of its
+// route, and false when it is not walking anywhere.
 func (p *Player) Target() (geom.Vec, bool) {
-	return p.target, p.walking
+	if len(p.route) == 0 {
+		return geom.Vec{}, false
+	}
+	return p.route[len(p.route)-1], true
 }
 
 // Moved reports whether the critter moved during the last update.
@@ -107,9 +124,12 @@ func (p *Player) HopHeight() float64 {
 }
 
 // Update moves the critter for dt seconds. A non-zero dir, from the keys, a
-// stick or the touch pad, walks that way and cancels any walk target. The
-// critter's feet never leave area, and a target outside it is walked to the
-// nearest point inside.
+// stick or the touch pad, walks that way and cancels the whole walk route. A
+// walk heads for the route's next point and, on reaching it, goes on to the
+// one after from the next update; a step that walls block (moving less than a
+// tenth of what was meant) drops the whole route. The critter's feet never
+// leave area, and a route point outside it is walked to the nearest point
+// inside.
 func (p *Player) Update(dt float64, dir geom.Vec, area geom.Rect) {
 	p.hop = math.Max(0, p.hop-dt)
 
@@ -117,16 +137,16 @@ func (p *Player) Update(dt float64, dir geom.Vec, area geom.Rect) {
 	next := p.Pos
 	switch {
 	case !dir.IsZero():
-		p.walking = false
+		p.route = nil
 		next = p.Pos.Add(dir.Scale(step))
-	case p.walking:
-		target := area.Clamp(p.target)
+	case len(p.route) > 0:
+		target := area.Clamp(p.route[0])
 		to := target.Sub(p.Pos)
 		if dist := to.Len(); dist > step {
 			next = p.Pos.Add(to.Scale(step / dist))
 		} else {
 			next = target
-			p.walking = false
+			p.route = p.route[1:]
 		}
 	}
 
@@ -140,8 +160,8 @@ func (p *Player) Update(dt float64, dir geom.Vec, area geom.Rect) {
 	if p.Walls != nil {
 		next = p.Pos.Add(p.Walls.Slide(p.Box(), next.Sub(p.Pos)))
 	}
-	if p.walking && next.Sub(p.Pos).Len() < 0.1*intended {
-		p.walking = false
+	if len(p.route) > 0 && next.Sub(p.Pos).Len() < 0.1*intended {
+		p.route = nil
 	}
 	p.moved = next != p.Pos
 	p.Pos = next

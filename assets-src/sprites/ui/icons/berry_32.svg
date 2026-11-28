@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Berry icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A round poppy red berry with a two-leaf green cap, the simplified redraw
+     of berry_64.svg without the seeds. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the berry 6 px lower -->
+  <g id="berry_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <circle cx="32" cy="35" r="18" fill="#181425" stroke="#181425" stroke-width="4"/>
+  </g>
+  <!-- Poppy red berry fill -->
+  <circle id="berry_32_body" cx="32" cy="35" r="18" fill="#e43b44" stroke="none"/>
+  <!-- Shade crescent on the lower-right curve -->
+  <path id="berry_32_shade" d="M 45 34 Q 45 47 32 48" fill="none" stroke="#a22633" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Highlight on the upper-left curve -->
+  <ellipse id="berry_32_highlight" cx="24" cy="29" rx="4" ry="6" transform="rotate(35 24 29)" fill="#f6757a" stroke="none"/>
+  <!-- Berry crimson outline on top -->
+  <circle id="berry_32_outline" cx="32" cy="35" r="18" fill="none" stroke="#a22633" stroke-width="4"/>
+  <!-- Leaf green cap and stem with pine green outline -->
+  <path id="berry_32_leaf_left" d="M 32 17 Q 24 6 15 13 Q 22 23 32 17 Z" fill="#3e8948" stroke="#265c42" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path id="berry_32_leaf_right" d="M 32 17 Q 40 6 49 13 Q 42 23 32 17 Z" fill="#3e8948" stroke="#265c42" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path id="berry_32_stem" d="M 32 17 Q 32 10 36 5" fill="none" stroke="#265c42" stroke-width="4" stroke-linecap="round"/>
+</svg>

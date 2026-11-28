@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Ground decoration twig: a fallen twig with one side branch and a small
+       leaf. 16 by 16 world px. The wood is drawn twice along the same paths: a
+       24 px bark brown stroke under an 8 px wood brown one, which leaves the
+       8 px round outline on each side. The leaf is leaf green with a pine green
+       outline. A soft ink shadow lies under the twig. -->
+  <ellipse cx="68" cy="82" rx="40" ry="9" transform="rotate(-18 68 82)" fill="#181425" fill-opacity="0.2" stroke="none"/>
+  <g fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <g stroke="#733e39" stroke-width="24">
+      <path d="M 28 86 C 48 78 70 70 100 58"/>
+      <path d="M 64 72 C 68 60 72 52 80 44"/>
+    </g>
+    <g stroke="#b86f50" stroke-width="8">
+      <path d="M 28 86 C 48 78 70 70 100 58"/>
+      <path d="M 64 72 C 68 60 72 52 80 44"/>
+    </g>
+  </g>
+  <path d="M 82 42 C 84 30 94 24 106 26 C 104 38 96 44 82 42 Z" fill="#3e8948" stroke="#265c42" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

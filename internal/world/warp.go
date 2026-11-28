@@ -122,6 +122,7 @@ func (m *Map) loadMarkers() error {
 	}
 	seen := make(map[string]int)
 	seenZones := make(map[string]int)
+	seenNPC := make(map[string]int)
 	for _, o := range layer.Objects {
 		switch o.Type {
 		case spawnType:
@@ -161,6 +162,11 @@ func (m *Map) loadMarkers() error {
 			}
 			seenZones[z.ID] = o.ID
 			m.zones = append(m.zones, z)
+      
+		case npcType:
+			if err := m.loadNPC(o, seenNPC); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

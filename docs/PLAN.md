@@ -87,7 +87,7 @@ deterministic.
 
 - Walk near a villager and a "…" bubble appears above them. Press paw: a
   dialogue box with portrait, name and text that types out. Tap anywhere to
-  continue.
+  continue; when choices are showing, the player picks one instead.
 - Choices: at most two, as big buttons with icons (check and cross, or
   pictures).
 - A speaker button (or auto mode) reads the line aloud using the browser's
@@ -246,7 +246,7 @@ Rules: eight-direction movement, four-direction facing. No run button (walk
 speed is brisk). The paw button interacts when something is in front of you
 and swings the stick otherwise; villagers can never be hit. There is no dodge
 or block button; enemies telegraph instead. Dialogue advances with any tap or
-paw. Everything the player can interact with shows a bubble when they are
+paw, except when it shows choices. Everything the player can interact with shows a bubble when they are
 near. Touch targets are at least 64 CSS pixels (about 1 cm on a tablet).
 
 ## 4. Technical plan
@@ -419,16 +419,16 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 - [ ] Camera follow and clamp; y-sorted props; "above" layer
 - [x] Warps: village to meadow, village to house interior
 - [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
-- [ ] A* tap-to-walk, joystick alternative
+- [x] A* tap-to-walk, joystick alternative
 - [ ] Audio manager: one music loop, footsteps, unlock on first tap
 
 **Done when** you can walk around the village, enter a house and reach the meadow.
 
 ### M2 Talking: "Hello, neighbour" (2 weeks)
 
-- [ ] NPC entities: idle and wander, face the player, "…" bubble
+- [x] NPC entities: idle and wander, face the player, "…" bubble
 - [ ] Dialogue box: portrait, name, typewriter text, at most two big choice buttons
-- [ ] Dialogue data format, runner and tests
+- [x] Dialogue data format, runner and tests
 - [x] i18n with sv and en string tables; a font with å, ä and ö
 - [ ] Read-aloud via speechSynthesis with a toggle
 
@@ -472,7 +472,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 
 - [ ] Gating items: Snippers (brambles), Splash Boots (shallow water)
 - [ ] Puzzle pieces: push block, flower switch, mushrooms in order, key and door, pots
-- [ ] Darkness with a light radius (firefly companion or lantern) using a light-mask image
+- [x] Darkness with a light radius (firefly companion or lantern) using a light-mask image
 - [ ] Rooms that lock until cleared; sunflower checkpoint
 - [ ] Boss: the Grumbling Grub with three telegraphed phases, star health bar, berry ending and sticker
 - [ ] Glow Cave map (five rooms), Glow Seed, Sturdy Stick, main quest skeleton; "Fix the Bridge" opens the Woods
@@ -644,12 +644,14 @@ only face down). Small critters: 5 to 10. Enemies: about 12. The boss: about
 7. Map layout in Tiled (orthogonal, 128 px tiles, about 40 by 30). Layers:
    `ground`, `decor`, `props` (object layer with tile objects, y-sorted),
    `above` (tree tops, roofs), `collision` (a one-tile "solid" tileset, or
-   rectangles), `objects` (`player_spawn`, `npc` with `id`, `warp` with
+   rectangles), `objects` (`player_spawn`, `npc` rectangles with `id`,
+   where the rectangle is the area the villager wanders in, `warp` with
    `target_map` and `target_spawn`, `spawn_zone` with `habitat`, `enemy` with
    `id`, `room` rectangles with `locks_doors`, `item` with `item_id`,
    `trigger` with `event`, puzzle objects). Map properties: `music`, `biome`,
-   `dark`. The loader divides Tiled's positions by 8, so the game works in
-   world pixels.
+   `dark`. *Now:* a dark map is covered by a light mask with a lantern light
+   on the critter; the firefly light and the lantern item come later. The
+   loader divides Tiled's positions by 8, so the game works in world pixels.
 8. Turn on "Repeat last export on save" in Tiled so the `.tmj` in
    `assets/maps/` is always current. Test with `go run ./cmd/game -map meadow`.
 
@@ -925,10 +927,34 @@ A dialogue file:
         {"text": "ui.yes",   "icon": "check", "do": [{"startQuest": "missing_hat"}], "goto": "thanks"},
         {"text": "ui.later", "icon": "cross", "goto": "end"}
       ]
+    },
+    "thanks": {
+      "lines": [
+        {"text": "grandma.hat.thanks", "face": "happy"}
+      ]
     }
   }
 }
 ```
+
+Rules of a dialogue file (`internal/dialogue`):
+
+- Entry nodes are the nodes with an `if` key. A conversation starts at the
+  first entry node, in file order, whose conditions all hold; `"if": []`
+  always holds, so it works as the fallback (daily chatter). A node without
+  `if`, like `thanks`, is only reached by a `goto`, and its `if` is never
+  checked on a `goto`.
+- `end` is reserved: `"goto": "end"` ends the conversation, a choice without
+  `goto` ends it too, and a node may not be called `end`. A node without
+  choices ends the conversation after its last line.
+- A node has at least one line and at most two choices. The choices appear
+  with the node's last line, and the player must pick one to go on.
+- Choosing runs the choice's `do` actions in order, then follows its `goto`.
+- A `goto` to a node that is not in the file is a load error, as are more
+  than two choices.
+- `text` values are string-table keys. Conditions and actions are passed to
+  the game unchanged, so the dialogue package knows nothing about quests or
+  flags.
 
 A string table (`strings/sv.json`):
 

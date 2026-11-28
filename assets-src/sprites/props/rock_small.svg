@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Prop rock_small: a small stone sitting low in its 16 by 16 world px
+       cell. The same materials as rock: cool grey outlined in slate blue, a
+       slate blue shade crescent on the lower right, a pale slate highlight on
+       the upper left and a soft ink shadow below. -->
+  <defs>
+    <clipPath id="rock">
+      <path d="M 36 92 C 30 76 42 60 62 58 C 80 56 96 66 96 82 C 96 94 84 100 66 100 C 50 100 40 98 36 92 Z"/>
+    </clipPath>
+  </defs>
+
+  <ellipse cx="68" cy="99" rx="34" ry="8" fill="#181425" fill-opacity="0.22" stroke="none"/>
+
+  <g clip-path="url(#rock)" stroke="none">
+    <rect x="0" y="0" width="128" height="128" fill="#5a6988"/>
+    <ellipse cx="58" cy="72" rx="28" ry="17" fill="#8b9bb4"/>
+    <ellipse cx="52" cy="68" rx="10" ry="5" transform="rotate(-25 52 68)" fill="#c0cbdc"/>
+  </g>
+  <path d="M 36 92 C 30 76 42 60 62 58 C 80 56 96 66 96 82 C 96 94 84 100 66 100 C 50 100 40 98 36 92 Z" fill="none" stroke="#5a6988" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

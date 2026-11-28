@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Heart icon, 64 by 64 px (32 by 32 CSS px HUD size at 2 px per CSS px).
+     A plump poppy red heart, the simplified redraw of heart_64.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Soft drop shadow, the heart 6 px lower -->
+  <g id="heart_32_shadow" transform="translate(0 6)" opacity="0.22">
+    <path d="M 32 50 C 15 40 7 30 8 20 C 9 10 24 6 32 17 C 40 6 55 10 56 20 C 57 30 49 40 32 50 Z" fill="#181425" stroke="#181425" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <!-- Poppy red heart fill -->
+  <path id="heart_32_body" d="M 32 50 C 15 40 7 30 8 20 C 9 10 24 6 32 17 C 40 6 55 10 56 20 C 57 30 49 40 32 50 Z" fill="#e43b44" stroke="none"/>
+  <!-- Shade on the lower-right curve -->
+  <path id="heart_32_shade" d="M 50 27 Q 47 37 36 44" fill="none" stroke="#a22633" stroke-width="4" stroke-linecap="round"/>
+  <!-- Highlight on the upper-left lobe -->
+  <ellipse id="heart_32_highlight" cx="19" cy="20" rx="4" ry="6" transform="rotate(40 19 20)" fill="#f6757a" stroke="none"/>
+  <!-- Berry crimson outline on top -->
+  <path id="heart_32_outline" d="M 32 50 C 15 40 7 30 8 20 C 9 10 24 6 32 17 C 40 6 55 10 56 20 C 57 30 49 40 32 50 Z" fill="none" stroke="#a22633" stroke-width="4" stroke-linejoin="round"/>
+</svg>

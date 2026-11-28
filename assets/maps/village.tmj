@@ -6697,7 +6697,58 @@
               "value": "pond"
             }
           ]
-        }
+         },
+        {
+          "id": 153,
+          "name": "baker_badger",
+          "type": "npc",
+          "x": 2688,
+          "y": 1664,
+          "width": 384,
+          "height": 384,
+          "visible": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "string",
+              "value": "baker_badger"
+            }
+          ]
+        },
+        {
+          "id": 154,
+          "name": "mayor_owl",
+          "type": "npc",
+          "x": 2048,
+          "y": 2688,
+          "width": 384,
+          "height": 384,
+          "visible": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "string",
+              "value": "mayor_owl"
+            }
+          ]
+        },
+        {
+          "id": 155,
+          "name": "grandma_hedgehog",
+          "type": "npc",
+          "x": 512,
+          "y": 1664,
+          "width": 384,
+          "height": 384,
+          "visible": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "string",
+              "value": "grandma_hedgehog"
+            }
+          ]
+        },
       ]
     }
   ]

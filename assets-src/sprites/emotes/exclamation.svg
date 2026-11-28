@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Exclamation emote, 128 by 128 px (16 by 16 world px at 8 px per world px).
+     A chubby sunny yellow exclamation mark, a bar that narrows downwards over
+     a round dot, centred on the page. Warm ochre 8 px outline like the star
+     icon and the hit spark, marigold shade on the lower-right, white
+     highlight on the upper-left. No drop shadow: it floats. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Bar: 36 px wide at the top, 20 px at the bottom -->
+  <path id="exclamation_bar" d="M 46 24 Q 46 12 64 12 Q 82 12 82 24 L 74 63 Q 72 70 64 70 Q 56 70 54 63 Z" fill="#fee761" stroke="#d77643" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Shade along the bar's right side -->
+  <path id="exclamation_bar_shade" d="M 75 26 L 68.5 58.5" fill="none" stroke="#feae34" stroke-width="6" stroke-linecap="round"/>
+  <!-- Highlight along the bar's left side -->
+  <ellipse id="exclamation_bar_highlight" cx="57" cy="31" rx="4" ry="9" transform="rotate(-12 57 31)" fill="#ffffff" stroke="none"/>
+  <!-- Dot, 12 px below the bar's outline -->
+  <circle id="exclamation_dot" cx="64" cy="103" r="13" fill="#fee761" stroke="#d77643" stroke-width="8"/>
+  <!-- Shade on the dot's lower-right -->
+  <path id="exclamation_dot_shade" d="M 70.5 103 A 6.5 6.5 0 0 1 64 109.5" fill="none" stroke="#feae34" stroke-width="6" stroke-linecap="round"/>
+  <!-- Highlight on the dot's upper-left -->
+  <circle id="exclamation_dot_highlight" cx="60.5" cy="99.5" r="3.5" fill="#ffffff" stroke="none"/>
+</svg>
