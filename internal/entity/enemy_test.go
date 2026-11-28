@@ -22,7 +22,7 @@ func thistleDef() combat.EnemyDef {
 	return combat.EnemyDef{ID: "thistle_beast", Behaviour: combat.BehaviourCharge, HP: 2, Damage: 1, Speed: 60, TelegraphSeconds: 0.8}
 }
 
-var openArea = geom.Rect{Max: geom.Vec{X: 320, Y: 240}}
+var enemyArea = geom.Rect{Max: geom.Vec{X: 320, Y: 240}}
 
 // newEnemy builds an enemy whose defeats are collected in the returned slice.
 func newEnemy(t *testing.T, def combat.EnemyDef, pos geom.Vec, clock *fakeClock) (*entity.Enemy, *[]combat.EnemyDefeated) {
@@ -80,7 +80,7 @@ func TestEnemy_DefeatedEnemyStopsHurtingRunsAwayAndIsGoneAfterTheRunOff(t *testi
 	// Squash for 0.6 s, then hop left at 30 px/s: 3 px by 0.7 s.
 	for _, at := range []time.Duration{0, 600 * time.Millisecond, 700 * time.Millisecond} {
 		clock.now = at
-		e.Update(critter, openArea)
+		e.Update(critter, enemyArea)
 	}
 	if e.Phase() != combat.Attack || len(e.Hazards()) == 0 || !near(e.Pos, geom.Vec{X: 97, Y: 100}) {
 		t.Fatalf("before the hit: phase %v hazards %v Pos %v, want a hop at (97, 100) with its body as a hazard", e.Phase(), e.Hazards(), e.Pos)
@@ -104,7 +104,7 @@ func TestEnemy_DefeatedEnemyStopsHurtingRunsAwayAndIsGoneAfterTheRunOff(t *testi
 	}
 	for _, s := range steps {
 		clock.now = s.at
-		e.Update(critter, openArea)
+		e.Update(critter, enemyArea)
 		if hz := e.Hazards(); len(hz) != 0 {
 			t.Errorf("at %v: hazards %v, want none", s.at, hz)
 		}
@@ -153,7 +153,7 @@ func TestEnemy_ChargeOnOpenGroundRunsItsFullDistance(t *testing.T) {
 	// 60 ticks a second: shake until 0.8 s, charge 72 px right until 2.0 s.
 	for i := 0; i <= 120; i++ {
 		clock.now = time.Duration(i) * time.Second / 60
-		e.Update(critter, openArea)
+		e.Update(critter, enemyArea)
 		if clock.now > 800*time.Millisecond && e.Phase() != combat.Attack {
 			t.Fatalf("at %v: phase %v at Pos %v, want the charge still running", clock.now, e.Phase(), e.Pos)
 		}
