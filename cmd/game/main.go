@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/audio"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
 	"github.com/Elpulgo/critterkingdom/internal/i18n"
 	"github.com/Elpulgo/critterkingdom/internal/world"
@@ -53,7 +54,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap, world.WithEnemies(enemies))
+	// The manager holds the start map's music until the audio device is
+	// ready: at once on the desktop, after the first tap in the browser.
+	sound := audio.NewManager(audio.NewEbitenBackend(assets.LoadMusic, assets.LoadSound))
+	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap,
+		world.WithEnemies(enemies), world.WithAudio(sound))
 	if err != nil {
 		log.Fatal(err)
 	}
