@@ -419,7 +419,7 @@ work in section 6 kicks in. Each milestone ends with a kid playtest.
 - [ ] Camera follow and clamp; y-sorted props; "above" layer
 - [x] Warps: village to meadow, village to house interior
 - [ ] Player critter as parts, with four-direction idle and walk animated in code; `make art` exports the parts from Inkscape (the code-drawn placeholder is fine until the drawing is ready)
-- [ ] A* tap-to-walk, joystick alternative
+- [x] A* tap-to-walk, joystick alternative
 - [ ] Audio manager: one music loop, footsteps, unlock on first tap
 
 **Done when** you can walk around the village, enter a house and reach the meadow.
