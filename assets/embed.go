@@ -11,5 +11,5 @@ import "embed"
 // data/strings/sv.json and data/strings/en.json, and critters.json.
 //
 //go:embed fonts maps critters.json
-//go:embed fonts maps data
+//go:embed fonts maps data sprites
 var FS embed.FS
