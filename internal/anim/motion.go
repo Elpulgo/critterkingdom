@@ -31,6 +31,11 @@ const (
 // blinkClosedScaleY is how far a blink squashes its parts.
 const blinkClosedScaleY = 0.1
 
+// blinkMinWeight is the least weight at which a blink still closes its parts:
+// a blink cannot be half done, so it plays while its animation is the larger
+// share of the pose.
+const blinkMinWeight = 0.5
+
 // knownMotion reports whether k is one of the shared motions.
 func knownMotion(k MotionKind) bool {
 	switch k {
@@ -71,27 +76,32 @@ func (m Motion) moves(part string) bool {
 	return false
 }
 
-// applyTo adds the motion at time t (seconds) to pose. Offsets and turns add
-// up and scales multiply, so several motions can move one part.
-func (m Motion) applyTo(pose *PartPose, t float64) {
+// applyTo adds the motion at time t (seconds) to pose, its amount scaled by
+// weight: 1 is full strength and 0 leaves the pose alone. A blink is not
+// scaled; it closes its parts only while weight is at least half. Offsets and
+// turns add up and scales multiply, so several motions can move one part.
+func (m Motion) applyTo(pose *PartPose, t, weight float64) {
 	u := t/m.Period + m.Phase
 	switch m.Kind {
 	case Breathe:
-		s := m.Size * math.Sin(2*math.Pi*u)
+		s := weight * m.Size * math.Sin(2*math.Pi*u)
 		pose.ScaleX *= 1 - s
 		pose.ScaleY *= 1 + s
 	case Blink:
+		if weight < blinkMinWeight {
+			return
+		}
 		into := (u - math.Floor(u)) * m.Period // seconds into this period
 		if into >= m.Period-m.Duration {
 			pose.ScaleY *= blinkClosedScaleY
 		}
 	case Bob:
 		s := math.Sin(math.Pi * u)
-		pose.Offset = pose.Offset.Add(geom.Vec{Y: -m.Size * s * s})
+		pose.Offset = pose.Offset.Add(geom.Vec{Y: -weight * m.Size * s * s})
 	case Patter:
-		lift := m.Size * math.Max(0, math.Sin(2*math.Pi*u))
+		lift := weight * m.Size * math.Max(0, math.Sin(2*math.Pi*u))
 		pose.Offset = pose.Offset.Add(geom.Vec{Y: -lift})
 	case Wiggle:
-		pose.Turn += m.Size * math.Pi / 180 * math.Sin(2*math.Pi*u)
+		pose.Turn += weight * m.Size * math.Pi / 180 * math.Sin(2*math.Pi*u)
 	}
 }

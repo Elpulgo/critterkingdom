@@ -140,14 +140,27 @@ func (l Layout) hasPart(name string) bool {
 // names that the view has, or every part when it names none. The same t
 // always gives the same pose.
 func (a Animation) Pose(v View, t float64) []PartPose {
+	poses := restPoses(v)
+	a.addTo(poses, t, 1)
+	return poses
+}
+
+// restPoses returns every part of the view where it is drawn, unmoved.
+func restPoses(v View) []PartPose {
 	poses := make([]PartPose, len(v.Parts))
 	for i, p := range v.Parts {
 		poses[i] = restPose(p)
+	}
+	return poses
+}
+
+// addTo adds the animation at time t, scaled by weight, to poses.
+func (a Animation) addTo(poses []PartPose, t, weight float64) {
+	for i := range poses {
 		for _, m := range a.Motions {
-			if m.moves(p.Name) {
-				m.applyTo(&poses[i], t)
+			if m.moves(poses[i].Name) {
+				m.applyTo(&poses[i], t, weight)
 			}
 		}
 	}
-	return poses
 }
