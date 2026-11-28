@@ -37,6 +37,17 @@ func thistleDef() combat.EnemyDef {
 	}
 }
 
+func mushroomDef() combat.EnemyDef {
+	return combat.EnemyDef{
+		ID:               "grumpy_mushroom",
+		Behaviour:        combat.BehaviourPuff,
+		HP:               1,
+		Damage:           1,
+		Speed:            25,
+		TelegraphSeconds: 0.9,
+	}
+}
+
 func newBehaviour(t *testing.T, def combat.EnemyDef, clock *fakeClock) combat.Behaviour {
 	t.Helper()
 	b, err := combat.NewBehaviour(def, clock.read)
@@ -59,6 +70,7 @@ func TestNewBehaviour_RejectsADefinitionItCannotRunSafely(t *testing.T) {
 		{"unknown behaviour name", func(d *combat.EnemyDef) { d.Behaviour = "wobble" }, `unknown behaviour "wobble"`},
 		{"telegraph under 0.6 s", func(d *combat.EnemyDef) { d.TelegraphSeconds = 0.59 }, "telegraph"},
 		{"charge without speed", func(d *combat.EnemyDef) { d.Behaviour, d.Speed = combat.BehaviourCharge, 0 }, "positive speed"},
+		{"puff without spore speed", func(d *combat.EnemyDef) { d.Behaviour, d.Speed = combat.BehaviourPuff, 0 }, "positive spore speed"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -76,7 +88,7 @@ func TestNewBehaviour_RejectsADefinitionItCannotRunSafely(t *testing.T) {
 }
 
 func TestBehaviour_NoHazardBeforeTheTelegraphHasRun(t *testing.T) {
-	defs := []combat.EnemyDef{slimeDef(), thistleDef()}
+	defs := []combat.EnemyDef{slimeDef(), thistleDef(), mushroomDef()}
 	self := geom.Vec{X: 100, Y: 100}
 	target := geom.Vec{X: 120, Y: 100} // inside every notice range
 	noticed := 5 * time.Second

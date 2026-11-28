@@ -62,8 +62,8 @@ type Behaviour interface {
 
 // NewBehaviour returns the state machine def.Behaviour names, reading game
 // time from clock. It returns an error for a behaviour name it does not know,
-// for a telegraph shorter than MinTelegraph, and for a charge without a
-// positive speed.
+// for a telegraph shorter than MinTelegraph, and for a charge or puff without
+// a positive speed (for puff, the speed of its spores).
 func NewBehaviour(def EnemyDef, clock Clock) (Behaviour, error) {
 	if def.Telegraph() < MinTelegraph {
 		return nil, fmt.Errorf("enemy %q: telegraph %v is below the minimum %v", def.ID, def.Telegraph(), MinTelegraph)
@@ -76,6 +76,11 @@ func NewBehaviour(def EnemyDef, clock Clock) (Behaviour, error) {
 			return nil, fmt.Errorf("enemy %q: charge needs a positive speed, got %v", def.ID, def.Speed)
 		}
 		return newCharge(def, clock), nil
+	case BehaviourPuff:
+		if def.Speed <= 0 {
+			return nil, fmt.Errorf("enemy %q: puff needs a positive spore speed, got %v", def.ID, def.Speed)
+		}
+		return newPuff(def, clock), nil
 	}
 	return nil, fmt.Errorf("enemy %q: unknown behaviour %q", def.ID, def.Behaviour)
 }
