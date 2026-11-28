@@ -31,6 +31,9 @@ const (
 	// may change, in world pixels per second, which lets it follow the swing
 	// and settle softly when the critter stops.
 	bobPace = math.Pi / (2 * stepTime)
+	// lanternRadius is how far the lantern the critter carries on dark maps
+	// reaches, in world pixels.
+	lanternRadius = 56
 )
 
 const (
@@ -181,6 +184,16 @@ func (s *Scene) updateBob(dt float64) {
 		target = swing * swing
 	}
 	s.bob += math.Max(-bobPace*dt, math.Min(bobPace*dt, target-s.bob))
+}
+
+// Lights returns the light sources of the current map: on a dark map the
+// lantern the critter carries, centred on its body at the camera's focus and
+// unmoved by a hop; on any other map none.
+func (s *Scene) Lights() []Light {
+	if !s.m.Dark {
+		return nil
+	}
+	return []Light{{Pos: s.player.Pos.Sub(geom.Vec{Y: focusLift}), Radius: lanternRadius}}
 }
 
 // DrawWorld draws the map layers and the critter.
