@@ -139,3 +139,109 @@ func solidCellUnder(g *world.Grid, box geom.Rect) ([2]int, bool) {
 	}
 	return [2]int{}, false
 }
+
+func TestWild_StopsAndFacesAPlayerWhoComesWithinTheNoticeRadius(t *testing.T) {
+	zone := geom.Rect{Min: geom.Vec{X: 0, Y: 0}, Max: geom.Vec{X: 200, Y: 200}}
+	home := geom.Vec{X: 100, Y: 100}
+	tests := []struct {
+		name   string
+		player geom.Vec
+		start  entity.Facing
+		want   entity.Facing
+	}{
+		{"player to the left", geom.Vec{X: 75, Y: 100}, entity.FacingRight, entity.FacingLeft},
+		{"player to the right", geom.Vec{X: 125, Y: 100}, entity.FacingLeft, entity.FacingRight},
+		{"player above", geom.Vec{X: 100, Y: 70}, entity.FacingDown, entity.FacingUp},
+		{"player below", geom.Vec{X: 100, Y: 130}, entity.FacingUp, entity.FacingDown},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := entity.NewWild(home, zone, seeded(3))
+			w.Facing = tc.start
+
+			// Five seconds is longer than any rest, so a critter that had
+			// not noticed would have hopped by the end.
+			for i := range 5 * 60 {
+				w.Update(tick, tc.player)
+				if !w.Noticing() {
+					t.Fatalf("tick %d: critter is in state %v, want noticing", i, w.State())
+				}
+				if w.Pos != home || w.HopHeight() != 0 {
+					t.Fatalf("tick %d: noticing critter moved to %v, %v px up", i, w.Pos, w.HopHeight())
+				}
+			}
+			if w.Facing != tc.want {
+				t.Errorf("critter faces %v, want %v", w.Facing, tc.want)
+			}
+		})
+	}
+}
+
+func TestWild_MidHopFinishesItsArcBeforeNoticingThePlayer(t *testing.T) {
+	zone := geom.Rect{Min: geom.Vec{X: 0, Y: 0}, Max: geom.Vec{X: 200, Y: 200}}
+	w := entity.NewWild(geom.Vec{X: 100, Y: 100}, zone, seeded(5))
+	for w.State() != entity.WildHopping {
+		w.Update(tick, farAway)
+	}
+	w.Update(tick, farAway)
+	takeOff := w.Pos
+
+	// The player steps right next to the critter while it is in the air.
+	player := geom.Vec{X: 100, Y: 110}
+	airborne := 0
+	for w.State() == entity.WildHopping {
+		w.Update(tick, player)
+		airborne++
+	}
+
+	if airborne < 10 {
+		t.Errorf("critter came down after %d ticks of a 21-tick hop", airborne)
+	}
+	if w.Pos == takeOff {
+		t.Errorf("critter stopped at %v instead of finishing its hop", w.Pos)
+	}
+	if !w.Noticing() {
+		t.Fatalf("critter landed next to the player in state %v, want noticing", w.State())
+	}
+	if w.HopHeight() != 0 {
+		t.Errorf("noticing critter is %v px off the ground", w.HopHeight())
+	}
+}
+
+func TestWild_ResumesHoppingOnlyOnceThePlayerIsBeyondTheMargin(t *testing.T) {
+	zone := geom.Rect{Min: geom.Vec{X: 0, Y: 0}, Max: geom.Vec{X: 200, Y: 200}}
+	home := geom.Vec{X: 100, Y: 100}
+	w := entity.NewWild(home, zone, seeded(9))
+
+	w.Update(tick, geom.Vec{X: 100 + entity.NoticeRadius - 2, Y: 100})
+	if !w.Noticing() {
+		t.Fatalf("critter is in state %v with the player inside the radius, want noticing", w.State())
+	}
+
+	// Between the radius and radius plus margin it keeps watching.
+	between := geom.Vec{X: 100 + entity.NoticeRadius + entity.NoticeMargin/2, Y: 100}
+	for i := range 10 * 60 {
+		w.Update(tick, between)
+		if !w.Noticing() || w.Pos != home {
+			t.Fatalf("tick %d: critter is in state %v at %v with the player in the margin, want still noticing at %v",
+				i, w.State(), w.Pos, home)
+		}
+	}
+
+	// Well beyond the margin it goes back to resting and hopping.
+	gone := geom.Vec{X: 100 + entity.NoticeRadius + entity.NoticeMargin + 1, Y: 100}
+	w.Update(tick, gone)
+	if w.State() != entity.WildIdle {
+		t.Fatalf("critter is in state %v after the player left, want idle", w.State())
+	}
+	hopped := false
+	for range 10 * 60 {
+		w.Update(tick, farAway)
+		if w.State() == entity.WildHopping {
+			hopped = true
+		}
+	}
+	if !hopped || w.Pos == home {
+		t.Errorf("critter never hopped away from %v after the player left (now at %v)", home, w.Pos)
+	}
+}

@@ -18,6 +18,14 @@ const (
 	// between hops, in seconds.
 	wildIdleMin = 0.8
 	wildIdleMax = 2.5
+
+	// NoticeRadius is how close the player must come, in world pixels, for an
+	// idle or landing wild critter to notice it.
+	NoticeRadius = 32.0
+	// NoticeMargin is how far beyond NoticeRadius the player must go before a
+	// noticing critter loses interest, so a player standing near the edge
+	// does not make it flicker between noticing and idling.
+	NoticeMargin = 8.0
 )
 
 // WildState is what a wild critter is doing.
@@ -29,9 +37,12 @@ const (
 	WildIdle WildState = iota
 	// WildHopping is one hop in an arc.
 	WildHopping
+	// WildNoticing stands still and faces the player.
+	WildNoticing
 )
 
-// Wild is a wild critter that stands about and hops around inside its zone.
+// Wild is a wild critter that stands about and hops around inside its zone,
+// and stops to look at the player when it comes close.
 // Its randomness comes from the rng it is given, so the same seed and the
 // same ticks always move it the same way.
 type Wild struct {
@@ -67,6 +78,12 @@ func (w *Wild) Box() geom.Rect {
 	return feetBox(w.Pos)
 }
 
+// Noticing reports whether the critter has noticed the player and is
+// standing still facing it.
+func (w *Wild) Noticing() bool {
+	return w.state == WildNoticing
+}
+
 // HopHeight returns how high above the ground the critter is, in world pixels.
 func (w *Wild) HopHeight() float64 {
 	if w.state != WildHopping || w.left <= 0 {
@@ -76,10 +93,18 @@ func (w *Wild) HopHeight() float64 {
 }
 
 // Update moves the critter on by dt seconds. playerPos is where the player's
-// feet are.
+// feet are. An idle critter, or one landing a hop, with the player within
+// NoticeRadius notices it; a hop in the air is always finished first. A
+// noticing critter keeps facing the player and goes back to resting once the
+// player is further than NoticeRadius plus NoticeMargin.
 func (w *Wild) Update(dt float64, playerPos geom.Vec) {
+	toPlayer := playerPos.Sub(w.Pos)
 	switch w.state {
 	case WildIdle:
+		if toPlayer.Len() <= NoticeRadius {
+			w.notice(toPlayer)
+			return
+		}
 		w.left -= dt
 		if w.left <= 0 {
 			w.hop()
@@ -87,10 +112,30 @@ func (w *Wild) Update(dt float64, playerPos geom.Vec) {
 	case WildHopping:
 		w.move(w.vel.Scale(math.Min(dt, w.left)))
 		w.left -= dt
-		if w.left <= 0 {
-			w.rest()
+		if w.left > 0 {
+			return
 		}
+		if toPlayer = playerPos.Sub(w.Pos); toPlayer.Len() <= NoticeRadius {
+			w.notice(toPlayer)
+			return
+		}
+		w.rest()
+	case WildNoticing:
+		if toPlayer.Len() > NoticeRadius+NoticeMargin {
+			w.rest()
+			return
+		}
+		w.Facing = w.Facing.Toward(toPlayer)
 	}
+}
+
+// notice stops the critter and turns it toward the player, which is
+// toPlayer away from its feet.
+func (w *Wild) notice(toPlayer geom.Vec) {
+	w.state = WildNoticing
+	w.vel = geom.Vec{}
+	w.left = 0
+	w.Facing = w.Facing.Toward(toPlayer)
 }
 
 // rest starts standing still for a random while.
