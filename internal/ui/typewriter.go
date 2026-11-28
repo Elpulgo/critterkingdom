@@ -1,6 +1,6 @@
 // Package ui draws the game's interface over the world and turns taps and
-// paw presses on it into actions: for now the dialogue box's typewriter text
-// and its two-line pages.
+// paw presses on it into actions: for now the dialogue box, an overlay with
+// its layout, typewriter text, two-line pages and choice buttons.
 package ui
 
 import "math"
