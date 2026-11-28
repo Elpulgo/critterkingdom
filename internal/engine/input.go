@@ -28,7 +28,8 @@ type Input struct {
 	// world, the touch pad half or the paw button) or the left mouse button
 	// goes down, and TapAt is where, in screen pixels. It ignores what the
 	// finger does after that, so interface such as a dialogue box can treat
-	// any touch as a tap.
+	// any touch as a tap. While the scene has an overlay up, tapping is all
+	// a new finger does: it neither presses paw nor steers nor points.
 	Tap   bool
 	TapAt geom.Vec
 }

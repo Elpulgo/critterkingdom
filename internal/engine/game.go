@@ -126,8 +126,23 @@ func (g *Game) LayoutF(outsideWidth, outsideHeight float64) (float64, float64) {
 	return w, h
 }
 
-// Update reads the input and advances the scene by one tick.
+// overlaidScene is implemented by scenes, such as a Stack, that can have an
+// overlay up which takes all the input.
+type overlaidScene interface {
+	// Overlaid reports whether an overlay is up.
+	Overlaid() bool
+}
+
+// overlaid reports whether the scene has an overlay up.
+func (g *Game) overlaid() bool {
+	s, ok := g.scene.(overlaidScene)
+	return ok && s.Overlaid()
+}
+
+// Update reads the input and advances the scene by one tick. While the scene
+// has an overlay up, the touch controls are modal: a new finger only taps.
 func (g *Game) Update() error {
+	g.input.touch.modal = g.overlaid()
 	l := g.touchLayout()
 	in := g.input.read(g.view, l)
 	if debugEnabled {
@@ -153,6 +168,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(borderColor)
 	g.drawWorld(screen)
 	g.scene.DrawUI(screen, UI{View: g.view, Unit: g.unit})
+	// An overlay pushed during the last Update hides the controls at once.
+	g.input.touch.modal = g.overlaid()
 	g.input.touch.draw(screen, g.touchLayout())
 	if debugEnabled {
 		g.debug.draw(screen, g)

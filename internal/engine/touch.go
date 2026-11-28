@@ -96,9 +96,14 @@ type touchInput struct {
 // touchControls turns fingers into input: a finger on the world walks the
 // critter there, a finger on the paw button presses paw, and, when the touch
 // pad is enabled, a finger on the left half of the screen steers with a pad
-// that appears where it touched down.
+// that appears where it touched down. While modal, as under an overlay, a
+// new finger only taps, and the paw button and pad are hidden.
 type touchControls struct {
 	padEnabled bool
+	// modal is true while an overlay takes the input. A finger that lands
+	// then gets no role and does nothing but tap until it lifts, even after
+	// the overlay has closed.
+	modal bool
 	// used becomes true at the first touch. Only then are the buttons drawn
 	// and pressable, so desktop players never see them.
 	used    bool
@@ -169,6 +174,8 @@ func (t *touchControls) touchDown(pos geom.Vec, l touchLayout) *finger {
 	t.seq++
 	f := &finger{role: walkFinger, start: pos, pos: pos, seq: t.seq}
 	switch {
+	case t.modal:
+		f.role = idleFinger
 	case t.used && l.onPawButton(pos):
 		f.role = pawFinger
 	case t.padEnabled && l.inPadZone(pos) && t.fingerWith(padFinger) != nil:
@@ -202,9 +209,9 @@ func hasTouch(points []touchPoint, id ebiten.TouchID) bool {
 }
 
 // draw draws the paw button and the touch pad, once the screen has been
-// touched.
+// touched and unless the controls are modal.
 func (t *touchControls) draw(dst *ebiten.Image, l touchLayout) {
-	if !t.used {
+	if !t.used || t.modal {
 		return
 	}
 	u := float32(l.unit)
