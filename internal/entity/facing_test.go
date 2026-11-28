@@ -30,3 +30,24 @@ func TestFacingToward_KeepsTheFacingOnADiagonalAndTurnsToTheLargerPartOtherwise(
 		})
 	}
 }
+
+func TestFacingView_LeftAndRightShareTheSideViewAndOnlyLeftIsMirrored(t *testing.T) {
+	tests := []struct {
+		facing       Facing
+		wantView     string
+		wantMirrored bool
+	}{
+		{FacingDown, "down", false},
+		{FacingUp, "up", false},
+		{FacingRight, "side", false},
+		{FacingLeft, "side", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.facing.String(), func(t *testing.T) {
+			view, mirrored := tt.facing.View()
+			if view != tt.wantView || mirrored != tt.wantMirrored {
+				t.Errorf("%v.View() = (%q, %v), want (%q, %v)", tt.facing, view, mirrored, tt.wantView, tt.wantMirrored)
+			}
+		})
+	}
+}
