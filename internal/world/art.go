@@ -63,9 +63,12 @@ const (
 	// wildRadius is the radius of a placeholder wild critter's body, about
 	// half the size of the player's.
 	wildRadius = 4
-	// wildReach is how far a wild critter's drawing, hop and sparkles
-	// included, can extend from its feet, in world pixels.
-	wildReach = 20
+	// wildReach is how far a wild critter's drawing, hop, sparkles and
+	// notice mark included, can extend from its feet, in world pixels.
+	wildReach = 23
+	// noticeTop is how far above a wild critter's feet the top of its notice
+	// mark is, in world pixels; it sits clear of the top sparkle.
+	noticeTop = 21.5
 	// sparkleCount is how many stars twinkle around a rare critter.
 	sparkleCount = 3
 	// sparklePace is how fast a star twinkles, in radians per second.
@@ -309,6 +312,27 @@ func drawSparkle(p *pen, x, y, t, phase float64) {
 		}
 		drawStar(p, sx, sy, 2.2*size, sparkle)
 	}
+}
+
+// drawNotice draws the "!" over a wild critter that has noticed the player,
+// with the top of the mark at the world point x, top. It is a placeholder for
+// the shared exclamation emote of the art bible.
+func drawNotice(p *pen, x, top float64) {
+	// An ink outline first, then the white mark on it, so the "!" reads on
+	// grass, water and sand alike.
+	drawExclaim(p, x, top, 0.5, ink)
+	drawExclaim(p, x, top, 0, white)
+}
+
+// drawExclaim draws a "!" 7 world pixels tall with its top at x, top, every
+// edge pushed out by grow.
+func drawExclaim(p *pen, x, top, grow float64, clr color.NRGBA) {
+	// A bar that narrows towards its foot, then a dot below it.
+	p.polygon(clr,
+		x-0.9-grow, top-grow, x+0.9+grow, top-grow,
+		x+0.5+grow, top+4.6+grow, x-0.5-grow, top+4.6+grow,
+	)
+	p.circle(x, top+6.1, 0.85+grow, clr)
 }
 
 // drawStar draws a four-point star centred on x, y whose points are r from

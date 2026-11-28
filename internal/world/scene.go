@@ -253,7 +253,7 @@ func (s *Scene) drawCritters(view geom.Rect) {
 }
 
 // drawWild draws one wild critter, with twinkling stars around it if it is
-// rare.
+// rare and a "!" above it while it is noticing the player.
 func (s *Scene) drawWild(w *wildCritter) {
 	lift := w.HopHeight()
 	drawWildCritter(&s.pen, w.Pos.X, w.Pos.Y, lift, w.Facing, speciesColor(w.species.ID))
@@ -261,6 +261,9 @@ func (s *Scene) drawWild(w *wildCritter) {
 		// The spawn id shifts each critter's twinkle so rare critters side
 		// by side do not twinkle in step.
 		drawSparkle(&s.pen, w.Pos.X, w.Pos.Y-wildRadius-lift, s.elapsed, float64(w.id))
+	}
+	if w.Noticing() {
+		drawNotice(&s.pen, w.Pos.X, w.Pos.Y-noticeTop)
 	}
 }
 
