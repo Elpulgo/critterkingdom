@@ -1,0 +1,38 @@
+[
+  {
+    "id": "sulky_slime",
+    "name": {"en": "Sulky Slime", "sv": "Surt Slem"},
+    "sprite": "enemies/sulky_slime",
+    "behaviour": "hop_toward",
+    "hp": 1,
+    "damage": 1,
+    "speed": 30,
+    "telegraphSeconds": 0.6,
+    "drops": [{"item": "heart", "chance": 0.5}, {"item": "berry", "chance": 0.2}],
+    "littleExplorer": {"hp": 1, "damage": 1, "speed": 20}
+  },
+  {
+    "id": "thistle_beast",
+    "name": {"en": "Thistle Beast", "sv": "Tistelbest"},
+    "sprite": "enemies/thistle_beast",
+    "behaviour": "charge",
+    "hp": 2,
+    "damage": 1,
+    "speed": 60,
+    "telegraphSeconds": 0.8,
+    "drops": [{"item": "heart", "chance": 0.5}, {"item": "berry", "chance": 0.3}],
+    "littleExplorer": {"hp": 1, "damage": 1, "speed": 40}
+  },
+  {
+    "id": "grumpy_mushroom",
+    "name": {"en": "Grumpy Mushroom", "sv": "Grinig Svamp"},
+    "sprite": "enemies/grumpy_mushroom",
+    "behaviour": "puff",
+    "hp": 1,
+    "damage": 1,
+    "speed": 25,
+    "telegraphSeconds": 0.9,
+    "drops": [{"item": "heart", "chance": 0.5}, {"item": "berry", "chance": 0.2}],
+    "littleExplorer": {"hp": 1, "damage": 1, "speed": 15}
+  }
+]
