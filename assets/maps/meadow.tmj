@@ -10,7 +10,7 @@
   "tilewidth": 128,
   "tileheight": 128,
   "nextlayerid": 7,
-  "nextobjectid": 152,
+  "nextobjectid": 155,
   "properties": [
     {
       "name": "biome",
@@ -6629,6 +6629,57 @@
               "name": "target_spawn",
               "type": "string",
               "value": "from_meadow"
+            }
+          ]
+        },
+        {
+          "id": 152,
+          "name": "pond_shore",
+          "type": "spawn_zone",
+          "x": 3328,
+          "y": 1152,
+          "width": 1152,
+          "height": 1024,
+          "visible": true,
+          "properties": [
+            {
+              "name": "habitat",
+              "type": "string",
+              "value": "pond"
+            }
+          ]
+        },
+        {
+          "id": 153,
+          "name": "meadow_north",
+          "type": "spawn_zone",
+          "x": 1664,
+          "y": 128,
+          "width": 1280,
+          "height": 1024,
+          "visible": true,
+          "properties": [
+            {
+              "name": "habitat",
+              "type": "string",
+              "value": "meadow"
+            }
+          ]
+        },
+        {
+          "id": 154,
+          "name": "meadow_south",
+          "type": "spawn_zone",
+          "x": 512,
+          "y": 2304,
+          "width": 1664,
+          "height": 1280,
+          "visible": true,
+          "properties": [
+            {
+              "name": "habitat",
+              "type": "string",
+              "value": "meadow"
             }
           ]
         }

@@ -10,7 +10,7 @@
   "tilewidth": 128,
   "tileheight": 128,
   "nextlayerid": 7,
-  "nextobjectid": 152,
+  "nextobjectid": 153,
   "properties": [
     {
       "name": "biome",
@@ -6678,6 +6678,23 @@
               "name": "target_spawn",
               "type": "string",
               "value": "from_village"
+            }
+          ]
+        },
+        {
+          "id": 152,
+          "name": "pond_shore",
+          "type": "spawn_zone",
+          "x": 3200,
+          "y": 2432,
+          "width": 1024,
+          "height": 896,
+          "visible": true,
+          "properties": [
+            {
+              "name": "habitat",
+              "type": "string",
+              "value": "pond"
             }
           ]
         }
