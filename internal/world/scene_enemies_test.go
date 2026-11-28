@@ -158,3 +158,85 @@ func TestScene_StartingOnAMapWithAnEnemyWithoutADefinitionFailsNamingIt(t *testi
 		}
 	}
 }
+
+func TestScene_OnLittleExplorerAnEnemyHitTakesItsOverriddenDamage(t *testing.T) {
+	// A slime whose hit takes two petals, one on Little Explorer. Only the
+	// damage is overridden, so its hop lands at the same time on both presets.
+	one := 1
+	heavySlime := slimeDef
+	heavySlime.Damage = 2
+	heavySlime.LittleExplorer = &combat.EnemyOverrides{Damage: &one}
+
+	// The arena's only spawn, from_village at (24,40), is both where a start
+	// on the arena and the warp from the village put the critter, right next
+	// to the slime at (33,40).
+	arena := `{"id": 1, "name": "from_village", "type": "player_spawn", "x": 192, "y": 320, "point": true},` +
+		enemyObject(2, 33, 40, "sulky_slime")
+	load := mapsLoader(map[string][]byte{
+		"village": roomMap(6, 4, "village", villageStart+`,`+warpObject(2, 4, 2, "arena", "from_village"), ``),
+		"arena":   roomMap(6, 4, "arena", arena, ``),
+	})
+
+	littleExplorer := []Option{WithPreset(combat.PresetLittleExplorer)}
+	tests := []struct {
+		name       string
+		opts       []Option
+		entry      string // "start" on the arena, "warp" into it from the village, or "nap" in it
+		wantPetals int
+	}{
+		{name: "explorer by default, starting on the map", entry: "start", wantPetals: 1},
+		{name: "explorer, starting on the map", opts: []Option{WithPreset(combat.PresetExplorer)}, entry: "start", wantPetals: 1},
+		{name: "little explorer, starting on the map", opts: littleExplorer, entry: "start", wantPetals: 2},
+		{name: "little explorer, after a warp into the map", opts: littleExplorer, entry: "warp", wantPetals: 2},
+		{name: "little explorer, after a nap", opts: littleExplorer, entry: "nap", wantPetals: 2},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			start := "arena"
+			if tc.entry == "warp" {
+				start = "village"
+			}
+			opts := append([]Option{WithEnemies([]combat.EnemyDef{heavySlime})}, tc.opts...)
+			s, err := NewScene(nil, load, start, opts...)
+			if err != nil {
+				t.Fatalf("NewScene: %v", err)
+			}
+			switch tc.entry {
+			case "warp":
+				updateUntilMap(t, s, "arena", walkFrame(geom.Vec{X: 1}))
+			case "nap":
+				standUntilNap(t, s)
+			}
+
+			// The slime's first hop lands well within 200 ticks; stop at the
+			// first petal lost.
+			for range 200 {
+				if err := s.Update(standFrame); err != nil {
+					t.Fatalf("Update: %v", err)
+				}
+				if s.health.Petals() < 3 {
+					break
+				}
+			}
+			if got := s.health.Petals(); got != tc.wantPetals {
+				t.Errorf("after the first hit: %d petals; want %d", got, tc.wantPetals)
+			}
+		})
+	}
+}
+
+// standUntilNap updates s with the critter standing still until it has napped
+// and woken with full petals.
+func standUntilNap(t *testing.T, s *Scene) {
+	t.Helper()
+	for range 1000 {
+		before := s.health.Petals()
+		if err := s.Update(standFrame); err != nil {
+			t.Fatalf("Update: %v", err)
+		}
+		if before < 3 && s.health.Petals() == 3 {
+			return
+		}
+	}
+	t.Fatalf("no nap after 1000 ticks: %d petals, critter at %v", s.health.Petals(), s.player.Pos)
+}

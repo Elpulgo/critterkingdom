@@ -22,3 +22,12 @@ func WithEnemyDefeated(sink func(combat.EnemyDefeated)) Option {
 		s.onDefeat = sink
 	}
 }
+
+// WithPreset spawns every enemy with the stats of the age preset p, as
+// combat.EnemyDef.ForPreset gives them. Without it enemies have their
+// Explorer, base, stats.
+func WithPreset(p combat.Preset) Option {
+	return func(s *Scene) {
+		s.preset = p
+	}
+}

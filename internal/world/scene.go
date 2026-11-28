@@ -95,8 +95,10 @@ type Scene struct {
 	clock     combat.Clock
 	health    *combat.Health
 	enemyDefs map[string]combat.EnemyDef
-	onDefeat  func(combat.EnemyDefeated)
-	enemies   []*entity.Enemy
+	// preset scales every enemy spawnEnemies builds.
+	preset   combat.Preset
+	onDefeat func(combat.EnemyDefeated)
+	enemies  []*entity.Enemy
 	// entrance is where the critter was placed on entering the current map,
 	// where it wakes from a nap.
 	entrance geom.Vec
@@ -196,9 +198,9 @@ func (s *Scene) now() time.Duration {
 }
 
 // spawnEnemies builds the enemies of m's enemy objects, each at its start
-// position with full hit points, reading the scene's clock. It returns an
-// error naming the object id and the enemy id for an enemy without a
-// definition.
+// position with full hit points and the stats of the scene's preset, reading
+// the scene's clock. It returns an error naming the object id and the enemy
+// id for an enemy without a definition.
 func (s *Scene) spawnEnemies(m *Map) ([]*entity.Enemy, error) {
 	var enemies []*entity.Enemy
 	for _, mk := range m.Enemies() {
@@ -206,7 +208,7 @@ func (s *Scene) spawnEnemies(m *Map) ([]*entity.Enemy, error) {
 		if !ok {
 			return nil, fmt.Errorf("%s object %d: no enemy definition %q", objectsLayer, mk.ObjectID, mk.EnemyID)
 		}
-		e, err := entity.NewEnemy(def, mk.Pos, s.clock, s.onDefeat)
+		e, err := entity.NewEnemy(def.ForPreset(s.preset), mk.Pos, s.clock, s.onDefeat)
 		if err != nil {
 			return nil, fmt.Errorf("%s object %d: %w", objectsLayer, mk.ObjectID, err)
 		}
