@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/combat"
 	"github.com/Elpulgo/critterkingdom/internal/engine"
 	"github.com/Elpulgo/critterkingdom/internal/i18n"
 	"github.com/Elpulgo/critterkingdom/internal/world"
@@ -24,6 +25,11 @@ type options struct {
 	// lang is the language to start in, "sv" or "en". An empty or unknown
 	// value keeps Swedish.
 	lang string
+	// preset names the age preset, "explorer" or "little-explorer". An empty
+	// or unknown value keeps Explorer.
+	preset string
+	// peaceful puts every enemy to sleep.
+	peaceful bool
 }
 
 // defaultStartMap is the map the game starts on unless -map names another.
@@ -53,7 +59,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap, world.WithEnemies(enemies))
+	preset := combat.PresetExplorer
+	if opts.preset != "" {
+		if preset, err = combat.ParsePreset(opts.preset); err != nil {
+			log.Printf("preset: %v; starting on explorer", err)
+		}
+	}
+	sceneOpts := []world.Option{world.WithEnemies(enemies), world.WithPreset(preset)}
+	if opts.peaceful {
+		sceneOpts = append(sceneOpts, world.WithPeaceful())
+	}
+	scene, err := world.NewScene(font, assets.LoadMap, opts.startMap, sceneOpts...)
 	if err != nil {
 		log.Fatal(err)
 	}

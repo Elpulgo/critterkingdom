@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Elpulgo/critterkingdom/internal/assets"
+	"github.com/Elpulgo/critterkingdom/internal/combat"
 )
 
 func TestLoadEnemies_ShipsTheSlimeTheThistleBeastAndTheMushroom(t *testing.T) {
@@ -43,6 +44,25 @@ func TestLoadEnemies_ShipsTheSlimeTheThistleBeastAndTheMushroom(t *testing.T) {
 		}
 		if d.LittleExplorer == nil {
 			t.Errorf("%s has no littleExplorer override", d.ID)
+		}
+	}
+}
+
+func TestLoadEnemies_OnLittleExplorerEveryEnemyHasOneHPDealsOnePetalAndIsSlower(t *testing.T) {
+	defs, err := assets.LoadEnemies()
+	if err != nil {
+		t.Fatalf("LoadEnemies: %v", err)
+	}
+	for _, d := range defs {
+		le := d.ForPreset(combat.PresetLittleExplorer)
+		if le.HP != 1 {
+			t.Errorf("%s hp on Little Explorer = %d; want 1", d.ID, le.HP)
+		}
+		if le.Damage != 1 {
+			t.Errorf("%s damage on Little Explorer = %d; want 1", d.ID, le.Damage)
+		}
+		if le.Speed >= d.Speed {
+			t.Errorf("%s speed on Little Explorer = %v; want below its base speed %v", d.ID, le.Speed, d.Speed)
 		}
 	}
 }

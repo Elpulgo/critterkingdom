@@ -23,6 +23,8 @@ make run ARGS=-lang=en # in English instead of Swedish
 make run ARGS='-map meadow'  # start on another map from assets/maps
 make run ARGS='-map dark_test'  # start on the dark test map, lit by the lantern
 make run ARGS='-map testroom'  # start in the test room with one of each enemy
+make run ARGS='-preset little-explorer'  # gentler, fewer enemies (default explorer)
+make run ARGS=-peaceful  # every enemy sleeps and never attacks
 make serve            # play in a browser at http://localhost:8080/web/
 make test             # run the tests
 make check            # what CI runs: gofmt, go mod tidy, vet and tests
@@ -33,6 +35,8 @@ make                  # list every command
 ```
 
 Without make, use `go run ./cmd/game` and `go tool wasmserve ./cmd/game`.
+In the browser, add `?preset=little-explorer` or `?peaceful=1` to the
+address for the same as `-preset little-explorer` and `-peaceful`.
 
 ## Playing on a tablet during development
 
@@ -46,6 +50,10 @@ Without make, use `go run ./cmd/game` and `go tool wasmserve ./cmd/game`.
    screen instead of tapping where to walk.
 5. Add `?lang=en` to play in English instead of Swedish, or both at once:
    `?pad=1&lang=en`.
+6. Add `?preset=little-explorer` for the gentler Little Explorer enemies,
+   and `?peaceful=1` to put every enemy to sleep, for example
+   `?preset=little-explorer&peaceful=1`. An unknown preset name keeps
+   Explorer.
 
 Every reload rebuilds the game, so edit, save and reload the tablet.
 
@@ -84,6 +92,18 @@ stops the map from loading. `make test` also checks the zones on the real
 maps: each zone has to lie inside its map, keep clear of warps and player
 spawns, have open ground you can walk to, and have a habitat that at least
 one species in `critters.json` lives in by day.
+
+Enemies stand on `enemy` point objects in the `objects` layer, with these
+custom properties:
+
+| Property | Type | Needed | Meaning |
+|---|---|---|---|
+| `enemy` | string | yes | Which enemy stands here: an `id` from `assets/data/enemies.json`, for example `sulky_slime` |
+| `explorer_only` | bool | no, false | Leave this enemy out on Little Explorer, so rooms hold fewer enemies for younger players |
+
+An enemy object without `enemy` stops the map from loading. On Explorer
+every enemy object appears; on Little Explorer those with `explorer_only`
+set to true are left out, at the start, after a warp and after a nap.
 
 In a debug build (`make run TAGS=debug`) the overlay outlines every spawn
 zone of the current map in red, next to the outline of where you may walk,
