@@ -135,18 +135,8 @@ func parseFixture(t *testing.T) *dialogue.Dialogue {
 	return mustParse(t, string(data))
 }
 
-func TestStart_AppendixADialogueStartsOnlyBeforeTheQuest(t *testing.T) {
-	d := parseFixture(t)
-
-	r, err := dialogue.Start(d, questStates{}, nil)
-	if err != nil {
-		t.Fatalf("Start before the quest: %v", err)
-	}
-	if got, want := r.Line(), (dialogue.Line{Text: "grandma.hat.1", Face: "sad"}); got != want {
-		t.Errorf("Line() = %+v, want %+v", got, want)
-	}
-
-	if r, err := dialogue.Start(d, questStates{"missing_hat": "started"}, nil); !errors.Is(err, dialogue.ErrNoEntry) {
+func TestStart_AppendixADialogueHasNothingToSayOnceTheQuestIsStarted(t *testing.T) {
+	if r, err := dialogue.Start(parseFixture(t), questStates{"missing_hat": "started"}, nil); !errors.Is(err, dialogue.ErrNoEntry) {
 		t.Errorf("Start once the quest is started = %+v, %v; want %v", r, err, dialogue.ErrNoEntry)
 	}
 }
@@ -271,29 +261,6 @@ func TestChoose_WithoutGotoEndsTheConversation(t *testing.T) {
 	}
 }
 
-func TestAdvance_OnAStepWithChoicesIsRefused(t *testing.T) {
-	r, err := dialogue.Start(parseFixture(t), questStates{}, questStates{})
-	if err != nil {
-		t.Fatalf("Start: %v", err)
-	}
-	if err := r.Advance(); err != nil {
-		t.Fatalf("Advance to the question: %v", err)
-	}
-
-	if err := r.Advance(); !errors.Is(err, dialogue.ErrChoiceRequired) {
-		t.Fatalf("Advance on the question = %v, want %v", err, dialogue.ErrChoiceRequired)
-	}
-	if got, want := r.Line(), (dialogue.Line{Text: "grandma.hat.2", Face: "neutral"}); got != want {
-		t.Errorf("Line() after the refused Advance = %+v, want %+v", got, want)
-	}
-	if got := len(r.Choices()); got != 2 {
-		t.Errorf("len(Choices()) after the refused Advance = %d, want 2", got)
-	}
-	if r.Done() {
-		t.Error("Done() after the refused Advance = true, want false")
-	}
-}
-
 func TestRunner_RefusedStepsLeaveTheConversationWhereItWas(t *testing.T) {
 	// The first choice's action is one the fake does not know, so it fails.
 	const file = `{"npc": "fox", "nodes": {
@@ -317,6 +284,9 @@ func TestRunner_RefusedStepsLeaveTheConversationWhereItWas(t *testing.T) {
 		wantErr  error
 		wantLine dialogue.Line
 	}{
+		{"tapping to continue on the question is refused", toQuestion,
+			func(r *dialogue.Runner) error { return r.Advance() },
+			dialogue.ErrChoiceRequired, dialogue.Line{Text: "fox.ask.2"}},
 		{"a failing action keeps the conversation on the choice", toQuestion,
 			func(r *dialogue.Runner) error { return r.Choose(0) },
 			errUnknownAction, dialogue.Line{Text: "fox.ask.2"}},
